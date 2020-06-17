@@ -1,0 +1,29 @@
+﻿c X.52 - Plotter test
+
+on 903 8K
+
+nonprinting off
+nonstop on
+
+c load x52 and data
+at ptr file X52(ISS1).BIN
+j 8181
+st 7820
+
+c move up page 
+origin 0 700
+c limit to one cycle - large format
+step 347500
+j 26
+sh t
+
+
+c load x52 and data
+at ptr file X52(ISS1).BIN
+j 8181
+st 7820
+
+c limit to one cycle - small format
+step 130000
+j 22
+sh t

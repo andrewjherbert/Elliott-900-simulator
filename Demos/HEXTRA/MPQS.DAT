@@ -1,0 +1,3259 @@
+﻿on 900 64K
+telecode 903
+c a cheat for long comments
+at ptr inline
+
+Edited from DGNH file 07README.TXT
+
+***********************************************************************
+
+                         QS and MPQS
+      Quadratic Sieve and Multiple Polynomial Quadratic Sieve
+      -------------------------------------------------------
+
+
+
+Introduction
+------------
+
+It's all very well reading learned articles on QS and MPQS, but there
+is no substitute for looking at code to see what happens. Both QS and
+MPQS have been split into several programs here and these refer to
+17 procedures written in assembly code which are briefly described in
+appendix A. I hope the reader can easily follow this structure.
+
+In fact QS consists of the programs FBASE, QS1, QS4 and GAUSS2, run
+in that order, while MPQS consists of FBASE, QS1, QS3, QS2 and GAUSS,
+also run in that order.
+
+FBASE calculates the factor base; QS1 works out the quadratic
+congruences; QS4 sieves on a single interval while QS2 sieves using
+multiple polynomials provided by QS3; GAUSS2 and GAUSS solve the
+equations and have identical code although different data.
+The naming reflects the order in which the pieces were written.
+
+The treatment mostly follows the description given in chapter 8 of the
+book, Factorization and Primality Testing by David M. Bressoud, 
+Springer-Verlag 1989.
+
+
+
+Outline of QS and MPQS
+----------------------
+
+There are several restrictions on numbers to be factorised which are
+discussed in the book. Briefly, they must not contain a repeated
+factor, be at least 13 decimal digits long and be equal to 1 modulo 8,
+ie leave a remainder of 1 when divided by 8. This last condition can
+be met by multiplying the given number by a pre-multiplier, for
+example if the number is equal to 3 modulo 8 it can be multiplied by 3
+which makes the result have the right form.
+
+This multiplication affects the values of the primes in the factor
+base. If there are many small primes generated there, then the
+sieving goes faster, so it is worth considering whether a larger
+pre-multiplier should be used; instead of 3 one could have 11, 19, 27
+and so on, all of which make the result equal to 1 modulo 8. The
+UBASIC package UBIBM32.EXE/MPQSX selects 33 as a pre-multiplier in
+the case of the example number, 499 94860 12441, perhaps because the
+largest prime in the factor base is only 257 instead of our value of
+397 using a pre-multiplier of 1.
+
+For a large pre-multiplier one might have to increase the number of
+computer words to represent each long number, slowing things down.
+
+Other choices have to be made. The factor base size (currently 29),
+the sieving interval (currently 10000 for QS and 1000 for MPQS) and 
+the Silverman factor (currently 1.5); these are discussed in the book.
+
+
+
+903 Algol
+---------
+
+The 903 Algol used here differs slightly from that in the HUNTER 
+directory. Specifically FIXEDBIGLIBRARY.RAW contains the material for 
+the 17 procedures listed in appendix A in addition to the contents of 
+the LIBRARY.BIN file in the HUNTER directory. (Note a more readable form 
+is in BIGLIBRARY.BIN, which is an exact copy of the file from Don's web 
+site.  Don's file however contains a sumcheck error, which is ignored
+by Algol, but has been fixed to created FIXEDBIGLIBRARY.RAW.  Note
+that this new library is to big to re-establish as the built-in
+library).
+
+The procedure 'copy' in FIXEDBIGLIBRARY.DAT, has the same name as one 
+contained for a different purpose in the previous LIBRARY.DAT, therefore 
+the latter procedure has been renamed here to alcopy (Algol copy).
+
+Input Format
+------------
+
+Long numbers must be split into groups of five decimal digits and
+must end with a letter. For example the number to be factorised
+appears on the data tape as
+
+  499 94860 12441P
+
+If the procedure which reads long numbers, get, has to read two such
+numbers in succession they must end in different letters or else the
+second one will be read in as zero.
+
+
+
+Times
+-----
+
+Don Hunter measured the time the programs took on his 100Mhz 486 machine
+using his simulator. These are shown in the column PCTIME below.  Andrew 
+Herbert ran the programs on his simulator using VMWare Fusion to run
+Windows 7 on a 2.7GHz iMac. These times are shown in the column MACTIME.
+The column 903TIME shows the approximate execution time on a physical
+Elliott 903 (including I/O time for data and results but excluding time
+to load the Algol system and compile the source code).
+
+Thus for Don, the PC simulations took longer than running the programs 
+on his real 903, although the convenience of editing programs and data 
+on a PC and not having to deal with paper tapes probably made the two
+systems comparable.  On a modern (for 2012) iMac, the simulator is 
+about 200 times faster than the 903.
+
+PROGRAM	      PCTIME	MACTIME	903TIME
+FBASE  		15m	   6s	  17m	
+QS1     	 4m	   1s	   4m
+QS2    		25m	   9s	  13m
+QS3    		 8m	   2s	   8m
+QS4    		37m	  13s     19m
+GAUSS  		22m        6s     15m
+GAUSS2 		31m	   9s     18m
+
+Thus QS takes 17+4+19+18 = 58 minutes on a real 903, and MPQS takes 
+17+4+8+13+15 = 57 minutes. MPQS is supposed to be faster than QS.
+
+
+
+                           APPENDIX A
+             Procedures written in SIR assembly code
+             ---------------------------------------
+
+These are all procedures except 'and' and 'max int' which are integer
+procedures. Procedure names can have spaces in them because Algol 
+symbols are surrounded by quote signs, eg "begin", and there is
+therefore no confusion, but you can think of max int being maxint if
+you wish.
+
+The procedures find out what length each array has and act
+appropriately. The procedure multiply is an exception to this rule
+and has an integer parameter giving the length.
+
+Parameters are numbered 1, 2, 3 and so on. The kind of parameter is
+indicated by a two-letter shorthand before the parameter number, thus
+the procedure mod2 is described as
+
+mod2   sa1 := da2 mod sa3;
+
+meaning that single length array, sa1, is given the value of double
+length array, da2, modulo single length array, sa3.
+
+add         sa1 := sa2 + sa3;
+and         has the value of the logical and of in1 and in2;
+copy        sa1 := sa2;
+div         sa1 := sa1 / in2;
+divide      sa1 := sa3 "div" sa4;
+            sa2 := sa3 "mod" sa4;
+if          "if" sa1 = sa2 "then" "goto" la3;
+            It would have been better to have made a boolean
+            procedure giving the value "true", for example, when
+            the arrays are equal. In fact just such a boolean
+            procedure has been created in GAUSS.
+lead blank  arrange for leading blanks when printing integers.
+lead zero   arrange for leading zeros when printing integers.
+max int     takes the value 131071.
+mod         sa1 := sa2 mod sa3;
+mod2        sa1 := da2 mod sa3;
+mpy         sa1 := sa1 * in2; (see note below)
+multiply    da1 := sa2 * sa3; it uses in4 words for sa2, sa3.
+revert      arrange for printing integers to have the default property.
+qdm         a procedure body called by both divide and mod which
+            has to be loaded somehow, see QS2.DAT code and note below.
+sub         sa1 := sa2 - sa3;
+unsigned    arrange for no sign to precede a printed integer.
+
+
+
+                           NOTE
+                           ----
+
+The library has some peculiarities, but none of them affects the ordinary
+use of procedures when the library is already established. What follows
+applies only to the case where a translation requires a library scan, ie
+the initial jump is to 12 rather than to 8.
+
+The library is arranged as a sequence of SIR blocks, each of which usually
+contains one procedure, eg arctan, and arctan names the block because it is
+the first global SIR label in the block. There are two kinds of exception to
+this model - one where more than one procedure is contained in a SIR block
+because the procedures have shared code, and one where two SIR blocks each
+call another SIR block which has the shared code.
+
+The first exception has four examples:
+
+(1) cos and sin are in a block called qatrig;
+(2) instring and outstring are in a block called qastri;
+(3) mpy, div, add, sub and neg are in a block called mpy.
+(4) multiply and mod2 are in a block called multip.
+
+When running a translation with a library scan, the use of any of the
+above mentioned procedures requires one to use, or to pretend to use,
+the procedure name of the block. For example to use cos one must have
+the declaration
+
+"code" "procedure" qatrig; "algol";
+
+among the declarations, and the statement
+
+"if" "false" "then" qatrig;
+
+among the statements. In the case of add, say, it is almost certain 
+that mpy will also be used, so all will be well. If it is not used 
+then a loader error message, "FU   ADD", is given and the program
+runs correctly until the call to add is encountered. This causes a
+message, "NO PROGRAM", to be given. There was no room in the run time
+system to adopt the modern type of error message in absolute hex.
+
+The second exception applies only to the procedures divide and mod
+which call a block named qdm. The code in QS2.DAT shows the pretence
+of calling qdm. 
+
+
+
+                           APPENDIX B
+          Purpose of the main variables in the programs
+          ---------------------------------------------
+
+a           A polynomial coeff. eg 6343.
+b           A polynomial coeff. eg 4150.
+c           Equals (a^(-1)) modulo nb, eg 419 08035 83186.
+e[j]        Exponents.
+ks          Pre-multiplier such that ks*nb = 1 modulo 8.
+L           Lower bound for polynomial search, eg -30.
+m           Number of primes in factor base, eg 29.
+n           Number of words per single length long number, eg 3.
+nb          The number to be factorised, eg 499 94860 12441
+one         Holds the value 1 as a long number.
+ps[j]       The factor base, eg 2, 3, ... , 397.
+s           Total sieve size, eg 1000 for QS2 and 10000 for QS4.
+sn          entier(sqrt(nb))
+t           Silverman's factor, eg 1.5
+u           Upper bound for polynomial search, eg 30.
+ts[j]       Quadratic congruences where ts[j]^2 = nb modulo ps[j]
+zero        Holds the number 0 as a long number.
+
+
+
+DGNH [ed CPB]  18-NOV-2005 (divide description changed)
+AJH	       04-FEB-2012 (use of different simulator)
+
+***********************************************************************
+<!!>
+
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+select out tty
+
+c no call by name
+enter 8273 =8 86
+c lots of store
+enter 27 +65522
+ 
+c FBASE------------------------------------------------------------
+
+at ptr inline
+fbase;
+"begin"
+   "comment" 27-APR-1998
+             David M. Bressoud.
+             Factorization and Primality Testing.
+             Springer-Verlag 1989.
+
+             Separately assembled stuff declared first;
+
+   "code" "procedure" date time; "algol";
+   "code" "procedure" lead zero;  "algol";
+   "code" "procedure" lead blank; "algol";
+   "code" "procedure" unsigned;   "algol";
+   "code" "procedure" revert;     "algol";
+   "code" "integer" "procedure" max int; "algol";
+   "code" "procedure" add(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" sub(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" mpy(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" div(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" copy(a,b);
+          "integer" "array" a,b; 
+   "algol";
+   "code" "procedure" if(a,b,L); 
+          "integer" "array" a,b; "label" L;
+   "algol";
+   "code" "procedure" mod2(x,aa,b); 
+          "integer" "array" x,aa,b;
+   "algol";
+   "code" "procedure" multiply(a,b,c,n); "value" n;
+          "integer" "array" a,b,c; "integer" n;
+   "algol";
+   "code" "procedure" divide(x,y,a,b);
+          "integer" "array" x,y,a,b;
+   "algol";
+   "code" "procedure" mod(x,a,b);
+          "integer" "array" x,a,b;
+   "algol";
+
+   "integer" n,ks,m;
+   "comment" Program start;
+   date time;
+   "comment" ''L`27-APR-1998'L``;
+   "read" n,ks,m; 
+   "print" n, same line, ks, m;
+   "begin"
+      "integer" "array" nb,work,w1,w2,zero[1:n],
+                        ps[1:m],
+                        z1,z2[1:1],
+                        ac,bc[1:2];
+      "integer" l1,l2,j,k;
+
+      "comment" The procedures, get and put, could be provided
+                with an extra parameter, n, and stowed alongside
+                the declarations of the assembly-coded procedures.
+
+                However, get uses add, and add needs its arrays
+                to be located withing 8192 words of each other.
+                Hence get actually needs to access a non-local
+                array, work, and therefore needs to be located
+                here. The same get and put have been used in all
+                the programs for consistency;
+ 
+      "procedure" get(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k;
+         "for" j := 1 "step" 1 "until" n "do" a[j] := work[j] := 0;
+
+         "for" j := j "while" "not" buffer(1,s) "do"
+         "begin"
+            mpy(a,100000);
+            "read" work[n];
+            add(a,a,work)
+         "end"
+      "end" of get;
+
+      "procedure" put(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k,L,m,p,r,half;
+         "boolean" zero;
+         "integer" "array" work[1:2*n+1];
+
+         "boolean" "procedure" fin;
+         "begin"
+            "integer" k;
+            fin := "true";
+            "for" k := 1 "step" 1 "until" n "do"
+               "if" work[k] "ne" 0 "then" fin := "false"
+         "end" of fin;
+
+         "procedure" group;
+         "begin"
+            "integer" s;
+            s := 10^r; mpy(work, s);
+            "if" zero "then" "print" ' `;
+            "print" digits(5), same line, work[n];
+            work[n] := 0
+         "end" of group;
+ 
+         half := (max int "div" 2) + 1;
+         "for" j := 1 "step" 1 "until" 2*n+1 "do" work[j] :=
+            "if" j "le" n "then" a[j] "else" 0;
+         work[n+1] := half;
+
+         "for" j := -5, j+5 "while" "not" fin "do" div(work, 100000);
+         mpy(work, 100000);
+         "for" j := j, j+1 "while" "not" fin "do" div(work, 10);
+
+         L := ((j-1) "div" 50) + 1;
+         m := j - (L-1) * 50;
+         p := ((m-1) "div" 5) + 1;
+ 
+         "print" ''L``;
+         r := m - (p-1) * 5;
+         zero := "false";
+         group;
+         lead zero;
+         unsigned;
+         zero := "true";
+         r := 5;
+         "for" k := 1 "step" 1 "until" p-1 "do" group;
+         "for" j := 2 "step" 1 "until" L "do"
+         "begin"
+            "print" ''L``;
+            "for" k := 1 "step" 1 "until" 10 "do" group
+         "end";
+         lead blank;
+         revert;
+         "print" s
+      "end" of put;
+
+      "comment" prime returns the next prime after x;
+      "integer" "procedure" prime(x); "value" x; "integer" x;
+      "begin"
+         "integer" k,L;
+         "boolean" found,next;
+         k := x;
+         next := "false";
+         "for" k := k+2 "while" "not" next "do"
+         "begin"
+            L := 1;
+            found := "false";
+            "for" L := L+2 "while" L*L "le" k "and" "not" found "do"
+               found := (k "div" L) * L = k;
+            next := "not" found
+         "end";
+         prime := "if" x = 2 "then" 3 "else" k-2
+      "end";
+
+      "for" j := 1 "step" 1 "until" n "do" zero[j] := 0;
+      get(nb,'P`);
+      put(nb,'P`);
+      ps[1] := 2;
+      "comment" This does not follow the method given in
+                Bressoud's book, but uses a direct method
+                which is probably slower;
+      "for" l1 := 2 "step" 1 "until" m "do"
+      "begin"
+         ps[l1] := ps[l1-1];
+again:
+         ps[l1] := prime(ps[l1]);
+         j := ps[l1];
+         k := (j-1) "div" 2;
+         copy(w1,nb);
+         mpy(w1,ks);
+         copy(w2,w1);
+         div(w2,j);
+         mpy(w2,j);
+         sub(w1,w1,w2);
+         z1[1] := z2[1] := w1[n];
+         "for" l2 := 2 "step" 1 "until" k "do"
+         "begin"
+            multiply(ac,z1,z2,1);
+            copy(bc,ac);
+            div(bc,j);
+            mpy(bc,j);
+            sub(ac,ac,bc);
+            z1[1] := ac[2]
+         "end";
+         "if" z1[1] = 0 "or" z1[1] = 1 "then"
+         "begin"
+            "if" l1 = 2 "then" "print" ''L`    2`;
+            "if" ((l1-1) "div" 10) * 10 = l1-1 "then" "print" ''L``;
+            "print" same line, digits(4), ps[l1]
+         "end" "else" "goto" again
+      "end"
+   "end";
+   "print" ''L``
+"end"
+<!!>
+
+j 12
+st 1727
+
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+
+at ptr inline
+  3  1  29
+  499  94860  12441P
+<!!>
+reset
+j 10
+st 1727
+sh t
+
+c QS1-------------------------------------------------------------
+
+at ptr inline
+qs1;
+"begin"
+   "comment" 27-APR-1998
+             David M. Bressoud.
+             Factorization and Primality Testing.
+             Springer-Verlag 1989.
+
+             Separately assembled stuff declared first;
+
+   "code" "procedure" lead zero;  "algol";
+   "code" "procedure" lead blank; "algol";
+   "code" "procedure" unsigned;   "algol";
+   "code" "procedure" revert;     "algol";
+   "code" "integer" "procedure" max int; "algol";
+   "code" "procedure" add(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" sub(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" mpy(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" div(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" copy(a,b);
+          "integer" "array" a,b; 
+   "algol";
+   "code" "procedure" if(a,b,L); 
+          "integer" "array" a,b; "label" L;
+   "algol";
+   "code" "procedure" mod2(x,aa,b); 
+          "integer" "array" x,aa,b;
+   "algol";
+   "code" "procedure" multiply(a,b,c,n); "value" n;
+          "integer" "array" a,b,c; "integer" n;
+   "algol";
+   "code" "procedure" divide(x,y,a,b);
+          "integer" "array" x,y,a,b;
+   "algol";
+   "code" "procedure" mod(x,a,b);
+          "integer" "array" x,a,b;
+   "algol";
+   "code" "procedure" qdm;
+   "algol";
+
+   "integer" n,ks,m;
+   "comment" Program start. Must pretend to call qdm in order
+             to load some of the separately assembled stuff;
+   "if" "false" "then" qdm; 
+   "comment" ''L`27-APR-1998'L``;
+   "read" n,ks,m;
+   "begin"
+      "integer" j,t;
+      "integer" "array" nb,one,w,work,zero[1:n],
+                        ps[1:m],
+                        a,b[1:2];
+
+      "comment" The procedures, get and put, could be provided
+                with an extra parameter, n, and stowed alongside
+                the declarations of the assembly-coded procedures.
+
+                However, get uses add, and add needs its arrays
+                to be located withing 8192 words of each other.
+                Hence get actually needs to access a non-local
+                array, work, and therefore needs to be located
+                here. The same get and put have been used in all
+                the programs for consistency;
+ 
+      "procedure" get(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k;
+         "for" j := 1 "step" 1 "until" n "do" a[j] := work[j] := 0;
+
+         "for" j := j "while" "not" buffer(1,s) "do"
+         "begin"
+            mpy(a,100000);
+            "read" work[n];
+            add(a,a,work)
+         "end"
+      "end" of get;
+
+      "procedure" put(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k,L,m,p,r,half;
+         "boolean" zero;
+         "integer" "array" work[1:2*n+1];
+
+         "boolean" "procedure" fin;
+         "begin"
+            "integer" k;
+            fin := "true";
+            "for" k := 1 "step" 1 "until" n "do"
+               "if" work[k] "ne" 0 "then" fin := "false"
+         "end" of fin;
+
+         "procedure" group;
+         "begin"
+            "integer" s;
+            s := 10^r; mpy(work, s);
+            "if" zero "then" "print" ' `;
+            "print" digits(5), same line, work[n];
+            work[n] := 0
+         "end" of group;
+ 
+         half := (max int "div" 2) + 1;
+         "for" j := 1 "step" 1 "until" 2*n+1 "do" work[j] :=
+            "if" j "le" n "then" a[j] "else" 0;
+         work[n+1] := half;
+
+         "for" j := -5, j+5 "while" "not" fin "do" div(work, 100000);
+         mpy(work, 100000);
+         "for" j := j, j+1 "while" "not" fin "do" div(work, 10);
+
+         L := ((j-1) "div" 50) + 1;
+         m := j - (L-1) * 50;
+         p := ((m-1) "div" 5) + 1;
+ 
+         "print" ''L``;
+         r := m - (p-1) * 5;
+         zero := "false";
+         group;
+         lead zero;
+         unsigned;
+         zero := "true";
+         r := 5;
+         "for" k := 1 "step" 1 "until" p-1 "do" group;
+         "for" j := 2 "step" 1 "until" L "do"
+         "begin"
+            "print" ''L``;
+            "for" k := 1 "step" 1 "until" 10 "do" group
+         "end";
+         lead blank;
+         revert;
+         "print" s
+      "end" of put;
+
+      "comment" a := sqrt(a);
+      "procedure" sqrt(a);
+                  "integer" "array" a;
+      "begin"
+         "integer" j;
+         "integer" "array" x,y,z[1:n],aa[1:2*n];
+         copy(y,one);
+         mpy(y,10);
+loop:
+         copy(x,y);
+         divide(z,y,a,x);
+         add(y,x,y);
+         add(y,y,one);
+         div(y,2);
+         "for" j := 1 "step" 1 "until" n-1 "do"
+            "if" x[j] "ne" y[j] "then" "goto" loop;
+         "if" abs(x[n] - y[n]) > 1 "then" "goto" loop;
+         add(x,x,one);
+         add(x,x,one);
+cycle:
+         sub(x,x,one);
+         multiply(aa,x,x,n);
+         "for" j := 1 "step" 1 "until" n "do" z[j] := aa[j+n];
+         sub(y,a,z);
+         "if" y[1] < 0 "then" "goto" cycle;
+         copy(a,x)
+      "end" of sqrt;
+
+      "comment" Program continues. Get initial data;
+      "for" j := 1 "step" 1 "until" n "do" one[j] := zero[j] := 0;
+      one[n] := 1;
+      get(nb,'P`);
+      mpy(nb,ks);
+      copy(w,nb);
+      sqrt(w);
+      put(w,'Q`);
+      "print" ''L``;
+      "for" j := 1 "step" 1 "until" m "do" "read" ps[j];
+      "comment" This does not follow the method given in 
+                Bressoud's book. It uses a direct method
+                instead which is probably slower;
+      "for" j := 1 "step" 1 "until" m "do"
+      "begin"
+         copy(w,nb);
+         div(w,ps[j]);
+         mpy(w,ps[j]);
+         sub(w,nb,w);
+         "for" t := 1 "step" 1 "until" ps[j] "do"
+         "begin"
+            a[1] := 0;
+            a[2] := t;
+            mpy(a,t);
+            copy(b,a);
+            div(b,ps[j]);
+            mpy(b,ps[j]);
+            sub(b,a,b);
+            "if" b[2] = w[n] "then" "goto" found
+         "end";
+         "print" ''L`gloom`, b[2], same line, w[n], ''L``;
+         stop;
+found:
+         "if" ((j-1) "div" 10) * 10 = j-1 "then" "print" ''L``;
+         "print" same line, digits(4), t
+      "end"
+   "end";
+   "print" ''L``
+"end"
+<!!>
+
+j 12
+st 1727
+
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+at ptr inline
+    3     1    29
+  499 94860 12441P
+    2    3    5    7   17   19   31   43   47   59
+   61   67  107  163  181  193  197  229  241  263
+  271  277  311  331  349  359  367  389  397
+<!!>
+reset
+j 10
+st 1727
+sh t
+
+c QS2-------------------------------------------------------------
+
+at ptr inline
+
+qs2;
+"begin"
+   "comment" 25-APR-1998
+             David M. Bressoud.
+             Factorization and Primality Testing.
+             Springer-Verlag 1989.
+
+             Separately assembled stuff declared first;
+
+   "code" "procedure" lead zero;  "algol";
+   "code" "procedure" lead blank; "algol";
+   "code" "procedure" unsigned;   "algol";
+   "code" "procedure" revert;     "algol";
+   "code" "integer" "procedure" max int; "algol";
+   "code" "integer" "procedure" and(a,b);
+          "value" a,b; "integer" a,b;
+   "algol";
+   "code" "procedure" add(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" sub(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" mpy(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" div(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" copy(a,b);
+          "integer" "array" a,b; 
+   "algol";
+   "code" "procedure" if(a,b,L); 
+          "integer" "array" a,b; "label" L;
+   "algol";
+   "code" "procedure" mod2(x,aa,b); 
+          "integer" "array" x,aa,b;
+   "algol";
+   "code" "procedure" multiply(a,b,c,n); "value" n;
+          "integer" "array" a,b,c; "integer" n;
+   "algol";
+   "code" "procedure" divide(x,y,a,b);
+          "integer" "array" x,y,a,b;
+   "algol";
+   "code" "procedure" mod(x,a,b);
+          "integer" "array" x,a,b;
+   "algol";
+   "code" "procedure" qdm;
+   "algol";
+
+   "comment" Outer block declarations;
+
+   "integer" ks,m,n,s,s2;
+   "real" bt,btw,t,wd,z;
+
+   "comment" John Pollard's logarithm choice.
+             z is 2/ln(2);
+   "integer" "procedure" iln(x); "value" x; "integer" x;
+      iln := z*ln(x);
+
+   "comment" jln is like iln, but for a long number. It
+             seemed hard to implement;
+   "integer" "procedure" jln(x); "integer" "array" x;
+   "begin"
+      "integer" i,j;
+      "real" tg;
+      tg := 0.0;
+      i := 0;
+      btw := 1.0;
+      "for" j := 1 "step" 1 "until" n "do"
+         "if" x[j] "ne" 0 "or" i "ne" 0 "then"
+      "begin"
+         i := i + 1;
+         btw := btw * bt;
+         tg := tg * wd + btw * x[j];
+         tg := tg * bt
+      "end";
+      jln := z * (ln(tg) - (i+1) * ln(bt))
+   "end" of jln;
+
+   "comment" Program start. Must pretend to call qdm in order
+             to load some of the separately assembled stuff;
+   "if" "false" "then"  qdm;
+
+   "print" ''L`25-APR-1998'L``;
+   "read" s,t,n,ks,m;
+   z := 2.0/ln(2.0);
+   s2 := s "div" 2;
+   wd := 1.0 + max int;
+   "comment" Using exp and ln instead of sqrt, for bt, saves
+             space because exp and ln are built-in anyway;
+   bt := 1.0/exp(0.5*ln(wd));
+ 
+   "begin"
+      "integer" i,j,L,npj,pj,t1,t2,t3,t4;
+      "boolean" first;
+      "integer" "array" a,b,c,nb,one,r,rs,work,w1,w2,zero[1:n],
+                        d[1:2*n],
+                        ps,ts[1:m],
+                        e,es[0:m],
+                        f[0:s]; "comment" f[0] is a dustbin;
+
+      "comment" The procedures, get and put, could be provided
+                with an extra parameter, n, and stowed alongside
+                the declarations of the assembly-coded procedures.
+
+                However, get uses add, and add needs its arrays
+                to be located withing 8192 words of each other.
+                Hence get actually needs to access a non-local
+                array, work, and therefore needs to be located
+                here. The same get and put have been used in all
+                the programs for consistency;
+ 
+      "procedure" get(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k;
+         "for" j := 1 "step" 1 "until" n "do" a[j] := work[j] := 0;
+
+         "for" j := j "while" "not" buffer(1,s) "do"
+         "begin"
+            mpy(a,100000);
+            "read" work[n];
+            add(a,a,work)
+         "end"
+      "end" of get;
+
+      "procedure" put(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k,L,m,p,r,half;
+         "boolean" zero;
+         "integer" "array" work[1:2*n+1];
+
+         "boolean" "procedure" fin;
+         "begin"
+            "integer" k;
+            fin := "true";
+            "for" k := 1 "step" 1 "until" n "do"
+               "if" work[k] "ne" 0 "then" fin := "false"
+         "end" of fin;
+
+         "procedure" group;
+         "begin"
+            "integer" s;
+            s := 10^r; mpy(work, s);
+            "if" zero "then" "print" ' `;
+            "print" digits(5), same line, work[n];
+            work[n] := 0
+         "end" of group;
+ 
+         half := (max int "div" 2) + 1;
+         "for" j := 1 "step" 1 "until" 2*n+1 "do" work[j] :=
+            "if" j "le" n "then" a[j] "else" 0;
+         work[n+1] := half;
+
+         "for" j := -5, j+5 "while" "not" fin "do" div(work, 100000);
+         mpy(work, 100000);
+         "for" j := j, j+1 "while" "not" fin "do" div(work, 10);
+
+         L := ((j-1) "div" 50) + 1;
+         m := j - (L-1) * 50;
+         p := ((m-1) "div" 5) + 1;
+ 
+         "print" ''L``;
+         r := m - (p-1) * 5;
+         zero := "false";
+         group;
+         lead zero;
+         unsigned;
+         zero := "true";
+         r := 5;
+         "for" k := 1 "step" 1 "until" p-1 "do" group;
+         "for" j := 2 "step" 1 "until" L "do"
+         "begin"
+            "print" ''L``;
+            "for" k := 1 "step" 1 "until" 10 "do" group
+         "end";
+         lead blank;
+         revert;
+         "print" s
+      "end" of put;
+
+      "comment" q copies the head of d to w1;
+      "procedure" q;
+      "begin"
+         "integer" j;
+         "for" j := 1 "step" 1 "until" n "do" w1[j] := d[n+j]
+      "end" of q;
+
+      "comment" md1 is the ordinary mod function;
+      "integer" "procedure" md1(x,y); "value" x,y; "integer" x,y;
+         md1 := x - (x "div" y) * y;
+
+      "comment" md2 is the mod function for a long number, but
+                only for when the result is a single-length number;
+      "integer" "procedure" md2(x,y); "value" y;
+         "integer" "array" x; "integer" y;
+      "begin"
+         copy(w1,x); div(w1,y); mpy(w1,y);
+         sub(w2,x,w1); md2 := w2[n]
+      "end";
+
+      "comment" From Knuth, extended Euclid algorithm for
+                single-length numbers.
+                I think that label names have to be unique
+                throughout the whole program, but am not sure.;
+      "integer" "procedure" inv(x,y); "value" x,y; "integer" x,y;
+      "begin"
+         "integer" u1,u2,u3,v1,v2,v3,t1,t2,t3,q;
+         u1 := v2 := 1; u2 := v1 := 0; u3 := y; v3 := x;
+qcyc:
+         "if" v3 = 1 "then" "goto" qfin;
+         q := u3 "div" v3;
+         t1 := u1 - v1 * q;
+         t2 := u2 - v2 * q;
+         t3 := u3 - v3 * q;
+         u1 := v1;
+         u2 := v2;
+         u3 := v3;
+         v1 := t1;
+         v2 := t2;
+         v3 := t3;
+         "goto" qcyc;
+qfin:
+         "if" v2 < 0 "then" v2 := v2 + y;
+         inv := v2
+      "end";
+
+      "comment" Just a way of finding md2 of t1*t2 without
+                causing overflow of t1*t2;
+      "integer" "procedure" md3;
+      "begin"
+         copy(w2,zero);
+         w2[n] := t1;
+         mpy(w2,t2);
+         md3 := md2(w2,pj)
+      "end" of md3;
+
+      "comment" Program continues by setting up stuff
+                and reading the initial data;
+      "for" j := 1 "step" 1 "until" n "do" one[j] := zero[j] := 0;
+      one[n] := 1;
+      get(nb,'P`);
+      mpy(nb,ks);
+      "for" j := 1 "step" 1 "until" m "do" "read" ps[j];
+      "for" j := 1 "step" 1 "until" m "do" "read" ts[j];
+      "comment" For each input polynomial;
+polyin:
+      get(a,'A`);
+      if(a,zero,endzzz);
+      get(b,'B`);
+      get(c,'C`);
+      first := "true";
+      "for" i := 1 "step" 1 "until" s "do" f[i] := 0;
+      "comment" The number to be factorised must be equal
+                to 1 modulo 8;
+      j := iln(8);
+      "for" i := 2 "step" 2 "until" s "do" f[i] := j;
+      "comment" Evaluate the limit, L, for the sieving
+                according to Bressoud's formula;
+      L := (jln(nb) "div" 2) + iln(s2) - t*iln(ps[m]);
+
+      "for" j := 2 "step" 1 "until" m "do"
+      "begin"
+         "comment" We are trying to find a value of i so that
+                   (a*(i-(s/2))+b)^2 - nb = 0 modulo p[j].
+                   It's a bit of a slog; 
+         pj := ps[j];
+         npj := iln(pj);
+         t4 := md2(b,pj);
+         t3 := md1(s2,pj);
+         t2 := inv(md2(a,pj),pj);
+         t1 := ts[j] - t4;
+         "if" t1 < 0 "then" t1 := t1 + pj;
+         t1 := md1(md3 + t3,pj);
+         "for" i := t1 "step" pj "until" s "do" f[i] := f[i] + npj;
+         "if" md1(ks,pj) "ne" 0 "then"
+         "begin"
+             "comment" The other solution;
+            t1 := pj - ts[j] - t4;
+            "if" t1 < 0 "then" t1 := t1 + pj;
+            t1 := md1(md3 + t3,pj);
+            "for" i := t1 "step" pj "until" s "do" f[i] := f[i] + npj
+         "end"
+      "end";
+
+      "comment" The sieve.;
+      "for" i := 1 "step" 1 "until" s "do"
+      "if" f[i] "ge" L "then"
+      "begin"
+         copy(r,zero);
+         "if" i<s2 "then"
+         "begin"
+            r[n] := s2 - i; 
+            e[0] := 1
+         "end" "else"
+         "begin"
+            r[n] := i - s2; 
+            e[0] := 0
+         "end";
+         multiply(d,a,r,n); q;
+         "if" e[0] = 1 "then" sub(r,b,w1) "else" add(r,b,w1);
+         "if" r[1] < 0 "then" sub(r,zero,r);
+         multiply(d,r,r,n); q;
+         sub(w2,w1,nb);
+         copy(w1,w2);
+         "if" w1[1] < 0 "then"
+         "begin"
+            e[0] := 1;
+            sub(w1,zero,w1)
+         "end" "else" e[0] := 0;
+         "for" j := 1 "step" 1 "until" m "do" e[j] := 0;
+         "for" j := 1 "step" 1 "until" m "do"
+         "begin"
+again:
+            copy(w2,w1);
+            div(w2,ps[j]);
+            mpy(w2,ps[j]);
+            if(w1,w2,found); "comment" if w1=w2 then goto found;
+            "goto" next;
+found:
+            div(w1,ps[j]);
+            e[j] := e[j] + 1;
+            "comment" Remember that a is a residual factor, so
+                      process stops when w1=a, not when w1=1;
+            if(w1,a,good);
+            "goto" again;
+next:
+         "end";
+         "goto" skip;
+good:
+         "if" first "then"
+         "begin"
+            "comment" Save first solution;
+            "for" j := 0 "step" 1 "until" m "do" es[j] := e[j];
+            copy(rs,r);
+            first := "false"
+         "end" "else"
+         "begin"
+            e[0] := "if" e[0] = es[0] "then" 0 "else" 1;
+            "for" j := 1 "step" 1 "until" m "do" e[j]:=e[j]+es[j];
+            "comment" Combine;
+            multiply(d,r,c,n);
+            mod2(r,d,nb);
+            multiply(d,r,rs,n);
+            mod2(r,d,nb);
+            put(r,'Q`);
+            "for" j := 0 "step" 1 "until" m "do"
+            "begin"
+               "if" md1(j,10) = 0 "then" "print" ''L``;
+               "print" digits(3), same line, e[j]
+            "end"
+         "end";
+skip:
+      "end";
+      "goto" polyin;
+endzzz:
+      "print" ''L``
+   "end"
+"end"
+<!!>
+
+j 12
+st 1727
+
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+
+at ptr inline
+ 1000  1.5
+
+    3     1    29
+  499 94860 12441P
+    2    3    5    7   17   19   31   43   47   59
+   61   67  107  163  181  193  197  229  241  263
+  271  277  311  331  349  359  367  389  397
+ 
+    1    1    1    2    3    1    5   19   18   14
+   16    6   32   38   19   86   14    7   18  101
+   22   39   39   65   52  171  125   69   50
+
+  6299A
+  1649B
+   217 31374 34841C
+  6311A
+  2063B
+   349 43325 62332C
+  6343A
+  4150B
+   419 08035 83186C
+     0A
+<!!>
+reset
+j 10
+st 1727
+sh t
+
+c QS3-------------------------------------------------------------
+
+c QS2 corrupts the library
+
+reset
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+c no call by name
+enter 8273 =8 86
+c lots of store
+enter 27 +65522
+
+at ptr inline
+qs3;
+"begin"
+   "comment" 26-APR-1998
+             David M. Bressoud.
+             Factorization and Primality Testing.
+             Springer-Verlag 1989.
+
+             Separately assembled stuff declared first;
+
+   "code" "procedure" lead zero;  "algol";
+   "code" "procedure" lead blank; "algol";
+   "code" "procedure" unsigned;   "algol";
+   "code" "procedure" revert;     "algol";
+   "code" "integer" "procedure" max int; "algol";
+   "code" "integer" "procedure" and(a,b);
+          "value" a,b; "integer" a,b;
+   "algol";
+   "code" "procedure" add(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" sub(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" mpy(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" div(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" copy(a,b);
+          "integer" "array" a,b; 
+   "algol";
+   "code" "procedure" if(a,b,L); 
+          "integer" "array" a,b; "label" L;
+   "algol";
+   "code" "procedure" mod2(x,aa,b); 
+          "integer" "array" x,aa,b;
+   "algol";
+   "code" "procedure" multiply(a,b,c,n); "value" n;
+          "integer" "array" a,b,c; "integer" n;
+   "algol";
+   "code" "procedure" divide(x,y,a,b);
+          "integer" "array" x,y,a,b;
+   "algol";
+   "code" "procedure" mod(x,a,b);
+          "integer" "array" x,a,b;
+   "algol";
+   "code" "procedure" qdm;
+   "algol";
+
+
+   "comment" Outer block declarations;
+   "integer" ks,L,m,n,s,u,x,y,z;
+
+   "comment" Program start. Must pretend to call qdm in order
+             to load some of the separately assembled stuff;
+   "if" "false" "then" qdm;
+
+   "comment" ''L`26-APR-1998'L``;
+   "read" s,L,u,n,ks,m; 
+   "comment" Initial assignments for the Wichman Hill
+             random number generator;
+   x:=123;
+   y:=67;
+   z:=85;
+   "begin"
+      "integer" i,j,k;
+      "integer" "array" a,b,c,nb,one,sn,work,
+                        w1,w2,zero[1:n],d[1:2*n];
+
+      "comment" The procedures, get and put, could be provided
+                with an extra parameter, n, and stowed alongside
+                the declarations of the assembly-coded procedures.
+
+                However, get uses add, and add needs its arrays
+                to be located withing 8192 words of each other.
+                Hence get actually needs to access a non-local
+                array, work, and therefore needs to be located
+                here. The same get and put have been used in all
+                the programs for consistency;
+ 
+      "procedure" get(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k;
+         "for" j := 1 "step" 1 "until" n "do" a[j] := work[j] := 0;
+
+         "for" j := j "while" "not" buffer(1,s) "do"
+         "begin"
+            mpy(a,100000);
+            "read" work[n];
+            add(a,a,work)
+         "end"
+      "end" of get;
+
+      "procedure" put(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k,L,m,p,r,half;
+         "boolean" zero;
+         "integer" "array" work[1:2*n+1];
+
+         "boolean" "procedure" fin;
+         "begin"
+            "integer" k;
+            fin := "true";
+            "for" k := 1 "step" 1 "until" n "do"
+               "if" work[k] "ne" 0 "then" fin := "false"
+         "end" of fin;
+
+         "procedure" group;
+         "begin"
+            "integer" s;
+            s := 10^r; mpy(work, s);
+            "if" zero "then" "print" ' `;
+            "print" digits(5), same line, work[n];
+            work[n] := 0
+         "end" of group;
+ 
+         half := (max int "div" 2) + 1;
+         "for" j := 1 "step" 1 "until" 2*n+1 "do" work[j] :=
+            "if" j "le" n "then" a[j] "else" 0;
+         work[n+1] := half;
+
+         "for" j := -5, j+5 "while" "not" fin "do" div(work, 100000);
+         mpy(work, 100000);
+         "for" j := j, j+1 "while" "not" fin "do" div(work, 10);
+
+         L := ((j-1) "div" 50) + 1;
+         m := j - (L-1) * 50;
+         p := ((m-1) "div" 5) + 1;
+ 
+         "print" ''L``;
+         r := m - (p-1) * 5;
+         zero := "false";
+         group;
+         lead zero;
+         unsigned;
+         zero := "true";
+         r := 5;
+         "for" k := 1 "step" 1 "until" p-1 "do" group;
+         "for" j := 2 "step" 1 "until" L "do"
+         "begin"
+            "print" ''L``;
+            "for" k := 1 "step" 1 "until" 10 "do" group
+         "end";
+         lead blank;
+         revert;
+         "print" s
+      "end" of put;
+
+      "comment" x := m ^ e modulo nn;
+      "procedure" power(x,m,e,nn);
+                  "integer" "array" x,m,e,nn;
+      "begin"
+         "integer" half,j,k;
+         "integer" "array" c,z[1:n];
+         copy(x,zero);
+         half := (max int "div" 2) + 1;
+         x[1] := half;
+         k := -1;
+         "for" k := k+1 "while" nn[1] < half "do" mpy(nn,2);
+p1:
+         "for" j := 1 "step" 1 "until" n "do" z[j] := and(x[j],e[j]);
+         if(z,zero,p2);
+         "goto" p3;
+p2:
+         div(x,2);
+         "goto" p1;
+p3:
+         copy(c,one);
+p4:
+         multiply(d,c,c,n);
+         mod2(c,d,nn);
+         "for" j := 1 "step" 1 "until" n "do"
+            "if" and(z[j],e[j]) "ne" 0 "then" "goto" p6;
+p5:
+         if(z,one,p7);
+         div(z,2);
+         "goto" p4;
+p6:
+         multiply(d,c,m,n);
+         mod2(c,d,nn);
+         "goto" p5;
+p7:
+         "for" j := 1 "step" 1 "until" k "do" div(nn,2);
+         copy(x,c);
+         mod(x,x,nn)
+      "end";
+
+      "comment" prime is true if the number in the non-local
+                array, b, is a prime;
+      "boolean" "procedure" prime;
+      "begin"
+         "integer" L;
+         "integer" "array" y[1:n+1];
+         "integer" j,k;
+         "integer" "array" q,z,bm1[1:n];
+         prime := "false";
+         "for" L :=  3,  5,  7, 11, 13, 17, 19, 23, 29, 31,
+                    37, 41, 43, 47, 53, 59, 61, 67, 71, 73,
+                    79, 83, 89, 97,101,103,107,109,113,127,
+                   131,137,139,149,151,157,163,167,173,179,
+                   181,191,193,197,199,211,223,227,229,233,
+                   239,241,251 "do"
+         "begin"
+            add(y,b,zero);
+            y[n+1] := 0;
+            "if" and(y[n],1) = 0 "then" y[n] := y[n]-1;
+            div(y,L);
+            "if" y[n+1] = 0 "then" "goto" exit
+         "end";
+         j := 0;
+         sub(bm1,b,one);
+         sub(q,b,one);
+         k := -1;
+         "for" k := k+1 "while" and(q[n],1) = 0 "do" div(q,2);
+         power(z,a,q,b);
+pp3:
+         "if" j = 0 "then" if(z,one,good);
+         if(z,bm1,good);
+         "if" j>0 "then" if(z,one,exit);
+pp4:
+         j := j + 1;
+         "if" j<k "then"
+         "begin"
+            multiply(d,z,z,n);
+            mod2(z,d,b);
+            "goto" pp3
+         "end";
+         "goto" exit;
+good:
+         prime := "true";
+exit:
+      "end";
+
+      "comment" x := a - b * c;
+      "procedure" reduce(x,a,b,c); "value" b,c;
+                  "integer" "array" x,a,b,c;
+      "begin"
+         "integer" j;
+         "boolean" plus;
+         "integer" "array" d[1:2*n];
+         plus := "true";
+         "if" b[1] < 0 "then"
+         "begin"
+            plus := "not" plus; sub(b,zero,b)
+         "end";
+         "if" c[1] < 0 "then"
+         "begin"
+            plus := "not" plus; sub(c,zero,c)
+         "end";
+         multiply(d,b,c,n);
+         "for" j := 1 "step" 1 "until" n "do" x[j] := d[j];
+         if(x,zero,r1);
+        "print" ''L`capacity exceeded'L``, stop;
+r1:
+         "for" j := 1 "step" 1 "until" n "do" x[j] := d[j+n];
+         "if" "not" plus "then" sub(x,zero,x);
+         sub(x,a,x)
+      "end" of reduce;
+
+      "comment" a := sqrt(a);
+      "procedure" sqrt(a);
+                  "integer" "array" a;
+      "begin"
+         "integer" j;
+         "integer" "array" x,y,z[1:n],
+                           aa[1:2*n];
+         copy(y,one);
+         mpy(y,10);
+loop:
+         copy(x,y);
+         divide(z,y,a,x);
+         add(y,x,y);
+         add(y,y,one);
+         div(y,2);
+         "for" j := 1 "step" 1 "until" n-1 "do"
+            "if" x[j] "ne" y[j] "then" "goto" loop;
+         "if" abs(x[n] - y[n]) > 1 "then" "goto" loop;
+         add(x,x,one);
+         add(x,x,one);
+cycle:
+         sub(x,x,one);
+         multiply(aa,x,x,n);
+         "for" j := 1 "step" 1 "until" n "do" z[j] := aa[j+n];
+         sub(y,a,z);
+         "if" y[1] < 0 "then" "goto" cycle;
+         copy(a,x)
+      "end" of sqrt;
+
+      "comment" a := b ^ (-1) modulo c;
+      "procedure" inverse(a,b,c);
+                  "integer" "array" a,b,c;
+      "begin"
+         "integer" "array" u1,u2,u3,v1,v2,v3,t1,t2,t3,p,q[1:n];
+         copy(u1,one);
+         copy(u2,zero);
+         copy(u3,c);
+         copy(v1,zero);
+         copy(v2,one);
+         copy(v3,b);
+zloop:
+         if(v3,one,finish);
+         divide(p,q,u3,v3);
+         reduce(t1,u1,v1,q);
+         reduce(t2,u2,v2,q);
+         reduce(t3,u3,v3,q);
+         copy(u1,v1);
+         copy(u2,v2);
+         copy(u3,v3);
+         copy(v1,t1);
+         copy(v2,t2);
+         copy(v3,t3);
+         "goto" zloop;
+finish:
+         "if" v2[1] < 0 "then" add(v2,v2,c);
+         copy(a,v2)
+      "end" of inverse;
+
+      "comment" The Wichmann-Hill portable random number
+                generator. B. A. Wichmann and I. D. Hill,
+                An Efficient and Portable Pseudo-Random Number
+                Generator, Applied Statistics, 31 (No. 2),
+                188-190 (1982) ;
+      "real" "procedure" Wichmann;
+      "begin"
+         "real" w;
+         x := 171 * (x - (x "div" 177) * 177) -  2 * (x "div" 177);
+         y := 172 * (y - (y "div" 176) * 176) - 35 * (y "div" 176);
+         z := 170 * (z - (z "div" 178) * 178) - 63 * (z "div" 178);
+         "if" x < 0 "then" x := x + 30269;
+         "if" y < 0 "then" y := y + 30307;
+         "if" z < 0 "then" z := z + 30323;
+         w := x/30269.0 + y/30307.0 + z/30323.0;
+         Wichmann := w - entier(w) 
+      "end" of Wichmann;
+
+      "comment" Program start;
+      "for" j := 1 "step" 1 "until" n "do" one[j] := zero[j] := 0;
+      one[n] := 1;
+      get(nb,'P`);
+      mpy(nb,ks);
+      copy(sn,nb);
+      mpy(sn,2);
+      sqrt(sn);
+      div(sn, s "div" 2);
+      "for" k := L "step" 1 "until" u "do"
+      "begin"
+         copy(b,sn);
+         copy(w1,zero);
+         w1[n] := abs(k);
+         "if" k < 0 "then" sub(b,b,w1) "else" add(b,b,w1);
+         "comment" Choose numbers equal to 3 modulo 4;
+         "if" and(b[n],3) "ne" 3 "then" "goto" next;
+         copy(w1,b);
+         "comment" This step takes a long time. Ideally one
+                   should run from 1 up to 5, but time is
+                   saved by only doing it twice;
+         "for" i := 1 "step" 1 "until" 2 "do"
+         "begin"
+            "for" j := 1 "step" 1 "until" n "do" 
+               a[j] := b[j] * Wichmann;
+            "if" "not" prime "then" "goto" next 
+         "end";
+         copy(a,b);
+         copy(w1,b);
+         add(w1,w1,one);
+         div(w1,4);
+         power(c,nb,w1,b);
+         copy(b,c);
+         multiply(d,b,b,n);
+         "for" j := 1 "step" 1 "until" n "do" c[j] := d[j];
+         if(c,zero,goo);
+         "print" ''L`overflow`;
+         stop;
+goo:  
+         "for" j := 1 "step" 1 "until" n "do" c[j] := d[j+n];
+         sub(c,nb,c);
+         divide(w1,w2,c,a);
+         if(w1,zero,fine);
+         "goto" next;
+fine: 
+         inverse(c,a,nb);
+         "comment" Output a polynomial;
+         put(a,'A`);
+         put(b,'B`);
+         put(c,'C`);
+next: 
+      "end"
+   "end";
+   "print" ''L`     0A'L``
+"end"
+<!!>
+
+j 12
+st 1727
+
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+
+at ptr inline
+   1000   -30    30
+      3     1    29
+    499 94860 12441P
+<!!>
+reset
+j 10
+st 1727
+sh t
+
+c QS4-------------------------------------------------------------
+
+at ptr inline
+qs4;
+"begin"
+   "comment" 27-APR-1998
+             David M. Bressoud.
+             Factorization and Primality Testing.
+             Springer-Verlag 1989.
+
+             Separately assembled stuff declared first;
+
+
+   "code" "procedure" lead zero;  "algol";
+   "code" "procedure" lead blank; "algol";
+   "code" "procedure" unsigned;   "algol";
+   "code" "procedure" revert;     "algol";
+   "code" "integer" "procedure" max int; "algol";
+   "code" "integer" "procedure" and(a,b);
+          "value" a,b; "integer" a,b;
+   "algol";
+   "code" "procedure" add(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" sub(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" mpy(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" div(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" copy(a,b);
+          "integer" "array" a,b; 
+   "algol";
+   "code" "procedure" if(a,b,L); 
+          "integer" "array" a,b; "label" L;
+   "algol";
+   "code" "procedure" mod2(x,aa,b); 
+          "integer" "array" x,aa,b;
+   "algol";
+   "code" "procedure" multiply(a,b,c,n); "value" n;
+          "integer" "array" a,b,c; "integer" n;
+   "algol";
+   "code" "procedure" divide(x,y,a,b);
+          "integer" "array" x,y,a,b;
+   "algol";
+   "code" "procedure" mod(x,a,b);
+          "integer" "array" x,a,b;
+   "algol";
+   "code" "procedure" qdm;
+   "algol";
+
+   "comment" Outer block declarations;
+   "integer" ks,m,n,s;
+   "real" bt,btw,t,wd,z;
+
+   "comment" John Pollard's logarithm choice.
+             z is 2/ln(2);
+   "integer" "procedure" iln(x); "value" x; "integer" x;
+      iln := z*ln(x);
+
+   "comment" jln is like iln, but for a long number. It
+             seemed hard to implement;
+   "integer" "procedure" jln(x); "integer" "array" x;
+   "begin"
+      "integer" i,j;
+      "real" tg;
+      tg := 0.0;
+      i := 0;
+      btw := 1.0;
+      "for" j := 1 "step" 1 "until" n "do"
+         "if" x[j] "ne" 0 "or" i "ne" 0 "then"
+      "begin"
+         i := i + 1;
+         btw := btw * bt;
+         tg := tg * wd + btw * x[j];
+         tg := tg * bt
+      "end";
+      jln := z * (ln(tg) - (i+1) * ln(bt))
+   "end" of jln;
+
+   "integer" "procedure" modulo(x,y); "value" x,y; "integer" x,y;
+   "begin"
+      "integer" k;
+      k := x - (x "div" y) * y;
+      modulo := "if" k = 0 "then" y "else" k
+   "end";
+
+
+   "comment" Program start. Must pretend to call qdm in order
+             to load some of the separately assembled stuff;
+   "if" "false" "then"  qdm;
+   "print" ''L`27-APR-1998'L``;
+   "read" s,t,n,ks,m;
+   z := 2.0/ln(2.0);
+ 
+   "begin"
+      "integer" i,j,L,npj,pj,tj;
+      "integer" "array" a,b,c,nb,one,r,sn,work,w1,w2,zero[1:n],
+                        d[1:2*n],
+                        ps,ts[1:m],
+                        e[0:m],
+                        f[1:s];
+
+      "comment" The procedures, get and put, could be provided
+                with an extra parameter, n, and stowed alongside
+                the declarations of the assembly-coded procedures.
+
+                However, get uses add, and add needs its arrays
+                to be located withing 8192 words of each other.
+                Hence get actually needs to access a non-local
+                array, work, and therefore needs to be located
+                here. The same get and put have been used in all
+                the programs for consistency;
+ 
+      "procedure" get(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k;
+         "for" j := 1 "step" 1 "until" n "do" a[j] := work[j] := 0;
+
+         "for" j := j "while" "not" buffer(1,s) "do"
+         "begin"
+            mpy(a,100000);
+            "read" work[n];
+            add(a,a,work)
+         "end"
+      "end" of get;
+
+      "procedure" put(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k,L,m,p,r,half;
+         "boolean" zero;
+         "integer" "array" work[1:2*n+1];
+
+         "boolean" "procedure" fin;
+         "begin"
+            "integer" k;
+            fin := "true";
+            "for" k := 1 "step" 1 "until" n "do"
+               "if" work[k] "ne" 0 "then" fin := "false"
+         "end" of fin;
+
+         "procedure" group;
+         "begin"
+            "integer" s;
+            s := 10^r; mpy(work, s);
+            "if" zero "then" "print" ' `;
+            "print" digits(5), same line, work[n];
+            work[n] := 0
+         "end" of group;
+ 
+         half := (max int "div" 2) + 1;
+         "for" j := 1 "step" 1 "until" 2*n+1 "do" work[j] :=
+            "if" j "le" n "then" a[j] "else" 0;
+         work[n+1] := half;
+
+         "for" j := -5, j+5 "while" "not" fin "do" div(work, 100000);
+         mpy(work, 100000);
+         "for" j := j, j+1 "while" "not" fin "do" div(work, 10);
+
+         L := ((j-1) "div" 50) + 1;
+         m := j - (L-1) * 50;
+         p := ((m-1) "div" 5) + 1;
+ 
+         "print" ''L``;
+         r := m - (p-1) * 5;
+         zero := "false";
+         group;
+         lead zero;
+         unsigned;
+         zero := "true";
+         r := 5;
+         "for" k := 1 "step" 1 "until" p-1 "do" group;
+         "for" j := 2 "step" 1 "until" L "do"
+         "begin"
+            "print" ''L``;
+            "for" k := 1 "step" 1 "until" 10 "do" group
+         "end";
+         lead blank;
+         revert;
+         "print" s
+      "end" of put;
+
+      "comment" Program continues. Get initial data;
+      "for" j := 1 "step" 1 "until" n "do" one[j] := zero[j] := 0;
+      one[n] := 1;
+      get(nb,'P`);
+      mpy(nb,ks);
+      "for" j := 1 "step" 1 "until" m "do" "read" ps[j];
+      get(sn,'Q`);
+      "for" j := 1 "step" 1 "until" m "do" "read" ts[j];
+      "for" i := 1 "step" 1 "until" s "do" f[i] := 0;
+      j := iln(8);
+      "for" i := 2 "step" 2 "until" s "do" f[i] := j;
+
+      wd := 1.0 + max int;
+      "comment" Using exp and ln instead of sqrt, for bt, saves
+                space because exp and ln are built-in anyway;
+      bt := 1.0/exp(0.5*ln(wd));
+
+      "comment" Evaluate the limit, L, for the sieving
+                according to Bressoud's formula;
+      L := (jln(nb) "div" 2) + iln(s "div" 2) - t*iln(ps[m]);
+
+      "print" ''L`L = `, same line, L;
+
+      copy(w1,zero);
+      w1[n] := s "div" 2;
+      sub(r, sn, w1);
+
+      "for" j := 2 "step" 1 "until" m "do"
+      "begin"
+        pj := ps[j];
+        tj := ts[j];
+        npj := iln(pj);
+        copy(w2,r);
+        copy(w1,w2);
+        div(w2,pj);
+        mpy(w2,pj);
+        sub(w1,w1,w2);
+        "comment" We are trying to find a value of i so that
+                  ((i-(s/2))+b)^2 - nb = 0 modulo p[j].
+                  It's a bit of a slog; 
+        "for" i := modulo(pj+tj-w1[n],pj) 
+           "step" pj "until" s "do" f[i] := f[i] + npj;
+        "if" (ks "div" pj) * pj "ne" ks "then"
+        "begin"
+           "comment" The other solution;
+           "for" i := modulo(2*pj-tj-w1[n],pj)
+              "step" pj "until" s "do" f[i] := f[i]+npj
+        "end"
+      "end";
+
+      "comment" The sieve;
+      "for" i := 1 "step" 1 "until" s "do"
+      "begin"
+         add(r,r,one);
+         "if" f[i] "ge" L "then"
+         "begin"
+            multiply(d,r,r,n);
+            "for" j := 1 "step" 1 "until" n "do" w1[j] := d[j+n];
+            sub(w1,w1,nb);
+            "if" w1[1] < 0 "then"
+            "begin"
+               e[0] := 1; 
+               sub(w1,zero,w1)
+            "end" "else" e[0] := 0;
+            "for" j := 1 "step" 1 "until" m "do" e[j] := 0;
+            "for" j := 1 "step" 1 "until" m "do"
+            "begin"
+again:
+               copy(w2,w1);
+               div(w2,ps[j]);
+               mpy(w2,ps[j]);
+               if(w1,w2,found);
+               "goto" next;
+found:
+               div(w1,ps[j]);
+               e[j] := e[j] + 1;
+               "comment" Good when w1 = 1;
+               if(w1,one,good);
+               "goto" again;
+next:
+            "end";
+            "goto" skip;
+good:
+            put(r,'Q`);
+            "for" j := 0 "step" 1 "until" m "do"
+            "begin"
+               "if" (j "div" 10) * 10 = j "then" "print" ''L``;
+               "print" digits(3), same line, e[j]
+            "end";
+skip:
+         "end"
+      "end";
+      "print" ''L``
+   "end"
+"end"
+<!!>
+
+j 12
+st 1727
+
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+
+at ptr inline
+ 10000  1.5
+    3     1    29
+  499 94860 12441P
+    2    3    5    7   17   19   31   43   47   59
+   61   67  107  163  181  193  197  229  241  263
+  271  277  311  331  349  359  367  389  397
+   22 35953Q 
+    1    1    1    2    3    1    5   19   18   14
+   16    6   32   38   19   86   14    7   18  101
+   22   39   39   65   52  171  125   69   50
+<!!>
+reset
+j 10
+st 1727
+sh t
+
+c GAUSS-----------------------------------------------------------
+
+c QS4 appears to corrupt Algol
+
+reset
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+c no call by name
+enter 8273 =8 86
+c lots of store
+enter 27 +65522
+
+at ptr inline
+gauss;
+"begin"
+   "comment" 28-APR-1998
+             David M. Bressoud.
+             Factorization and Primality Testing.
+             Springer-Verlag 1989.
+
+             Separately assembled stuff declared first;
+
+   "code" "procedure" date time; "algol";
+   "code" "procedure" lead zero;  "algol";
+   "code" "procedure" lead blank; "algol";
+   "code" "procedure" unsigned;   "algol";
+   "code" "procedure" revert;     "algol";
+   "code" "integer" "procedure" max int; "algol";
+   "code" "integer" "procedure" and(a,b);
+          "value" a,b; "integer" a,b;
+   "algol";
+   "code" "procedure" add(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" sub(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" mpy(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" div(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" copy(a,b);
+          "integer" "array" a,b; 
+   "algol";
+   "code" "procedure" if(a,b,L); 
+          "integer" "array" a,b; "label" L;
+   "algol";
+   "code" "procedure" mod2(x,aa,b); 
+          "integer" "array" x,aa,b;
+   "algol";
+   "code" "procedure" multiply(a,b,c,n); "value" n;
+          "integer" "array" a,b,c; "integer" n;
+   "algol";
+   "code" "procedure" divide(x,y,a,b);
+          "integer" "array" x,y,a,b;
+   "algol";
+   "code" "procedure" mod(x,a,b);
+          "integer" "array" x,a,b;
+   "algol";
+   "code" "procedure" qdm;
+   "algol";
+
+   "comment" This expression avoids overflow;
+   "integer" "procedure" or(x,y); "value" x,y; "integer" x,y;
+      or := x - and(x,y) + y;
+
+   "comment" This expression avoids overflow;
+   "integer" "procedure" xor(x,y); "value" x,y; "integer" x,y;
+      xor := x - and(x,y) + y - and(x,y);
+
+   "comment" This should have been provided as an assembly
+             coded boolean procedure;
+   "boolean" "procedure" ifb(a,b); "integer" "array" a,b;
+   "begin"
+      ifb := "true";
+      if(a,b,ifbjoin);
+      ifb := "false";
+ifbjoin:
+   "end";
+
+   "integer" bits,dups,i1,i2,i3,j,k,ks,
+             m,maxsol,n,nos,r1,r2,usable;
+
+   "comment" Program start. Must pretend to call qdm in order
+             to load some of the separately assembled stuff;
+   "if" "false" "then"  qdm;
+   "print" ''L`28-APR-1998'L``;
+   "read" n,ks,m,maxsol;
+   bits := entier((ln(max int)/ln(2)) + 0.5);
+   r1 := 1 + ((maxsol - 1) "div" bits);
+   r2 := 1 + ((m+1) "div" bits);
+
+   "begin"
+      "integer" "array" ans,c,nb,one,p,
+                        work,ww1,x,y,zero[1:n],
+                        d,ww2[1:2*n],
+                        ps,es[0:m],
+                        em[1:maxsol,0:m],
+                        soln[1:maxsol,1:n],
+                        lrow[1:r2], left[1:maxsol,1:r2],
+                        rrow[1:r1],right[1:maxsol,1:r1],
+                        zeror[1:r1];
+      "boolean" "array" used[1:maxsol];
+
+      "comment" The procedures, get and put, could be provided
+                with an extra parameter, n, and stowed alongside
+                the declarations of the assembly-coded procedures.
+
+                However, get uses add, and add needs its arrays
+                to be located withing 8192 words of each other.
+                Hence get actually needs to access a non-local
+                array, work, and therefore needs to be located
+                here. The same get and put have been used in all
+                the programs for consistency;
+ 
+      "procedure" get(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k;
+         "for" j := 1 "step" 1 "until" n "do" a[j] := work[j] := 0;
+
+         "for" j := j "while" "not" buffer(1,s) "do"
+         "begin"
+            mpy(a,100000);
+            "read" work[n];
+            add(a,a,work)
+         "end"
+      "end" of get;
+
+      "procedure" put(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k,L,m,p,r,half;
+         "boolean" zero;
+         "integer" "array" work[1:2*n+1];
+
+         "boolean" "procedure" fin;
+         "begin"
+            "integer" k;
+            fin := "true";
+            "for" k := 1 "step" 1 "until" n "do"
+               "if" work[k] "ne" 0 "then" fin := "false"
+         "end" of fin;
+
+         "procedure" group;
+         "begin"
+            "integer" s;
+            s := 10^r; mpy(work, s);
+            "if" zero "then" "print" ' `;
+            "print" digits(5), same line, work[n];
+            work[n] := 0
+         "end" of group;
+ 
+         half := (max int "div" 2) + 1;
+         "for" j := 1 "step" 1 "until" 2*n+1 "do" work[j] :=
+            "if" j "le" n "then" a[j] "else" 0;
+         work[n+1] := half;
+
+         "for" j := -5, j+5 "while" "not" fin "do" div(work, 100000);
+         mpy(work, 100000);
+         "for" j := j, j+1 "while" "not" fin "do" div(work, 10);
+
+         L := ((j-1) "div" 50) + 1;
+         m := j - (L-1) * 50;
+         p := ((m-1) "div" 5) + 1;
+ 
+         "print" ''L``;
+         r := m - (p-1) * 5;
+         zero := "false";
+         group;
+         lead zero;
+         unsigned;
+         zero := "true";
+         r := 5;
+         "for" k := 1 "step" 1 "until" p-1 "do" group;
+         "for" j := 2 "step" 1 "until" L "do"
+         "begin"
+            "print" ''L``;
+            "for" k := 1 "step" 1 "until" 10 "do" group
+         "end";
+         lead blank;
+         revert;
+         "print" s
+      "end" of put;
+
+      "comment" x := gcd(u,v);
+      "procedure" gcd(x,u,v); "value" u,v;
+         "integer" "array" x,u,v;
+      "begin"
+gcdl1:
+         if(v,zero,gcdl2);
+         mod(x,u,v);
+         copy(u,v);
+         copy(v,x);
+         "goto" gcdl1;
+gcdl2:
+         copy(x,u)
+      "end" of gcd;
+
+      "comment" Looks for non-zero words;
+      "boolean" "procedure" oddbit(i); "value" i; "integer" i;
+      "begin"
+         "integer" j;
+         oddbit := "false";
+         "for" j := 1 "step" 1 "until" r2 "do"
+         "begin"
+            "if" and(left[i,j],lrow[j]) "ne" 0 
+            "then" oddbit := "true"
+         "end"
+      "end";
+
+      "comment" Looks for a solution; 
+      "boolean" "procedure" found;
+      "begin"
+         "integer" j;
+         found := "true";
+         "for" j := 1 "step" 1 "until" r2 "do"
+         "begin"
+            "if" left[i3,j] "ne" 0 "then" found := "false"
+         "end"
+      "end";
+
+      "comment" x := m ^ e modulo nn;
+      "procedure" power(x,m,e,nn); "value" m,e;
+                  "integer" "array" x,nn; 
+                  "integer" m,e;
+      "begin"
+         "integer" j,kx,z;
+         "integer" "array" c[1:n];
+
+         kx := (max int "div" 2) + 1;
+
+         "if" e < 0 "then" "print" ''L`e = `, same line, e, stop;
+
+         "if" e = 0 "then"
+         "begin"
+            copy(x,one);
+            "goto" finish
+         "end";
+
+p1:
+         z := and(kx,e);
+         "if" z = 0 "then"
+         "begin"
+            kx := kx "div" 2; "goto" p1;
+         "end";
+
+         copy(c,one);
+p4:
+         multiply(d,c,c,n);
+         mod2(c,d,nn);
+         "if" and(z,e) "ne" 0 "then" "goto" p6;
+p5:
+         "if" z = 1 "then" "goto" p7;
+         z := z "div" 2;
+         "goto" p4;
+p6:
+         "for" j := 1 "step" 1 "until" 2*n "do"
+            d[j] := "if" j "le" n "then" 0 "else" c[j-n];
+         mpy(d,m);
+         mod2(c,d,nn);
+         "goto" p5;
+p7:
+         mod(x,c,nn);
+finish:
+      "end";
+
+      "comment" Tries to solve a found solution;
+      "procedure" tryit;
+      "begin"
+         "integer" h,j,k,r;
+         "boolean" first;
+         first := "true";
+         k := 0;
+         "for" j := 1 "step" 1 "until" r1 "do" 
+            rrow[j] := right[i3,j];
+cycle:
+         k := k + 1;
+         "comment" When rrow is zero we have a possible solution;
+         if(rrow,zeror,eval);
+         "if" and(rrow[r1],1) = 1 "then" "goto" doit;
+         div(rrow,2);
+         "goto" cycle;
+doit:
+         div(rrow,2);
+         "for" j := 1 "step" 1 "until" n "do" ww1[j] := soln[k,j];
+         "comment" Save the first solution;
+         "if" first "then"
+         "begin"
+            first := "false";
+            copy(x,ww1);
+            "for" j := 0 "step" 1 "until" m "do" es[j] := em[k,j];
+         "end" "else"
+         "begin"
+            multiply(ww2,x,ww1,n);
+            mod2(x,ww2,nb);
+            "for" j := 0 "step" 1 "until" m "do"
+               es[j] := es[j] + em[k,j];
+         "end";
+         "goto" cycle;
+eval:
+         copy(y,one);
+         "comment" Have we any odd powers;
+         "for" r := 1 "step" 1 "until" m "do"
+         "begin"
+            "if" and(es[r],1) = 1 "then"
+            "begin"
+               "print" 'odd'L``;
+               "for" h := 0 "step" 1 "until" m "do"
+               "begin"
+                  "if" ((h-1) "div" 10)*10 = h - 1 
+                  "then" "print" ''L``;
+                  "print" same line, digits(5), es[h]
+               "end";
+               stop
+            "end";
+            "comment" Even powers only;
+            "if" es[r] "ne" 0 "then"
+            "begin"
+               power(ww1,ps[r],es[r] "div" 2,nb);
+               multiply(ww2,ww1,y,n);
+               mod2(y,ww2,nb)
+            "end"
+         "end";
+         "if" and(es[0],3) "ne" 0 "then" 
+         "begin"
+            sub(ww1,nb,y);
+            copy(y,ww1)
+         "end";
+         "comment" Reject cases where x = y;
+         "if" ifb(x,y) "then"
+         "begin"
+            "print" 'x = y    'L``; "goto" fail
+         "end";
+         "comment" Reject cases where x + y = n;
+         add(ww1,x,y);
+         "if" ifb(ww1,nb) "then"
+         "begin"
+            "print" 'x + y = n'L``; "goto" fail
+         "end";
+         "comment" Force ww1 to be positive;
+         sub(ww1,x,y);
+         "if" ww1[1] < 0 "then"
+         "begin"
+            add(c,ww1,nb);
+            copy(ww1,c)
+         "end";
+         gcd(ans,ww1,nb);
+         "comment" Reject cases where factor equals 1;
+         "if" ifb(ans,one) "then"
+         "begin"
+            "print" 'fact = 1 'L``; "goto" fail
+         "end";
+         "comment" Aha, the answer;
+         "print" ''L2`x, y = `;
+         put(x,'X`); put(y,'y`); 
+         "print" ''L2`exponents'L``;
+
+         "for" h := 0 "step" 1 "until" m "do"
+         "begin"
+            "if" ((h-1) "div" 10)*10 = h - 1 
+            "then" "print" ''L``;
+            "print" same line, digits(5), es[h]
+         "end";
+         "print" ''L2`factor = `;
+         put(ans,'f`);
+         "print" ''L2`number = `;
+         put(nb,'n`);
+         date time;
+         stop;
+fail:
+      "end" of tryit;
+
+      "comment" Program continues;
+      "for" j := 1 "step" 1 "until" n "do" one[j]:=zero[j]:=0;
+      one[n]:=1;
+      "for" j := 1 "step" 1 "until" r1 "do" zeror[j] := 0;
+      get(nb,'P`);
+      "for" j := 1 "step" 1 "until" m "do" "read" ps[j];
+      nos := 0;
+      copy(rrow,zeror);
+      rrow[r1]:=1;
+      "comment" Get solutions until a zero value of p is met;
+again:
+      get(p,'Q`);
+      if(p,zero,contin);
+      nos := nos + 1;
+      "if" nos > maxsol "then"
+      "begin"
+         "print" 'too many equations'L``; stop
+      "end";
+
+      "for" j := 1 "step" 1 "until" r1 "do" right[nos,j] := rrow[j];
+      mpy(rrow,2);
+      "for" j := 1 "step" 1 "until" n  "do" soln[nos,j] := p[j];
+      "for" j:=0 "step" 1 "until" m "do" 
+      "begin"
+         "read" es[j];
+         em[nos,j] := es[j]
+      "end";
+      "for" j := 1 "step" 1 "until" r2 "do"
+      "begin"
+         lrow[j] := 0;
+         left[nos,j] := 0
+      "end";
+
+      lrow[r2] := 1;
+      "for" j := 0 "step" 1 "until" m "do"
+      "begin"
+         "if" and(es[j],1) = 1 "then"
+         "begin"
+            "for" k := 1 "step" 1 "until" r2 "do" left[nos,k] :=
+               or(left[nos,k], lrow[k]);
+         "end";
+         "if" j < m "then" mpy(lrow,2)
+      "end";
+
+      "goto" again;
+      "comment" Gaussian elimination starts;
+contin:
+      "for" j := 1 "step" 1 "until" nos "do" used[j] := "false";
+      dups := 0;
+      "for" i1 := 1 "step" 1 "until" nos - 1 "do"
+      "begin"
+         "for" j := 1 "step" 1 "until" n "do" x[j] := soln[i1,j];
+         "for" i2 := i1+1 "step" 1 "until" nos "do"
+         "begin"
+            "for" j := 1 "step" 1 "until" n "do" y[j] := soln[i2,j];
+            "if" ifb(x,y) "then"
+            "begin"
+               dups := dups + 1;
+               used[i2] := "true"
+            "end"
+         "end"
+      "end";
+      "if" dups > 0 "then" "print" 'duplicates'L``;
+
+      "for" i1 := m "step" -1 "until" 0 "do"
+      "begin"
+         "for" i2 := 1 "step" 1 "until" nos-1 "do"
+         "begin"
+            "if" (oddbit(i2) "and" "not" used[i2]) "then"
+            "begin"
+               used[i2] := "true";
+               "for" i3 := i2+1 "step" 1 "until" nos "do"
+               "begin"
+                  "if" (oddbit(i3) "and" "not" used[i3]) "then"
+                  "begin"
+                     "for" j := 1 "step" 1 "until" r2 "do"
+                        left[i3,j] := xor(left[i3,j], left[i2,j]);
+                      "for" j := 1 "step" 1 "until" r1 "do"
+                        right[i3,j] := xor(right[i3,j], right[i2,j]);
+                      "if" found "then" tryit
+                  "end"
+               "end"
+            "end"
+         "end";
+        "if" i1 > 0 "then" div(lrow,2)
+      "end";
+   date time;
+   "end";
+   "print" 'failed miserably'``
+"end"
+<!!>
+
+j 12
+st 1727
+
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+
+at ptr inline
+   3   1  29  60
+  499 94860 12441P
+    2    3    5    7   17   19   31   43   47   59
+   61   67  107  163  181  193  197  229  241  263
+  271  277  311  331  349  359  367  389  397
+  4487 10460Q
+   0   9   4   0   1   0   2   0   0   0
+   1   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   2   0   0   0   0
+  3329 21914Q
+   0  11   0   1   1   0   2   0   0   0
+   0   0   1   0   0   0   0   0   1   0
+   0   0   0   0   1   1   0   0   0   0
+  3085 45378Q
+   0  10   3   1   2   0   1   0   1   1
+   0   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+  2872 15909Q
+   1   6   0   2   2   0   2   0   0   0
+   0   0   0   0   0   0   0   0   1   0
+   0   0   0   1   0   1   0   0   0   0
+  2750 27641Q
+   1   6   1   0   2   1   2   0   0   1
+   1   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+  1714 27363Q
+   1   6   2   1   1   1   2   1   0   0
+   0   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   1   1   0   0   0
+   160 26946Q
+   1  10   1   0   1   1   1   0   1   0
+   0   1   0   0   1   0   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+   499 94685 21650Q
+   1   6   2   2   1   0   1   1   0   0
+   0   0   0   0   0   0   0   0   2   1
+   0   0   0   0   0   1   0   0   0   0
+   499 93984 39109Q
+   1   9   0   1   2   1   1   0   0   0
+   0   0   0   0   0   0   0   0   1   1
+   0   0   0   0   0   1   0   0   0   1
+   499 92399 91625Q
+   1  11   1   2   2   0   2   0   2   0
+   0   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+   499 88347 31714Q
+   1   6   2   2   2   0   2   0   0   0
+   0   0   1   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   1   0
+   499 87707 43307Q
+   1  10   1   0   2   0   1   1   0   0
+   0   0   0   0   0   0   0   0   2   0
+   0   0   0   0   1   1   0   0   0   0
+   499 87585 55039Q
+   1   9   0   2   2   0   1   0   0   1
+   0   1   0   0   0   0   0   1   1   0
+   0   0   0   0   0   1   0   0   0   0
+  9407 52092Q
+   1   9   1   1   3   0   3   0   0   0
+   0   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   1   0   0
+  9834 11030Q
+   1  16   0   0   2   1   1   0   0   0
+   1   0   0   1   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+ 10321 64102Q
+   1  11   4   2   1   0   1   0   1   0
+   0   0   0   0   0   0   0   0   1   0
+   0   1   0   0   0   1   0   0   0   0
+ 15562 59626Q
+   1   9   2   1   1   0   1   0   1   0
+   0   0   0   1   0   0   0   0   1   1
+   0   0   0   0   0   1   0   0   0   0
+ 17086 12976Q
+   1  11   1   1   2   1   1   0   0   0
+   1   0   1   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+ 18365 89790Q
+   1  10   1   0   3   0   1   0   0   0
+   0   1   0   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   1   0
+ 18548 72192Q
+   1  12   3   1   1   0   2   0   0   0
+   0   0   0   0   0   1   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+ 18822 95795Q
+   0   6   2   0   1   0   1   0   0   0
+   1   0   0   1   0   1   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+  2028 96037Q
+   0   5   1   1   1   2   0   0   1   0
+   0   1   0   0   1   0   0   0   0   1
+   0   0   0   0   0   0   0   0   0   1
+  1721 73601Q
+   0   5   2   1   2   1   1   0   0   1
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   1   0   1
+  1388 90962Q
+   0  11   0   1   2   1   0   0   0   0
+   0   1   0   0   1   0   0   0   0   0
+   0   0   0   1   0   0   0   0   0   1
+  1337 70556Q
+   0   8   1   1   1   2   0   0   0   0
+   1   0   0   0   1   0   0   0   0   0
+   0   0   1   0   0   0   0   0   0   1
+   499 94456 89193Q
+   1  12   1   2   3   2   0   1   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+   499 93176 79043Q
+   1   9   0   2   3   1   2   0   0   0
+   1   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+   499 92818 36201Q
+   1  16   1   0   2   1   0   0   0   0
+   1   0   0   0   1   1   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+   499 90155 75089Q
+   1   9   1   0   2   1   0   0   0   0
+   1   0   0   0   1   1   1   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+  9235 93283Q
+   1   5   5   1   1   1   0   1   0   0
+   1   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   1   0   0   0   1
+ 10080 79982Q
+   1  11   1   0   2   1   0   0   1   0
+   0   0   1   0   1   0   1   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+ 11719 32974Q
+   1  11   1   1   3   2   1   0   1   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+ 13383 46169Q
+   1   5   4   1   1   1   0   0   1   0
+   0   0   0   1   1   0   0   0   0   0
+   0   1   0   0   0   0   0   0   0   1
+ 14228 32868Q
+   1   8   1   1   4   1   0   0   0   0
+   0   1   0   0   2   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+ 16711 72559Q
+   1   5   2   1   3   1   0   0   0   0
+   0   1   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   1   0   0   1
+ 16788 53168Q
+   1  12   1   1   1   1   0   0   0   0
+   1   0   0   0   1   0   0   0   0   0
+   0   0   0   1   0   0   0   0   0   1
+ 16942 14386Q
+   1   8   2   0   1   2   0   0   0   0
+   0   0   1   1   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+ 17070 15401Q
+   0   5   2   0   2   1   1   1   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   1   0   1
+ 17863 81694Q
+   0  10   4   1   1   1   0   1   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   2
+ 19937 58137Q
+   0   5   8   0   2   1   0   0   0   1
+   0   0   0   0   1   0   0   0   0   0
+   0   0   1   0   0   0   0   0   0   1
+ 20167 99964Q
+   0   8   2   2   1   2   2   0   0   0
+   1   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+ 20475 22400Q
+   0  10   1   0   4   1   2   0   0   0
+   0   1   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+  6388 09305Q
+   0   4   2   4   5   1   2   0   0   0
+   0   0   0   0   1   0   0   0   0   0
+   1   0   0   0   0   0   0   0   0   0
+  5504 78713Q
+   0   3   5   1   5   0   1   0   0   1
+   1   0   0   0   1   0   0   1   0   0
+   0   0   0   0   0   0   0   0   0   0
+  4495 29465Q
+   0   3   5   2   6   0   1   0   1   0
+   0   0   0   0   1   0   1   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+  3611 98873Q
+   0   8   2   1   6   1   2   1   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+  3391 16225Q
+   0   0   1   2   6   0   2   0   0   0
+   0   0   0   0   1   2   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+  1466 81721Q
+   1   3   2   3   5   2   1   1   1   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+   499 88377 18834Q
+   1   7   2   1   5   1   1   0   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   1   0   1   0   0   0
+  9259 04039Q
+   1   4   3   2   5   1   1   0   0   0
+   0   0   0   0   2   0   0   0   0   0
+   0   0   0   0   0   0   0   0   1   0
+  9385 22695Q
+   1   3   1   5   5   0   1   0   1   0
+   1   1   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+ 13991 03639Q
+   1   4   2   2   5   1   2   1   0   0
+   0   0   0   0   1   0   0   0   1   0
+   0   0   0   0   0   0   0   0   0   0
+ 16167 75455Q
+   1   0   2   2   6   0   2   0   1   0
+   0   1   1   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+ 16924 87391Q
+   1   0   3   1   7   0   1   1   0   0
+   1   0   0   0   1   0   0   0   0   0
+   0   0   0   0   1   0   0   0   0   0
+ 17303 43359Q
+   1   0   2   2   5   1   1   0   0   1
+   0   0   1   0   1   0   0   0   0   0
+   0   0   1   0   0   0   0   0   0   0
+ 19353 96519Q
+   0   4   4   2   6   1   1   0   0   0
+   0   0   0   0   1   0   0   1   0   0
+   0   0   0   0   0   0   0   0   0   0
+ 23423 48175Q
+   0   0   2   2   5   0   1   0   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   1   0   0   0   2   0
+   0Q
+<!!>
+reset
+j 10
+st 1727
+sh t
+
+c GAUSS2----------------------------------------------------------
+
+c GAUSS appears to corrupt Algol
+
+reset
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+c no call by name
+enter 8273 =8 86
+c lots of store
+enter 27 +65522
+
+at ptr inline
+gauss;
+"begin"
+   "comment" 29-APR-1998
+             David M. Bressoud.
+             Factorization and Primality Testing.
+             Springer-Verlag 1989.
+
+             Separately assembled stuff declared first;
+
+   "code" "procedure" lead zero;  "algol";
+   "code" "procedure" lead blank; "algol";
+   "code" "procedure" unsigned;   "algol";
+   "code" "procedure" revert;     "algol";
+   "code" "integer" "procedure" max int; "algol";
+   "code" "integer" "procedure" and(a,b);
+          "value" a,b; "integer" a,b;
+   "algol";
+   "code" "procedure" add(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" sub(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" mpy(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" div(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" copy(a,b);
+          "integer" "array" a,b; 
+   "algol";
+   "code" "procedure" if(a,b,L); 
+          "integer" "array" a,b; "label" L;
+   "algol";
+   "code" "procedure" mod2(x,aa,b); 
+          "integer" "array" x,aa,b;
+   "algol";
+   "code" "procedure" multiply(a,b,c,n); "value" n;
+          "integer" "array" a,b,c; "integer" n;
+   "algol";
+   "code" "procedure" divide(x,y,a,b);
+          "integer" "array" x,y,a,b;
+   "algol";
+   "code" "procedure" mod(x,a,b);
+          "integer" "array" x,a,b;
+   "algol";
+   "code" "procedure" qdm;
+   "algol";
+
+   "comment" This expression avoids overflow;
+   "integer" "procedure" or(x,y); "value" x,y; "integer" x,y;
+      or := x - and(x,y) + y;
+
+   "comment" This expression avoids overflow;
+   "integer" "procedure" xor(x,y); "value" x,y; "integer" x,y;
+      xor := x - and(x,y) + y - and(x,y);
+
+   "comment" This should have been provided as an assembly
+             coded boolean procedure;
+   "boolean" "procedure" ifb(a,b); "integer" "array" a,b;
+   "begin"
+      ifb := "true";
+      if(a,b,ifbjoin);
+      ifb := "false";
+ifbjoin:
+   "end";
+
+   "integer" bits,dups,i1,i2,i3,j,k,ks,
+             m,maxsol,n,nos,r1,r2,usable;
+
+   "comment" Program start. Must pretend to call qdm in order
+             to load some of the separately assembled stuff;
+   "if" "false" "then"  qdm;
+   "print" ''L`29-APR-1998'L``;
+   "read" n,ks,m,maxsol;
+   bits := entier((ln(max int)/ln(2)) + 0.5);
+   r1 := 1 + ((maxsol - 1) "div" bits);
+   r2 := 1 + ((m+1) "div" bits);
+
+   "begin"
+      "integer" "array" ans,c,nb,one,p,
+                        work,ww1,x,y,zero[1:n],
+                        d,ww2[1:2*n],
+                        ps,es[0:m],
+                        em[1:maxsol,0:m],
+                        soln[1:maxsol,1:n],
+                        lrow[1:r2], left[1:maxsol,1:r2],
+                        rrow[1:r1],right[1:maxsol,1:r1],
+                        zeror[1:r1];
+      "boolean" "array" used[1:maxsol];
+
+      "comment" The procedures, get and put, could be provided
+                with an extra parameter, n, and stowed alongside
+                the declarations of the assembly-coded procedures.
+
+                However, get uses add, and add needs its arrays
+                to be located withing 8192 words of each other.
+                Hence get actually needs to access a non-local
+                array, work, and therefore needs to be located
+                here. The same get and put have been used in all
+                the programs for consistency;
+ 
+      "procedure" get(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k;
+         "for" j := 1 "step" 1 "until" n "do" a[j] := work[j] := 0;
+
+         "for" j := j "while" "not" buffer(1,s) "do"
+         "begin"
+            mpy(a,100000);
+            "read" work[n];
+            add(a,a,work)
+         "end"
+      "end" of get;
+
+      "procedure" put(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k,L,m,p,r,half;
+         "boolean" zero;
+         "integer" "array" work[1:2*n+1];
+
+         "boolean" "procedure" fin;
+         "begin"
+            "integer" k;
+            fin := "true";
+            "for" k := 1 "step" 1 "until" n "do"
+               "if" work[k] "ne" 0 "then" fin := "false"
+         "end" of fin;
+
+         "procedure" group;
+         "begin"
+            "integer" s;
+            s := 10^r; mpy(work, s);
+            "if" zero "then" "print" ' `;
+            "print" digits(5), same line, work[n];
+            work[n] := 0
+         "end" of group;
+ 
+         half := (max int "div" 2) + 1;
+         "for" j := 1 "step" 1 "until" 2*n+1 "do" work[j] :=
+            "if" j "le" n "then" a[j] "else" 0;
+         work[n+1] := half;
+
+         "for" j := -5, j+5 "while" "not" fin "do" div(work, 100000);
+         mpy(work, 100000);
+         "for" j := j, j+1 "while" "not" fin "do" div(work, 10);
+
+         L := ((j-1) "div" 50) + 1;
+         m := j - (L-1) * 50;
+         p := ((m-1) "div" 5) + 1;
+ 
+         "print" ''L``;
+         r := m - (p-1) * 5;
+         zero := "false";
+         group;
+         lead zero;
+         unsigned;
+         zero := "true";
+         r := 5;
+         "for" k := 1 "step" 1 "until" p-1 "do" group;
+         "for" j := 2 "step" 1 "until" L "do"
+         "begin"
+            "print" ''L``;
+            "for" k := 1 "step" 1 "until" 10 "do" group
+         "end";
+         lead blank;
+         revert;
+         "print" s
+      "end" of put;
+
+      "comment" x := gcd(u,v);
+      "procedure" gcd(x,u,v); "value" u,v;
+         "integer" "array" x,u,v;
+      "begin"
+gcdl1:
+         if(v,zero,gcdl2);
+         mod(x,u,v);
+         copy(u,v);
+         copy(v,x);
+         "goto" gcdl1;
+gcdl2:
+         copy(x,u)
+      "end" of gcd;
+
+      "comment" Looks for non-zero words;
+      "boolean" "procedure" oddbit(i); "value" i; "integer" i;
+      "begin"
+         "integer" j;
+         oddbit := "false";
+         "for" j := 1 "step" 1 "until" r2 "do"
+         "begin"
+            "if" and(left[i,j],lrow[j]) "ne" 0 
+            "then" oddbit := "true"
+         "end"
+      "end";
+
+      "comment" Looks for a solution; 
+      "boolean" "procedure" found;
+      "begin"
+         "integer" j;
+         found := "true";
+         "for" j := 1 "step" 1 "until" r2 "do"
+         "begin"
+            "if" left[i3,j] "ne" 0 "then" found := "false"
+         "end"
+      "end";
+
+      "comment" x := m ^ e modulo nn;
+      "procedure" power(x,m,e,nn); "value" m,e;
+                  "integer" "array" x,nn; 
+                  "integer" m,e;
+      "begin"
+         "integer" j,kx,z;
+         "integer" "array" c[1:n];
+
+         kx := (max int "div" 2) + 1;
+
+         "if" e < 0 "then" "print" ''L`e = `, same line, e, stop;
+
+         "if" e = 0 "then"
+         "begin"
+            copy(x,one);
+            "goto" finish
+         "end";
+
+p1:
+         z := and(kx,e);
+         "if" z = 0 "then"
+         "begin"
+            kx := kx "div" 2; "goto" p1;
+         "end";
+
+         copy(c,one);
+p4:
+         multiply(d,c,c,n);
+         mod2(c,d,nn);
+         "if" and(z,e) "ne" 0 "then" "goto" p6;
+p5:
+         "if" z = 1 "then" "goto" p7;
+         z := z "div" 2;
+         "goto" p4;
+p6:
+         "for" j := 1 "step" 1 "until" 2*n "do"
+            d[j] := "if" j "le" n "then" 0 "else" c[j-n];
+         mpy(d,m);
+         mod2(c,d,nn);
+         "goto" p5;
+p7:
+         mod(x,c,nn);
+finish:
+      "end";
+
+      "comment" Tries to solve a found solution;
+      "procedure" tryit;
+      "begin"
+         "integer" h,j,k,r;
+         "boolean" first;
+         first := "true";
+         k := 0;
+         "for" j := 1 "step" 1 "until" r1 "do" 
+            rrow[j] := right[i3,j];
+cycle:
+         k := k + 1;
+         "comment" When rrow is zero we have a possible solution;
+         if(rrow,zeror,eval);
+         "if" and(rrow[r1],1) = 1 "then" "goto" doit;
+         div(rrow,2);
+         "goto" cycle;
+doit:
+         div(rrow,2);
+         "for" j := 1 "step" 1 "until" n "do" ww1[j] := soln[k,j];
+         "comment" Save the first solution;
+         "if" first "then"
+         "begin"
+            first := "false";
+            copy(x,ww1);
+            "for" j := 0 "step" 1 "until" m "do" es[j] := em[k,j];
+         "end" "else"
+         "begin"
+            multiply(ww2,x,ww1,n);
+            mod2(x,ww2,nb);
+            "for" j := 0 "step" 1 "until" m "do"
+               es[j] := es[j] + em[k,j];
+         "end";
+         "goto" cycle;
+eval:
+         copy(y,one);
+         "comment" Have we any odd powers;
+         "for" r := 1 "step" 1 "until" m "do"
+         "begin"
+            "if" and(es[r],1) = 1 "then"
+            "begin"
+               "print" 'odd'L``;
+               "for" h := 0 "step" 1 "until" m "do"
+               "begin"
+                  "if" ((h-1) "div" 10)*10 = h - 1 
+                  "then" "print" ''L``;
+                  "print" same line, digits(5), es[h]
+               "end";
+               stop
+            "end";
+            "comment" Even powers only;
+            "if" es[r] "ne" 0 "then"
+            "begin"
+               power(ww1,ps[r],es[r] "div" 2,nb);
+               multiply(ww2,ww1,y,n);
+               mod2(y,ww2,nb)
+            "end"
+         "end";
+         "if" and(es[0],3) "ne" 0 "then" 
+         "begin"
+            sub(ww1,nb,y);
+            copy(y,ww1)
+         "end";
+         "comment" Reject cases where x = y;
+         "if" ifb(x,y) "then"
+         "begin"
+            "print" 'x = y    'L``; "goto" fail
+         "end";
+         "comment" Reject cases where x + y = n;
+         add(ww1,x,y);
+         "if" ifb(ww1,nb) "then"
+         "begin"
+            "print" 'x + y = n'L``; "goto" fail
+         "end";
+         "comment" Force ww1 to be positive;
+         sub(ww1,x,y);
+         "if" ww1[1] < 0 "then"
+         "begin"
+            add(c,ww1,nb);
+            copy(ww1,c)
+         "end";
+         gcd(ans,ww1,nb);
+         "comment" Reject cases where factor equals 1;
+         "if" ifb(ans,one) "then"
+         "begin"
+            "print" 'fact = 1 'L``; "goto" fail
+         "end";
+         "comment" Aha, the answer;
+         "print" ''L2`x, y = `;
+         put(x,'X`); put(y,'y`); 
+         "print" ''L2`exponents'L``;
+
+         "for" h := 0 "step" 1 "until" m "do"
+         "begin"
+            "if" ((h-1) "div" 10)*10 = h - 1 
+            "then" "print" ''L``;
+            "print" same line, digits(5), es[h]
+         "end";
+         "print" ''L2`factor = `;
+         put(ans,'f`);
+         "print" ''L2`number = `;
+         put(nb,'n`);
+         stop;
+fail:
+      "end" of tryit;
+
+      "comment" Program continues;
+      "for" j := 1 "step" 1 "until" n "do" one[j]:=zero[j]:=0;
+      one[n]:=1;
+      "for" j := 1 "step" 1 "until" r1 "do" zeror[j] := 0;
+      get(nb,'P`);
+      "for" j := 1 "step" 1 "until" m "do" "read" ps[j];
+      nos := 0;
+      copy(rrow,zeror);
+      rrow[r1]:=1;
+      "comment" Get solutions until a zero value of p is met;
+again:
+      get(p,'Q`);
+      if(p,zero,contin);
+      nos := nos + 1;
+      "if" nos > maxsol "then"
+      "begin"
+         "print" 'too many equations'L``; stop
+      "end";
+
+      "for" j := 1 "step" 1 "until" r1 "do" right[nos,j] := rrow[j];
+      mpy(rrow,2);
+      "for" j := 1 "step" 1 "until" n  "do" soln[nos,j] := p[j];
+      "for" j:=0 "step" 1 "until" m "do" 
+      "begin"
+         "read" es[j];
+         em[nos,j] := es[j]
+      "end";
+      "for" j := 1 "step" 1 "until" r2 "do"
+      "begin"
+         lrow[j] := 0;
+         left[nos,j] := 0
+      "end";
+
+      lrow[r2] := 1;
+      "for" j := 0 "step" 1 "until" m "do"
+      "begin"
+         "if" and(es[j],1) = 1 "then"
+         "begin"
+            "for" k := 1 "step" 1 "until" r2 "do" left[nos,k] :=
+               or(left[nos,k], lrow[k]);
+         "end";
+         "if" j < m "then" mpy(lrow,2)
+      "end";
+
+      "goto" again;
+      "comment" Gaussian elimination starts;
+contin:
+      "for" j := 1 "step" 1 "until" nos "do" used[j] := "false";
+      dups := 0;
+      "for" i1 := 1 "step" 1 "until" nos - 1 "do"
+      "begin"
+         "for" j := 1 "step" 1 "until" n "do" x[j] := soln[i1,j];
+         "for" i2 := i1+1 "step" 1 "until" nos "do"
+         "begin"
+            "for" j := 1 "step" 1 "until" n "do" y[j] := soln[i2,j];
+            "if" ifb(x,y) "then"
+            "begin"
+               dups := dups + 1;
+               used[i2] := "true"
+            "end"
+         "end"
+      "end";
+      "if" dups > 0 "then" "print" 'duplicates'L``;
+
+      "for" i1 := m "step" -1 "until" 0 "do"
+      "begin"
+         "for" i2 := 1 "step" 1 "until" nos-1 "do"
+         "begin"
+            "if" (oddbit(i2) "and" "not" used[i2]) "then"
+            "begin"
+               used[i2] := "true";
+               "for" i3 := i2+1 "step" 1 "until" nos "do"
+               "begin"
+                  "if" (oddbit(i3) "and" "not" used[i3]) "then"
+                  "begin"
+                     "for" j := 1 "step" 1 "until" r2 "do"
+                        left[i3,j] := xor(left[i3,j], left[i2,j]);
+                      "for" j := 1 "step" 1 "until" r1 "do"
+                        right[i3,j] := xor(right[i3,j], right[i2,j]);
+                      "if" found "then" tryit
+                  "end"
+               "end"
+            "end"
+         "end";
+        "if" i1 > 0 "then" div(lrow,2)
+      "end"
+   "end";
+   "print" 'failed miserably'``
+"end"
+<!!>
+
+j 12
+st 1727
+
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+
+at ptr inline
+   3   1  29  60
+  499 94860 12441P
+    2    3    5    7   17   19   31   43   47   59
+   61   67  107  163  181  193  197  229  241  263
+  271  277  311  331  349  359  367  389  397
+    22 31196Q
+   1   0   0   2   1   1   0   0   0   0
+   0   0   0   1   0   0   0   0   0   1
+   0   0   1   0   0   0   0   0   0   0
+    22 31437Q
+   1   4   3   0   1   0   1   1   0   1
+   0   0   0   0   0   0   0   0   0   1
+   0   0   0   0   0   0   0   0   0   0
+    22 31602Q
+   1   0   1   0   2   0   0   1   0   0
+   1   0   0   0   0   0   0   1   0   0
+   0   0   0   0   0   0   0   1   0   0
+    22 32501Q
+   1   5   0   1   1   0   1   1   0   0
+   0   0   1   0   0   0   0   0   0   0
+   0   0   0   0   0   1   0   0   0   0
+    22 32708Q
+   1   0   0   0   1   0   1   1   1   0
+   0   0   0   0   0   0   0   0   0   0
+   1   0   0   1   0   0   0   0   0   0
+    22 33009Q
+   1   3   1   1   1   0   0   0   3   0
+   0   0   0   0   0   0   0   1   0   0
+   0   0   0   0   0   0   0   0   0   0
+    22 33229Q
+   1   4   3   3   2   0   0   0   1   0
+   0   0   0   1   0   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+    22 33289Q
+   1   3   1   1   1   0   0   0   0   0
+   0   0   0   0   0   0   1   0   0   0
+   0   2   0   0   0   0   0   0   0   0
+    22 33831Q
+   1   3   2   1   1   1   1   0   1   0
+   0   0   0   0   0   0   0   0   0   0
+   0   1   0   0   0   0   0   0   0   0
+    22 33869Q
+   1   4   0   1   0   0   1   0   1   0
+   0   0   0   0   0   0   0   0   0   0
+   0   0   0   0   0   0   1   0   0   1
+    22 34021Q
+   1   6   2   3   0   0   1   0   0   0
+   1   0   0   1   0   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+    22 34171Q
+   1   7   1   2   1   1   1   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+   0   0   0   0   0   0   0   1   0   0
+    22 34245Q
+   1   8   3   0   0   1   0   0   0   0
+   0   0   0   0   0   1   0   0   0   0
+   0   0   0   0   0   0   1   0   0   0
+    22 34299Q
+   1   7   4   1   0   0   0   1   1   0
+   0   0   0   1   0   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+    22 34347Q
+   1   5   1   0   0   1   0   0   1   0
+   0   0   0   0   0   0   0   0   0   0
+   1   0   0   0   0   0   0   0   1   0
+    22 35047Q
+   1   3   2   0   0   0   1   0   0   0
+   0   0   1   0   0   0   1   0   1   0
+   0   0   0   0   0   0   0   0   0   0
+    22 35293Q
+   1   4   1   0   0   1   0   0   1   0
+   0   0   0   0   0   0   0   0   0   1
+   0   0   0   0   0   1   0   0   0   0
+    22 35429Q
+   1   6   0   2   0   1   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+   0   0   1   1   0   0   0   0   0   0
+    22 35583Q
+   1   3   1   0   0   0   0   0   0   0
+   1   0   1   1   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+    22 35605Q
+   1   5   5   0   0   1   0   0   0   0
+   0   1   0   0   0   0   1   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+    22 35639Q
+   1   3   0   1   0   2   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+   0   0   0   0   1   0   0   1   0   0
+    22 35739Q
+   1   6   2   1   1   0   0   0   0   0
+   0   0   0   0   0   0   0   1   0   1
+   0   0   0   0   0   0   0   0   0   0
+    22 35746Q
+   1   0   1   2   1   0   0   1   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   1   0   0   0   0
+    22 35819Q
+   1   5   0   1   1   0   0   0   0   1
+   1   0   0   0   0   0   1   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+    22 35949Q
+   1   4   1   1   1   0   0   0   0   1
+   0   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   0   0   0   0   0
+    22 35991Q
+   0   3   2   1   1   0   0   0   0   0
+   0   0   0   0   0   0   1   0   0   0
+   0   0   0   0   0   1   0   0   0   0
+    22 35996Q
+   0   0   0   2   0   1   0   0   0   1
+   1   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+    22 36043Q
+   0   5   1   0   1   0   0   0   0   2
+   0   0   0   0   0   0   0   0   0   0
+   0   1   0   0   0   0   0   0   0   0
+    22 36054Q
+   0   0   3   2   1   0   1   0   0   1
+   0   0   0   1   0   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+    22 36159Q
+   0   3   1   1   2   0   0   2   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+    22 36398Q
+   0   0   0   0   0   1   0   0   0   0
+   0   2   0   0   1   0   1   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+    22 36421Q
+   0  10   1   2   1   1   0   0   0   0
+   0   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   0   0   0   0   0
+    22 36459Q
+   0   5   3   1   0   0   0   1   0   0
+   0   1   0   0   0   0   0   0   0   0
+   0   0   1   0   0   0   0   0   0   0
+    22 36636Q
+   0   0   1   1   0   3   0   0   0   0
+   0   0   0   0   0   1   0   0   1   0
+   0   0   0   0   0   0   0   0   0   0
+    22 36793Q
+   0   3   3   0   0   0   1   0   1   0
+   0   1   0   0   0   0   0   0   0   0
+   0   0   0   0   0   1   0   0   0   0
+    22 37179Q
+   0   9   2   2   0   0   0   0   0   0
+   0   0   0   0   0   1   0   0   0   0
+   1   0   0   0   0   0   0   0   0   0
+    22 37459Q
+   0   4   2   1   0   0   0   0   0   0
+   0   0   1   0   0   0   0   0   0   0
+   0   0   0   0   0   0   1   0   1   0
+    22 37503Q
+   0   3   2   0   1   2   0   0   0   0
+   0   0   0   0   0   1   0   0   0   0
+   1   0   0   0   0   0   0   0   0   0
+    22 37873Q
+   0   3   4   0   0   0   0   0   2   0
+   0   0   1   1   0   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+    22 38733Q
+   0   4   1   0   0   1   1   0   1   1
+   0   0   0   0   0   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+    22 39169Q
+   0   3   4   1   1   1   0   0   0   0
+   0   0   0   0   1   0   0   0   1   0
+   0   0   0   0   0   0   0   0   0   0
+    22 39481Q
+   0   3   1   1   0   1   0   0   0   0
+   0   0   1   0   0   0   0   0   0   0
+   0   0   0   0   1   1   0   0   0   0
+    22 39631Q
+   0   3   1   1   1   0   0   1   1   0
+   0   1   0   0   0   0   0   0   0   1
+   0   0   0   0   0   0   0   0   0   0
+    22 39679Q
+   0   3   1   2   0   1   0   0   1   0
+   0   0   0   0   0   0   1   1   0   0
+   0   0   0   0   0   0   0   0   0   0
+    22 39861Q
+   0   5   3   1   0   0   0   0   0   1
+   0   0   0   0   0   0   0   0   0   0
+   0   0   1   1   0   0   0   0   0   0
+    22 40179Q
+   0   4   1   2   0   0   0   2   0   1
+   0   0   0   0   0   0   0   0   0   0
+   0   0   0   0   0   1   0   0   0   0
+    22 40331Q
+   0   5   0   1   1   1   0   0   0   1
+   0   1   0   0   0   0   0   0   0   0
+   0   0   0   0   0   0   1   0   0   0
+    22 40405Q
+   0   5   1   0   0   0   2   0   2   0
+   0   0   0   0   0   0   0   0   0   0
+   0   0   0   1   0   0   0   0   0   0
+    22 40716Q
+   0   0   2   1   2   1   0   1   0   0
+   1   0   0   0   0   0   0   0   0   0
+   0   0   0   1   0   0   0   0   0   0
+    22 40861Q
+   0   4   2   1   0   0   1   1   0   0
+   0   0   0   0   0   0   0   1   0   0
+   1   0   0   0   0   0   0   0   0   0
+   0Q
+<!!>
+reset
+j 10
+st 1727
+sh t
+

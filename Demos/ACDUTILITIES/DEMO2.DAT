@@ -1,0 +1,18 @@
+﻿c demonstrate ACD BINCOP utility with a over length input
+
+
+on 903 8K
+
+c load bincop
+at ptr file BINCOP.BIN
+j 8181
+st 8175
+
+nonstop on
+at ptr file ../HUNTER/ALG16KLG(HUNTER).BIN
+at ptp file demo2.txt legible
+j 12
+de ptp
+print demo2.txt
+delete demo2.txt
+sh t

@@ -1,0 +1,211 @@
+﻿on
+telecode 903
+at ptr file ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+at ptr inline
+
+moon;
+"begin"
+   "comment" 15-OCT-2000. Apollo 8 journey in 1968;
+   "integer" j,k,n,state,xscale,yscale;
+   "real"    d,eps,eta,gme,gmm,pi;
+   "real" "array" y,y2,z[1:4];
+
+   "procedure" gravity(x,y,n,z); "value" x,n;
+      "real" x; "real" "array" y,z; "integer" n;
+      "begin"
+         "real" w1,w2;
+         z[1]:=y[3]; z[2]:=y[4];
+         w1:=(d-y[1])^2+y[2]^2;
+         w2:=y[1]^2+y[2]^2;
+         z[3]:=(gmm/w1)*(d-y[1])/sqrt(w1) -
+               (gme/w2)*y[1]/sqrt(w2);
+         z[4]:=-(gmm/w1)*y[2]/sqrt(w1) -
+               (gme/w2)*y[2]/sqrt(w2)
+      "end" of gravity;
+
+   "procedure" body(x,r); "value" x,r; "real" x,r;
+   "begin"
+      "integer" k;
+      move pen(x+r,0);
+      "for" k:=1 "step" 1 "until" 50 "do"
+         draw line(x+r*cos(2*pi*k/50),r*sin(2*pi*k/50))
+   "end" of body;
+
+   "procedure" rk(x,y,n,fkt,eps,eta,xe,ye,fi);
+      "value" x,n,eps,eta,xe,fi;
+      "integer" n; "boolean" fi;
+      "real" x,eps,eta,xe; "array" y,ye;
+      "procedure" fkt;
+
+   "comment" Algorithm 9 in Collections CACM, also see
+             example in Algol Report 1960. Note that this
+             version is in a single-case alphabet, and that
+             as many scalar parameters as possible are
+             called by value;
+
+   "begin"
+      "array" z,y1,y2,y3[1:n];
+      "real" x1,x2,x3,h,hs;
+      "integer" k,j,s;
+      "boolean" out;
+
+      "comment" s and hs are supposed to be own variables, but
+                in 903 Algol all locals are treated as own. Also
+                note that s has been made integer as Thacher 
+                recommends;
+
+      "real" "procedure" comp(a,b,c);
+         "value" a,b,c;
+         "real"  a,b,c;
+
+      "comment" This is from H.C. Thacher's certification
+                of Algorithm 9, July 1964, Nov. 1965. It
+                should be in assembly code;
+      "begin"
+         "integer" ae,be,ce;
+
+         "integer" "procedure" expon(x);
+            "value" x;
+            "real"  x;
+            expon := "if" x=0 
+                        "then" -22
+                        "else" entier(0.43429448*ln(abs(x))+1);
+
+            "comment" -22 is smaller than -18, the exponent of
+                      the smallest no. in 903 Algol (decimal
+                      exponents);
+
+         ae := expon(a);
+         be := expon(b);
+         ce := expon(c);
+         "if" ae < be "then" ae := be;
+         "if" ae < ce "then" ae := ce;
+         comp := abs(a-b)/10^ae
+      "end" of comp;
+
+      "procedure" rk1st(x,y,h,xe,ye);
+         "value" x,h;
+         "real" x,h,xe; "array" y,ye;
+      "begin"
+         "array" w[1:n],a[1:5];
+         "integer" k,j;
+         a[1] := a[2] := a[5] := h/2;
+         a[3] := a[4] := h;
+         xe := x;
+         "for" k := 1 "step" 1 "until" n "do" 
+                         ye[k] := w[k] := y[k];
+         "for" j := 1 "step" 1 "until" 4 "do"
+         "begin"
+            "comment" In 903 Algol there is a local convention -
+                      in formal procedures like fkt the parameters
+                      called by value, ie xe and n, must be 
+                      surrounded by brackets, and the ones
+                      called by name, ie w and z, must not be; 
+            fkt((xe),w,(n),z);
+            xe := x + a[j];
+            "for" k := 1 "step" 1 "until" n "do"
+            "begin"
+               w[k]  := y[k]  + a[j]   * z[k];
+               ye[k] := ye[k] + a[j+1] * z[k] /3
+            "end" of k
+         "end" of j
+      "end" of rk1st;
+
+      "comment" start of rk;
+
+      "if" fi "then"
+      "begin"
+         h := xe - x;
+         s := 0
+      "end" "else" h := hs;
+
+      out := "false";
+AA:
+      "if" (x + 2.01 * h - xe > 0) "equiv" (h > 0) "then"
+      "begin"
+         hs := h;
+         out := "true";
+         h := (xe - x) / 2
+      "end" of if;
+
+      rk1st(x,y,2*h,x1,y1);
+BB:
+      rk1st(x,y,h,x2,y2);
+      rk1st(x2,y2,h,x3,y3);
+      "for" k := 1 "step" 1 "until" n "do"
+         "if" comp(y1[k],y3[k],eta) > eps "then" "goto" CC;
+      x := x3;
+      "if" out "then" "goto" DD;
+
+      "for" k := 1 "step" 1 "until" n "do" y[k] := y3[k];
+
+      "if" s = 5 "then"
+      "begin"
+         s := 0;
+         h := 2 * h
+      "end";
+      s := s + 1; 
+      "goto" AA;
+CC:
+      h := 0.5 * h;
+      out := "false";
+      x1 := x2;
+      "for" k := 1 "step" 1 "until" n "do" y1[k] := y2[k];
+      "goto" BB;
+DD:
+      "for" k := 1 "step" 1 "until" n "do" ye[k] := y3[k]
+   "end" of RK SEP 1978 DGNH;
+
+   "print" punch(1), '15-OCT-2000`;
+   gme:=3.987?14; gmm:=4.904?12; d:=3.844?8; state := 0;
+   "read" y[1], y[4], eps,eta,xscale,yscale;
+   y[1]:=-y[1]*1000-6371020; y[2]:=y[3]:=0; pi:=4*arctan(1);
+   set origin(60,160);
+   move pen(-3*xscale,-6*yscale); draw line(-3*xscale,6*yscale);
+   draw line(42*xscale,6*yscale); draw line(42*xscale,-6*yscale);
+   draw line(-3*xscale,-6*yscale); body(0,0.637102*yscale);
+   body(38.44*xscale,0.172*yscale); move pen(-2*xscale, 4.5*yscale);
+   punch(5); way(0,2); "print" 'APOLLO 8 - 1968`;
+   move pen(y[1]*0.0000001*xscale,0);
+   k:=0;
+again:
+   gravity(1,y,4,z);
+   n:=20/(sqrt(z[3]^2+z[4]^2)+0.25);
+   rk(k*18.0,y,4,gravity,eps,eta,(k+n)*18.0,y2,k=0);
+   "for" j:=1 "step" 1 "until" 4 "do" y[j]:=y2[j];
+   k:=k+n;
+   draw line(y[1]*0.0000001*xscale,y[2]*0.0000001*yscale);
+   "if" state=0 "and" y[2]<0 "then" state:=1;
+
+   "if" state=1 "and" y[2]>0 "then" state:=2;
+
+   "if" state=2 "and" y[2]<0 "then" state:=3;
+
+   k:=k+n;
+   "if" state=3 "and" y[2]>0 "then"
+   "begin"
+      "print" punch(1), k, same line, n, ''L``, y[1], y[2], ''L``,
+                                                y[3], y[4];
+      stop
+   "end" "else" "goto" again
+"end"
+<!!>
+j 12
+st 1727
+at ptr file LIBRARY.RLB
+j 9
+st 7943
+de ptr
+at plt
+at ptr inline
+300  10824.84  ?-4  ?-4  13  10
+<!!>
+select out tty
+j 10
+de plt
+st 1727
+sh t
+

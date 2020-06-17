@@ -1,0 +1,94 @@
+﻿C
+C Demonstrate 2 pass Fortran - relocatable mode
+C
+on 903 8K
+telecode 903
+C Load Fortran translator 
+at ptr file 903FORT1(ISS4C).BIN
+J 8181
+st 8171
+
+C translate - compile
+
+at ptr inline
+      GLOBAL, NEWTON, EXP, COS, SIN, ABS]
+
+C  NEWTON-RAPHSON METHOD TO CALCULATE ROOTS OF
+C  F(X) = COSH X + COS X - 3
+C  BASED ON CASE STUDY 4 (NEWTON RAPHSON METHOD, PROGRAM CHECKOUT)
+C  IN D.D. MCCRACKEN "A GUIDE TO FORTRAN IV PROGRAMMING" 
+
+C  SET INITIAL APPROXIMATION
+
+       X = 1.0
+
+C  N IS COUNT OF ITERATIONS
+
+       DO 30 N = 1, 20
+
+C  CALCULATE EXP X EXP -X
+
+
+   10     EX = EXP(X)
+          EMX = 1.0 / EX
+
+C  CALCULATE NEW ESTIMATE AND OUTPUT
+
+          XNEW = X - ((EX+EMX)/2. + COS(X) - 3.)/((EX-EMX)/2. - SIN(X))
+          WRITE (2, 100) XNEW
+   100    FORMAT (F10.7)
+
+C  TEST FOR CONVERGENCE
+
+          IF (ABS(X - XNEW) - 1E-6) 999, 999, 20
+
+C  INCREMENT ITERATION COUNTER
+
+   20     X = XNEW
+   30  CONTINUE
+
+C  FINISHED
+
+  999  STOP
+       END
+
+<! Halt !>
+<!!>
+at ptp file DEMO3.903
+j 8
+de ptp
+st 2449
+
+C Load Fortran interpreter 
+at ptr file 903FORT2(ISS4A).BIN
+j 8181
+st 8171
+
+C load compiled program
+nonprinting off
+at ptr file DEMO3.903
+at ptp file DEMO3.RLB
+j 13
+st 6926
+
+C indicate program complete
+j 10
+
+de ptp
+st 6238
+
+C load rlb
+at ptr file DEMO3.RLB
+j 14
+st 161
+
+C run program
+select out tty
+j 11
+st 1919
+delete DEMO3.903
+delete DEMO3.RLB
+sh t
+
+
+

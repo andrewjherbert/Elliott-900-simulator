@@ -1,0 +1,55 @@
+﻿C
+C DEMO1
+C
+on 920m 8k
+
+nonprinting off
+
+telecode 920
+
+C read in translator 
+at ptr file ALG1(920ISS6).BIN mode1
+j 8181
+st 8174
+
+c program
+at ptr inline 920
+
+HELLO;
+~BEGIN~
+   ~COMMENT~ 31-MAR-2011.
+              Simple Hello World;
+   ~PRINT~ ''L2`HELLO WORLD'L2``;
+~END~
+<! halt !>
+<!!>
+
+c translate 
+at ptp file DEMO1.RLB
+j 8
+de ptp
+st 9
+
+select out tty
+
+c load interpreter 
+at ptr file ALG2(920ISS6).BIN mode1
+j 8181
+st 8174
+
+c read in rlb
+at ptr file DEMO1.RLB mode1
+j 8
+st 7943
+
+c run program
+j 10
+st 1727
+c keep DEMO1.RLB for ACDSIR DEMO1
+sh t
+
+
+
+
+
+

@@ -1,0 +1,78 @@
+   OPASC
+   IPBIN
+   ADLIB
+   JUMP 12
+   IPASC
+cook;
+"begin"
+   "comment" 03-OCT-2000;
+
+   "integer" j, k, posx, posy, r, step;
+   "real" depth, lat, lon, pi, x, xscale, y, z;
+
+   "comment" program start;
+
+   "print" '03-OCT-2000@;
+   "read" depth, posx, posy, r, xscale; pi := 4*arctan(1);
+   set origin(320,160);
+   way(0,2); punch(5);
+   move pen(-posx, 0); draw line(-posx, 1.1*r);
+   move pen(-posx, 0); draw line(xscale*r*1.1-posx, 0);
+   move pen(-posx, 0); draw line(-posx+72, -20);
+   move pen(posx, 0); draw line(posx, 1.1*r);
+   move pen(posx, 0); draw line(xscale*r*1.1+posx, 0);
+   move pen(posx, 0); draw line(posx+68, -20);
+
+   move pen(posx,r);
+   "for" j := 1 "step" 1 "until" 90 "do" 
+             draw line(posx+xscale*r*sin(j*pi/45),
+                                  r*cos(j*pi/45));
+   move pen(-posx,r);
+   "for" j := 1 "step" 1 "until" 90 "do" 
+             draw line(-posx+xscale*r*sin(j*pi/45),
+                                   r*cos(j*pi/45));
+
+   "for" k := 40 "step" 40 "until" 160 "do"
+   "begin"
+      move pen(posx,r);
+      lon := k*pi/180;
+      "for" j := 1 "step" 1 "until" 180 "do"
+      "begin"
+         lat := (90-j)*pi/180;
+         x := r*cos(lon)*cos(lat);
+         y := r*sin(lat);
+         z:=r*sin(lon)*cos(lat);
+         draw line(posx+xscale*(x-z*depth),y);
+      "end";
+      move pen(-posx,r);
+      lon := k*pi/180;
+      "for" j := 1 "step" 1 "until" 180 "do"
+      "begin"
+         lat := (90-j)*pi/180;
+         x := r*cos(lon)*cos(lat);
+         y := r*sin(lat);
+         z:=r*sin(lon)*cos(lat);
+         draw line(-posx+xscale*(x+z*depth),y);
+      "end"
+   "end";
+   "goto" fin;
+   "for" k := 40 "step" 40 "until" 160 "do"
+   "begin"
+      lat := k*pi/180;
+      "for" j := 1 "step" 1 "until" 180 "do"
+      "begin"
+         lon := j*pi/180;
+         x := r*cos(lon)*cos(lat);
+         y := r*sin(lat);
+         z:=r*sin(lon)*cos(lat);
+         draw line(posx+xscale*(x-z*depth),y);
+      "end"
+   "end";
+fin:
+"end"
+
+  0.05  160  140  100  1.2
+
+
+
+

@@ -1,0 +1,31 @@
+
+    IPBIN
+    OPASC
+    JUMP 8
+    IPASC
+strings;
+"begin"
+   "comment" 20-MAY-1996;
+   "integer" m; "integer" "array" a[1:30];
+   punch(3); reader(1);
+   m := 1; instring(a, m);
+   m := 1; outstring(a, m);
+   "print" ''L@and this contains # £ $ % & \@;
+
+   "comment" In INNER strings
+             L means Carriage Return Line Feed
+             S means Space
+             R means Runout
+             Q means Quote
+             U means Unquote
+             H means Halt Code
+     Any of these followed by a small integer repeats the
+     character that many times, and
+             B means output a single character with the value
+               of the small integer which follows it, eg B33
+               is Exclamation Mark;
+   "print" ''LS2RLS3QLS4ULS5HLS6B33@@;
+"end"
+ ''L@This string will appear in upper case'L@@
+
+

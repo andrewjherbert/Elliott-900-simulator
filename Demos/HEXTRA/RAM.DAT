@@ -1,0 +1,51 @@
+﻿on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+at ptr inline
+ram;
+"begin"
+   "comment" 17-AUG-2001;
+   "integer" j;
+   "procedure" ramanujan(m); "value" m; "integer" m;
+   "begin"
+      "integer" j, j1, k, k1, lim, n;
+      "if" m < 2 "then" "print" ''L`m must be 2 or more`, stop;
+      lim := m * (m-1) "div" 2;
+      "begin"
+         "integer" "array" cube[1:m], sum[1:lim];
+         "for" j:=1 "step" 1 "until" m "do" cube[j] := j*j*j;
+         n := 1;
+         "for" j:=1 "step" 1 "until" m "do"
+            "for" k:=j+1 "step" 1 "until" m "do"
+            "begin"
+               sum[n] := cube[j] + cube[k];
+               n := n+1
+            "end";
+         "for" j:=1 "step" 1 "until" lim "do"
+         "begin"
+            n := sum[j];
+            "for" k:=j+1 "step" 1 "until" lim "do"
+            "if" n = sum[k] "then" 
+            "begin"
+               "for" j1:=1 "step" 1 "until" m "do"
+                  "for" k1:=j1+1 "step" 1 "until" m "do"
+                     "if" n = cube[j1] + cube[k1] "then" "print" same line, j1, k1;
+               "print" '   smallest `, same line, n, ''L``;
+            "end"
+         "end"
+      "end";
+      "print" 'end of case`, same line, m, ''L``
+   "end" of ramanujan;
+
+   "print" ''L``;
+   "for" j:=2 "step" 1 "until" 12 "do" ramanujan(j)
+"end" of program
+<!!>
+j 12
+st 7943
+select out tty
+j 10
+st 1727
+sh t

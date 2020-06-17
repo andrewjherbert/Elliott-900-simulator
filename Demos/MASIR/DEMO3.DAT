@@ -1,0 +1,121 @@
+﻿c Create a sum-checked binary version of a MASIR program using 900 LOADER
+
+on 903 16K
+
+c assemble demo3 by MASIR, input MASIR commands from teleprinter
+at ptr file MASIR(181175).BIN
+j  8181
+st 8164
+
+nonprinting off
+nonstop on
+select out auto
+
+at ptr inline
+*LISTLA				(list labels)
+
+*PROG DEMO3			(program unit name)
+
+((DEMO3 14/06/2012))
+
+^^1				(put program in second store module)
+
+	ST	X		(store parameter in accumulator)
+	LD	MSGADD		(initialize loop)
+	ST	INDEX
+LOOP	LDB 	INDEX		(fetch next code)
+	/LD 	0		
+	JZ	;+0		(0 terminates)
+	IPO	6148		(output to teleprinter)
+	INC 	INDEX		(advance pointer)
+	J	LOOP
+
+MSGADD 	0 MSG
+
+MSG	+141			(message masir demo ok in ascii)
+	>2:+10
+	+77
+	+65
+	+83
+	+201
+	+210
+	+160
+	+68
+	+197
+	+77
+	+207
+	+160
+X	>+1
+	+160
+	+207
+	+75
+	+141
+	>2:+10
+	+0			(0 terminates message)
+
+INDEX	>+1
+	
+%
+
+<! H !>
+<!!>
+
+C MASIR commands
+c O4 - punch loader halt code, normal assembly
+c M  - assemble
+at tty inline
+O4M
+<!!>
+
+at ptp file DEMO3_RLB.BIN
+j 16
+
+c falls off tty inline
+de ptp
+
+reverse DEMO3_RLB.BIN
+
+c load output MASIR rlb tape with MASIR Loader
+at ptr file LOADER(ISS3).BIN
+j 8181
+st 8171
+
+c 
+at ptr file DEMO3_RLB.BIN
+at ptp file DEMO3_SCB.BIN
+
+c LOADER commands
+c O134 - set options
+c option 004 - output program to tape or backing store
+c option 010 - select paper tape
+c option 020 - no built-in routines required
+c option 100 -list labels
+c L read tape
+at tty inline
+O134L<!!>
+j 16
+
+c reaches loader halt code
+
+c LOADER commands
+c M finalize loading
+at tty inline
+M<!!>
+
+j 16
+
+de ptp
+
+c load binary tape at 16
+at ptr file DEMO3_SCB.BIN
+j 8181
+st 8164
+
+c LOADER generated binaries are entered at 16
+c set accumulator via key generator
+enter a 51
+j 16
+st 16338
+delete DEMO3_RLB.BIN
+delete DEMO3_SCB.BIN
+sh t

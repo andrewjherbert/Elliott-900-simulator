@@ -1,0 +1,36 @@
+﻿C Demonstrate DUMP, CLEAR and VERIFY utilities
+
+c compile and run a FORTRAN program
+cd ../903fortran
+do demo2
+de tty
+
+c load dump (self triggering)
+cd ../acdutilities
+at ptp file DEMO11.BIN
+select out auto
+at ptr file DUMP.BIN
+j 8181
+st 8014
+
+de ptp
+sh t
+
+c clear store
+at ptr file CS8KCONT.BIN
+nonstop on
+j 8181
+
+c runs off tape
+
+c reload dumped program and rerun 
+at ptr file DEMO11.BIN
+nonstop off
+r
+st 8175
+
+select out tty
+j 11
+st 1919
+delete DEMO11.BIN
+sh t         

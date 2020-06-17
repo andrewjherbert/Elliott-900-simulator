@@ -1,0 +1,76 @@
+﻿c demonstrate BOWDLER editor
+
+on 903 8K
+runout on
+c load bowdler
+at ptr file BOWDLER.BIN
+j 8181
+st 8175
+
+c load steering tape
+at ptr inline 
+
+CLE	0	+0
+INS
+	4	+0
+^%,
+REP 2
+RTS COUNT
+SUM^%,
+END
+CLI REPEAT
+DLI	7	EXIT
+INS
+	9	REPEAT
+^%,
+CAN2
+CSE REPEAT
+PHT
+CLI	EXIT
+DSE	CHECK
+INS
+	7	^%,
+CSI	CHE
+DSP
+COP
+<! halt !>
+<!!>
+j 8
+st 490
+
+c load tape to edit
+at ptr inline
+((EXAMPLE)
+[CHECK]
+CHECK	>1
+	0	+0
+	3	COUNT
+	5	WS
+REPEAT	5	WSP
+	7	EXIT
+	1	-1
+	6	WSP
+	10	COUNT
+	8REPEAT
+EXIT	4	COUNT
+	0	CHE CK
+	/8	1
+WS	>1
+WSP	>1
+COUNT	>1
+%
+<! HALT !>
+<!!>
+at ptp file DEMO3.900
+j 9
+de ptp
+st 1274
+
+c verify punched tape
+at ptr file DEMO3.900
+j 12
+st 1469
+
+print DEMO3.900
+delete DEMO3.900
+sh t

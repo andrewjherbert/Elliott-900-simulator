@@ -1,0 +1,52 @@
+﻿C Demonstrate AUTOSTART
+
+on 920b
+
+c assemble a simple program  using 2-pass SIR
+c note no clear store option set
+
+at ptr file ../ACDSIR/SIR2P71.BIN
+j 8181
+st 8175
+at ptr inline
+
+*19
+[TEST]
+TEST	4	+0
+	5	COUNT
+	0	COUNT
+	/4	MESS
+	9	;+0
+	15	6148
+	10	COUNT
+	8	;-5
+
+MESS	+141 +10 +10 +65 +85 +212 +207 +83 +212 +65 +210 +212 +141 +10 -1
+COUNT	>+1
+%
+<! halt !> <!!>
+select out tty
+j 12
+st 562
+rewind
+select out auto
+at ptp file DEMO13.BIN
+j 10
+st 587
+de ptp
+
+c load  program
+at ptr file DEMO13.BIN
+j 8181
+st 8175
+
+c set up autostart
+at ptr file AUTOSTART.BIN
+j 8181
+
+c demonstart autostart
+auto
+
+delete DEMO13.BIN
+
+sh t

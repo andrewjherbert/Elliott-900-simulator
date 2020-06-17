@@ -1,0 +1,71 @@
+﻿C DEMONSTRATE MAGNETIC TAPE INITIALZATION
+
+on 903 8K
+
+c initialize a tape
+
+c ensure tape file does not exist
+delete tape1.raw
+
+at ptr file MTINIT(ISS3).BIN
+j 8181
+st 8171
+
+c mount tape with write permit ring fitted
+at mt 0 tape1.raw wp
+
+c initialize as a scratch tape
+at tty inline
+ 0: SCRATCH:<!!>
+j 32
+st 1395
+
+c reinitialize the same tape, with a useful name 
+c showing the scratch tapes can be renamed
+at tty inline
+ 0: MYTAPE:<!!>
+j 9
+st 1395
+
+c unmount the tape
+de mt 0
+
+c print the tape
+print tape1.raw
+sh t
+
+c repeat the demo using the paper tape interface
+
+at ptr file MTINIT(ISS3).BIN
+j 8181
+st 8171
+
+c mount tape with write permit ring fitted
+at mt 0 tape1.raw wp
+
+c initialize as a scratch tape
+at ptp file demo9.txt
+at ptr inline
+ 0: 
+ SCRATCH:<!!>
+j 33
+st 1395
+
+c inspect the output and continue
+de ptp
+print demo9.txt
+at ptp file demo9.txt
+j 9
+st 1395
+
+de ptp
+print demo9.txt
+
+c unmount the tape
+de mt 0
+
+c print the tape
+print tape1.raw
+delete tape1.raw
+delete demo9.txt
+sh t

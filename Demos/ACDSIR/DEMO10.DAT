@@ -1,0 +1,71 @@
+﻿C
+C DEMONSTRATE LEGIBLE CHARACTERS
+C
+
+C LOAD ASSEMBLER
+ON 920B 8K
+AT PTR FILE SIR1P71.BIN
+J 8181
+ST 8175
+
+C PROGRAM TO ASSEMBLE
+TELECODE 920
+SELECT OUT TTY
+NONPRINTING OFF
+
+AT PTR INLINE 920 MODE3
+
+*19      (1-pass SIR option: locate from 32, & print labels)
+
+((Demonstrate legible output)
+
+[START CHIPF CHIPL CHIPE CHIP CHOPC CHOPF CHOPL CHOPE ERRORL ERRORE]   
+
+(Delete comments from a SIR program)
+
+START	4	&400000		(set legible output)
+	5	CHOPC
+	4	+0
+	5	CHOPF		(start new output)
+	5	CHIPF		(start new input)
+
+TEXT	11	CHIPL
+	8	CHIPE
+	11	CHOPL
+	8	CHOPE
+	4	CHIP
+	1	-20		(stop on halt code)
+	7	;+0
+	8	TEXT
+<! halt !>       		
+<!!>
+J &17741
+ST 6852
+
+AT PTR FILE CHIOL.900
+J &17742
+ST 6852
+
+AT PTR INLINE
+
+%
+<! halt !>
+<!!>
+J &17742
+ST 7573
+
+AT PTR INLINE
+
+Legible Tape can use UPPER and lower case letters. 1234567890
+<! halt !>
+<!!>
+select out auto
+AT PTP FILE LEGIBLE.TXT LEGIBLE
+J 8
+DE PTP
+PRINT LEGIBLE.TXT
+SH T
+
+
+
+

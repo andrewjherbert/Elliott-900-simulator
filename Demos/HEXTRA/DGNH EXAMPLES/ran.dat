@@ -1,0 +1,46 @@
+   OPASC
+   IPBIN
+   ADLIB
+   JUMP 12
+   IPASC
+ran;
+"begin"
+   "comment" 26-NOV-2000;
+   
+   "integer" i,j,k,x,y,z; "real" s,t; 
+   "real" "procedure" Wichmann;
+   "begin"
+      "comment" The Wichmann-Hill portable Wichmann number
+                generator. B. A. Wichmann and I. D. Hill,
+                An Efficient and Portable Pseudo-Wichmann Number
+                Generator, Applied Statistics, 31 (No. 2),
+                188-190 (1982) ;
+      "real" w;
+      x := 171 * (x - (x "div" 177) * 177) -  2 * (x "div" 177);
+      y := 172 * (y - (y "div" 176) * 176) - 35 * (y "div" 176);
+      z := 170 * (z - (z "div" 178) * 178) - 63 * (z "div" 178);
+      "if" x < 0 "then" x := x + 30269;
+      "if" y < 0 "then" y := y + 30307;
+      "if" z < 0 "then" z := z + 30323;
+      w := x/30269.0 + y/30307.0 + z/30323.0;
+      Wichmann := w - entier(w) 
+   "end" of Wichmann;
+
+   "integer" "procedure" ranlet;
+   ranlet := entier(186.0*Wichmann + 0.5);
+
+   "comment" program start;   
+
+   digits(4); aligned(2,3); "print" ''L@26-NOV-2000'L@@;
+   "read" x,y,z;
+   "print" x,same line,y,z;
+   "for" j := 1 "step" 1 "until" 763 "do"
+   "begin"
+      "if" (j "div" 10)*10=j-1 "then" "print" ranlet
+                               "else" "print" same line, ranlet
+   "end"
+"end" of program
+
+  123  71  23 
+
+

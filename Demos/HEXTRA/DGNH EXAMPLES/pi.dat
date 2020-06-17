@@ -1,0 +1,117 @@
+
+    IPBIN
+    OPASC
+    ADLIB
+    JUMP 12
+    IPASC
+pi;
+"begin"
+   "comment" 17-MAY-2005;
+   "integer" blocks, digs, length, lines, max, pages;
+   "integer" j,k,L,m,n;
+   "code" "procedure" date time; "algol";
+   "code" "procedure" unsigned; "algol";
+   "code" "procedure" revert; "algol";
+   "code" "procedure" lead blank; "algol";
+   "code" "procedure" lead zero; "algol";
+   "code" "integer" "procedure" max int; "algol";
+   "code" "procedure" neg(a);
+          "integer" "array" a; 
+   "algol";
+   "code" "procedure" add(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" sub(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" mpy(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" div(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "integer" "procedure" store max; "algol";
+
+   "real" "procedure" log(x); "value" x; "real" x; log:=ln(x)/ln(10);
+   "integer" "procedure" min(a,b); "value" a,b; "integer" a,b;
+                         min := "if" a<b "then" a "else" b;
+
+   "comment" program start;
+   date time;
+   digits(5); "print" ''L@10-OCT-1998'L@@; 
+   "if" store max > 50000 
+   "then" max := 120000 
+   "else" max := min(log(max int) * store max/2,
+                     max int * log(5)) - 10;
+   max := (max "div" 50) * 50;
+again:
+   "print" ''L@how many digits, max = @, same line, digits(6), max;
+   "read" digs; "if" digs < 1 "then" "goto" again;
+   digs := (((digs - 1) "div" 50) + 1) * 50;
+   "if" digs > max "then" "goto" again;
+   length := (digs + 10)/log(max int);
+
+   "print" ''L@(@, same line, digits(5), digs,
+           ' digits will be computed)'L3S27@pi = 3.+'L@@;
+   "begin"
+      "integer" "array" a,b[1:length];
+      "procedure" recip arctan(n); "value" n; "integer" n;
+      "begin"
+         "integer" k, terms;
+         terms := (digs+10)/(2*log(n));
+         a[1] := 0;
+         "for" k := 2 "step" 1 "until" length "do" a[k] := max int;
+         "for" k := 1 "step" 1 "until" terms "do"
+         "begin"
+            mpy(a,2*(terms-k)+1); div(a,2*(terms-k)+3);
+            div(a,n^2); neg(a)
+         "end";
+         div(a,n)
+      "end" of recip arctan;
+
+      recip arctan(239);
+      "for" j := 1 "step" 1 "until" length "do" b[j] := a[j];
+      recip arctan(5);
+      mpy(a,4); sub(a,a,b); mpy(a,4);
+
+      "comment" output in decent layout;
+      pages := ((digs-1) "div" 2500) + 1;
+      blocks := ((digs-1) "div" 500) + 1;
+      lines := digs "div" 50;
+
+      lead zero; unsigned;
+      "for" j := 1 "step" 1 "until" pages "do"
+      "begin"
+         "for" k := 1 "step" 1 "until" 
+               "if" blocks<5 "then" blocks "else" 5 "do"
+         "begin"
+            "for" L := 1 "step" 1 "until"
+                "if" lines<10 "then" lines "else" 10 "do"
+            "begin"
+               "print" ''s5@@;
+               "for" m := 1 "step" 1 "until" 5 "do"
+               "begin"
+                  "for" n := 1, 2 "do"
+                  "begin"
+                     a[1] := 0; mpy(a, 100000);
+                     "print" same line, a[1]
+                  "end";
+                  "print" ''s@@
+               "end";
+               "print" ''l@@
+            "end";
+            lines := lines - 10;
+            "print" ''l@@
+         "end";
+         blocks := blocks - 5;
+         "if" pages "ne" 0 "then" "print" ''l5@@
+      "end";
+      lead blank; revert
+   "end";
+   date time
+"end"
+
+ 10000
+
+
+

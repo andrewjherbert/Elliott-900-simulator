@@ -1,0 +1,90 @@
+﻿C DEMONSTRATE XMT71
+
+on 903
+
+delete tape1
+
+at mt 0 tape1 wp
+
+c test runs for ever ...
+nonstop on
+
+c step count to run one cycle
+step 130000000
+
+
+at ptr file XMT71(ISS1).BIN
+j 8181
+st 8171
+
+C the following patch fixes an error in
+C end of cycle message
+e 1563 1625
+
+j 26
+st 92
+
+at mt 0 tape1 wp
+j 9
+st 115
+
+c remove write permit ring
+de mt 0
+at mt 0 tape1
+j 9
+st 205
+
+c replace write permit ring
+de mt 0
+at mt 0 tape1 wp
+j 9
+st 228
+
+c go to manual
+de mt 0
+j 9
+st 248
+
+c put back into remote
+at mt 0 tape1 wp
+j 9
+
+c halted by stepcount
+
+reset
+de mt 0
+
+c repeat for handler 1
+step 130000000
+
+delete tape2
+
+at mt 1 tape2 wp
+
+j 27
+st 92
+
+at mt 1 tape2 wp
+j 9
+st 115
+
+de mt 1
+at mt 1 tape2
+j 9
+st 205
+
+de mt 1
+at mt 1 tape2 wp
+j 9
+st 228
+
+de mt 1
+j 9
+st 248
+
+at mt 1 tape2 wp
+j 9
+
+de mt 1
+
+sh t

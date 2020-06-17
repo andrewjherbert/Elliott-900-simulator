@@ -1,0 +1,521 @@
+﻿C Demonstrate ACD input/output routines
+
+on 903 8K
+
+c load assembler
+at ptr file SIR1P71.BIN
+j 8181
+st 8175
+
+c main program
+select out tty
+nonprinting off
+at ptr inline
+
+*19
+
+((A J HERBERT -- 15/02/12)
+((Program to demonstrate ACD i/o routines)
+
+
+(Summary of INTIP					  )
+(							  )
+( INTIPL/INTIPE: print integer in accumulator             )
+(	INTIPE - first character of number must be in     )
+(	CHIPC						  )
+(	INTIPE+2 - INTIP reads first character		  )
+(	returns integer in accumulator on exit		  )
+(	INTIP error 1 on overflow                         )
+(							  )
+(Summary of SLOP					  )
+(							  )
+( SLOPL/SLOPE	print contents of accumulator		  )
+(	SLOPE+0 print unsigned number			  )
+(	SLOPE+1	print signed number			  )
+(	SLOPE+3 print octal group			  )
+(	SLOPE+4 print alphanumeric group		  )
+(	n.b. CHOP will give error if character not        )
+(	available in selected telecode			  )
+(							  )
+(Summary of ADIP					  )
+(							  )
+( ADIPL/ADIPE read address range into ADDR and ADDRB      )
+(	address in form location[^module], e.g., 2048^3   )
+(       range in form addra[-addrb] e.g., 2048-4096^3     )
+(	ADIPE read with first character in CHIP           )
+(	ADIPE-2 read first character with CHIP routine    )
+(	ASUSER lowest address allowed			  )
+(	AEUSER highest address allowed                    )
+(	ADIP Error 1 if address > 8191 followed by ^      )
+(	ADIP Error 2 if module > 15                       )
+(	ADIP Error 3 if address < ASUSER                  )
+(	ADIP Error 4 if address > AEUSER                  )
+(	ADIP Error 5 if addrb < addr                      )
+(							  )
+(Summary of ADOP					  )
+(							  )
+( ADOPL/ADOPE print contents of accumulator as address    )
+(	e.g. 8191, 2048^3              			  )
+(						  	  )
+(Summary of IDIP					  )
+(						          )
+( IDIPL/IDIPE read identifier				  )
+(	e.g. FRED23					  )
+(	IDIPE read with first character in CHIP		  )
+(	IDIPE-2 read first character with CHIP routine    )
+(	IDIP Error 1 if first character not a letter      )
+(						  	  )
+(Summary of AMIP					  )
+(						          )
+( AMIPL/AMIPE read constant or instruction       	  )
+(	e.g. +1, -1, &77, /4 99, 8 ;+0			  )
+(	AMIPE read with first character in CHIP		  )
+(	AMIPE-2 read first character with CHIP routine    )
+(	ADDRA base for relative addresses                 )
+(	IDIP Error 1 error in octal group	          )
+(	IDIP Error 2 error in instruction	          )
+(	IDIP Error 1 error in relative address	          )
+
+["START 
+ CHIPF CHOPF CHOPC CHIPL CHIPE 
+ "NEWLINE "OUTSTR]
+
+(set up interrupt handling)
+<	4	L2ENT
+	5	2
+	4	L3ENT
+	5	4
+	4	L4ENT
+	5	6
+IGNORE	15	7168
+	8	;-1		(ignore interrupts)
+L2ENT
+L3ENT	0 IGNORE
+L4ENT	0 START
+
+START 	4 	+0		(initialize input and output)
+	5 	CHIPF
+	5	CHOPF
+	4	+1
+	5	CHOPC		(select 903 telecode for output)
+	11 	NEWLIN		(output title)
+	8 	NEWLIN+2
+	11 	OUTSTR
+	8	OUTSTR+1
+	\FIX
+	\ED
+	\POI
+	\NT
+	\ARI
+	\THM
+	\ETI
+	\C D
+	\EMO
+	\ AJ
+	\ HE
+	\RBE
+	\RT
+	\10/
+	\02/
+	\12^
+
+(integer input)
+["INT "SLOP "NEWLIN "OUTSTR "SKIPWL "SKIPWE INTIPL INTIPE QOUT1]
+INT	11	NEWLIN
+	8	NEWLIN+2
+	11	OUTSTR
+	8	OUTSTR+1
+	\INT
+	\EGE
+	\R
+	\INP
+	\UT^
+	11	NEWLIN
+	8	NEWLIN+1
+INTIN	11	SKIPWL
+	8	SKIPWE-2	(skip white space)
+	11	INTIPL		(read integer)
+	8	INTIPE
+	7	SLOP		(terminate on zero)
+	11	QOUT1
+	8	QOUT1+1
+	/0 0
+	8	INTIN
+
+
+(single length output)
+["SLOP "ADDR "TAB "NEWLIN "OUTSTR SLOPL SLOPE]
+SLOP	11	NEWLIN
+	8	NEWLIN+2
+	11	OUTSTR
+	8	OUTSTR+1
+	\SIN
+	\GLE
+	\ LE
+	\NGT
+	\H O
+	\UTP
+	\UT^
+	11	NEWLIN
+	8	NEWLIN+2
+
+	(for i := tabmax step -1 while i < 0 do)
+	4	TABMAX
+	5	TABCT
+TABNXT	0 	TABCT
+	(print tab[i])		
+	/4	TABEND
+	11 	SLOPL
+	8	SLOPE		(unsigned)
+	11	TAB
+	8	TAB+1
+	0 	TABCT
+	/4	TABEND
+	11 	SLOPL
+	8	SLOPE+1		(signed)
+	11	TAB
+	8	TAB+1
+	0 	TABCT
+	/4	TABEND
+	11 	SLOPL
+	8	SLOPE+2		(fraction)
+	11	TAB
+	8	TAB+1
+	0 	TABCT
+	/4	TABEND
+	11 	SLOPL
+	8	SLOPE+3		(octal)
+	11	TAB
+	8	TAB+1
+	0 	TABCT
+	/4	TABEND
+   	11 	SLOPL
+	8	SLOPE+4		(alphanumeric)
+	11	TAB
+	8	TAB+1
+	11	NEWLIN
+	8	NEWLIN+1
+	10	TABCT
+	4	TABCT
+	9	TABNXT
+	(end do)
+	8	ADDR
+
+	(table of test values)
+	&77
+ 	+0
+	\ABC
+	\[\]
+	\\]
+	\]^
+	&737373
+	-1
+	+.251
+	&400000
+TABEND
+TABMAX	-10
+TABCT	>1
+
+(punch a tab)
+["TAB CHOPL CHOPE]
+
+TAB	>1			(link)
+	4	+9		(tab)
+	11	CHOPL
+	8	CHOPE
+	0	TAB
+	/8	1
+
+(skip white space)
+[SKIPWL SKIPWE CHIPL CHIPE CHIP]
+
+SKIPWL	>1			(link)
+(-2)	11	CHIPL		(entry if CHIP not next character)
+	8	CHIPE
+SKIPWE	4	CHIP		(entry if character in CHIP)
+	2 	+31
+	9	EXIT		(0-31 are non printing)
+	8	SKIPWE-2
+EXIT	0	SKIPWL
+	/8	1
+
+	(address input/output)
+["ADDR "IDENT
+ ADIPL ADIPE "ASUSER "AEUSER ADDRA ADDRB 
+ ADIPL ADIPE ADOPL ADOPE CHOPL CHOPE
+ "NEWLIN "OUTSTR "SKIPWL "SKIPWE]
+
+ADDR	11	NEWLIN
+	8	NEWLIN+2
+	11	OUTSTR
+	8	OUTSTR+1
+	\ADD
+	\RES
+	\S I
+	\NPU
+	\T &
+	\ OU
+	\TPU
+	\T^
+	11	NEWLIN
+	8	NEWLIN+2
+
+	11	SKIPWL
+	8	SKIPWE-2
+LOOP	4	+0
+	5	ADDRB
+	11	ADIPL
+	8	ADIPE
+	4	ADDRA
+	1	ADDRB
+	7	IDENT		(treat 0-0 as terminator)
+	4	ADDRA
+	11	ADOPL
+	8	ADOPE
+	4	+45		(-)
+	11	CHOPL
+	8	CHOPE
+	4	ADDRB
+	11	ADOPL
+	8	ADOPE
+	11	NEWLIN
+	8	NEWLIN+1
+	11	SKIPWL
+	8	SKIPWE
+	8	LOOP
+
+ASUSER 	+0
+AEUSER	15 8191	
+
+(read identifier)
+["IDENT "AMEND "SKIPWL "SKIPWE "NEWLIN "OUTSTR
+ IDIPL IDIPE NAME CHOPL CHOPE SLOPL SLOPE]
+
+IDENT	11	NEWLIN
+	8	NEWLIN+2
+	11	OUTSTR
+	8	OUTSTR+1
+	\IDE
+	\NTI
+	\FIE
+	\R I
+	\NPU
+	\T^
+	11	NEWLIN
+	8 	NEWLIN+2
+
+	11	SKIPWL
+	8	SKIPWE-2
+LOOP	11	IDIPL
+	8	IDIPE
+	4	NAME
+	2	\END
+	7	AMEND
+	4	NAME
+	11	SLOPL
+	8	SLOPE+4
+	4	+32		(sp)
+	11	CHOPL
+	8	CHOPE
+	4	NAME+1
+	11	SLOPL
+	8	SLOPE+4
+	11	NEWLIN
+	8	NEWLIN+1
+	11	SKIPWL
+	8	SKIPWE
+	8	LOOP
+
+(amend input)
+["AMEND "END "SKIPWL "SKIPWE "NEWLIN "OUTSTR
+ AMIPL AMIPE NAME CHOPL CHOPE SLOPL SLOPE ADDRA]
+
+AMEND	11	NEWLIN
+	8	NEWLIN+2
+	11	OUTSTR
+	8	OUTSTR+1
+	\AME
+	\ND
+	\INP
+	\UT^
+	11	NEWLIN
+	8 	NEWLIN+2
+
+	4	+4096		(location to update)
+	5	ADDRA
+	11	SKIPWL
+	8	SKIPWE-2
+LOOP	11	AMIPL
+	8	AMIPE
+	7	END
+	11	SLOPL
+	8	SLOPE+3
+	11	NEWLIN
+	8	NEWLIN+1
+	11	SKIPWL
+	8	SKIPWE
+	8	LOOP
+
+(end)
+["END "NEWLIN "OUTSTR]
+
+END	11	NEWLIN
+	8	NEWLIN+2
+	11	OUTSTR
+	8	OUTSTR+1
+	\END
+	\^
+	11	NEWLIN
+	8	NEWLIN+2
+	8	;+0
+
+[NEWLIN CHOPL CHOPE]
+
+(subroutine to output a sequence of newlines)
+(enter at NEWLIN+1  for one newline         )
+(enter at NEWLIN+2  for two newlines        )
+(with count in accumulator                  )
+
+NEWLIN	+0
+	8	ONE		(one newline)
+	4 	-246		(two newlines)
+OP	11 	CHOPL
+	8 	CHOPE
+EXIT	0 	NEWLIN
+	/8 	1
+
+ONE	4	-118
+	8   	OP
+
+[OUTSTRI CHOPL CHOPE]
+
+(subroutine to output a string)
+
+OUTSTR 	+0
+LOOP	0 	OUTSTR
+	/4 	1		(next word in string)
+	14 	8180		(first char)
+	6 	+63
+	1 	-1
+	7 	EXIT
+	1 	+33		(convert to ACD internal code)
+	11 	CHOPL
+	8 	CHOPE
+	0 	OUTSTR
+	/4 	1
+	14 	8186
+	6 	+63		(second char)
+	1 	-1
+	7 	EXIT
+	1 	+33
+	11 	CHOPL
+	8 	CHOPE
+	0 	OUTSTR
+	/4 	1
+	6 	+63		(third char)
+	1 	-1
+	7 	EXIT
+	1 	+33
+	11 	CHOPL
+	 8 	CHOPE
+	10 	OUTSTR
+	8 	LOOP
+EXIT	0 	OUTSTR
+	/8 	2
+<! halt !>
+<!!>
+
+c assemble main program
+j &17740
+st 6852
+
+c assemble chiol
+at ptr file CHIOL.900
+j &17742
+st 6852
+
+c assemble qsio
+at ptr file QSIO.900
+j &17742
+st 6852
+
+c assemble intip
+at ptr file INTIP.900
+j &17742
+st 6852
+
+c assemble slop_sit
+at ptr file SLOP_SIT.900
+j &17742
+st 6852
+
+c assemble adop
+at ptr file ADOP.900
+j &17742
+st 6852
+
+c assemble adip
+at ptr file ADIP.900
+j &17742
+st 6852
+
+c assemble idip
+at ptr file IDIP.900
+j &17742
+st 6852
+
+c assemble amip
+at ptr file AMIP.900
+j &17742
+
+st 6852
+c finish assembly
+at ptr inline
+
+%
+<! halt !>
+<!!>
+j &17742
+st 7573
+
+c run
+at ptr inline
+
+1
+2
+3
+1000
+10000
+100000
+131071
+0
+
+2048
+8191
+4096^2
+2048-4096
+0-16384
+0
+
+FIRST
+SECOND
+L1234
+TOOLONG
+END
+
++1
+-1
+&77
+/1 2
+3 4
+8 ;+1
+0 0
+
+<! halt !>
+<!!>
+
+C trigger program
+j &17743
+st 245
+sh t
+

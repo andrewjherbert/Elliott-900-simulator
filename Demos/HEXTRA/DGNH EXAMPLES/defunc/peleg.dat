@@ -1,0 +1,164 @@
+
+    OPASC
+    IPBIN
+    ADLIB
+    JUMP 12
+    IPASC
+
+peleg;
+"begin"
+   "comment" 24-APR-1981. CACM. Nov. 1979
+             Converted on 04-NOV-1999;
+
+   "integer" a, b, c, f, i, j, k, lit a, lit space, n, words, limit;
+   "real"    max, sum;
+
+   "comment" arrays - O for Occurrences,
+                    - P for pointers,
+                    - LITERAL for 'A@ and ' @,
+                    - E for expected letter probabilities;
+   "integer" "array" O, P[1:26], LITERAL[1:2];
+   "real" "array"    E[1:26];
+
+   "code" "real" "procedure" sigma(j,n,z); "value" n;
+   "integer" j,n; "real" z; "algol";
+
+   "code" "procedure" date time; "algol";
+
+   "procedure" copy(j, n, z, v); "value" n; "integer" j, n, z, v;
+      "for" j := 1 "step" 1 "until" n "do" z := v;
+
+   "procedure" move(j, n, z, v); "value" n;
+                                 "integer" j, n; "real" z, v;
+      "for" j := 1 "step" 1 "until" n "do" z := v;
+
+   "print" ''L@24-APR-1981@;
+   date time; limit:=0;
+
+   "comment" read in LITERAL A and LITERAL SPACE;
+   j := 1; instring(LITERAL, j); instring(LITERAL, j);
+   LIT A := LITERAL[1]; LIT SPACE := LITERAL[2];
+
+   "comment" Initialise P, n, words, f;
+   copy(a, 26, P[a], 0); "read" n, words, f;
+
+   "comment" Set up work space as follows :=
+             - X for given message, stored as A=1, B=2 etc.,
+             - Y for given message, stored as 'A@, 'B@ etc.,
+             - Z for trial output message, stored as Y.
+
+             - SPACE for space insertion on output.
+
+             - R for trigram coefficients, taken from given message.
+
+             - ALPHABET for output conversion, and T for letter table.
+
+             - U, V for work space to hold letter probabilities.
+               U[j, k] and V[j, k] are the probabilities that cipher
+               letter ALPHABET[k] is really actual letter ALPHABET[j];
+
+   "begin"
+      "integer" "array" X, Y, Z[1:n],
+                        SPACE[1:words],
+                        R[1:f, 1:f, 1:f],
+                        ALPHABET, T[1:f];
+      "real" "array"    U, V[1:f, 1:f];
+                       
+      "comment" Fill Y, SPACE and X;
+      j := 0;
+      "for" i:=1 "step" 1 "until" n "do" 
+      "begin"
+skip:
+         k := i; instring(Y, k);
+         "if" Y[i] = LIT SPACE "then"
+         "begin"
+            j := j + 1; SPACE[j] := i; "goto" skip
+         "end";
+         X[i] := (Y[i] - LIT A) "div" 64 + 1
+      "end";
+
+      "comment" Fill ALPHABET, LETTER table, T, and pointer array, P;
+      j := 0;
+      "for" i := 1 "step" 1 "until" n "do"
+      "if" P[X[i]] = 0 "then"
+      "begin"
+         j := j + 1; ALPHABET[j] := Y[i];
+         T[j] := X[i]; P[X[i]] := j
+      "end";
+
+      "comment" Read English letter probavilities and fill O;
+      "for" j := 1 "step" 1 "until" 26 "do" "read" E[j];
+      copy(j, 26, O[j], 0); copy(i, n, O[X[i]], O[X[i]] + 1);
+
+      "comment" Set up R;
+      "for" a := 1 "step" 1 "until" f "do"
+         "for" b := 1 "step" 1 "until" f "do"
+            copy(c, f, R[a, b, c], 0);
+      "for" i := 2 "step" 1 "until" n-1 "do"
+         R[P[X[i-1]], P[X[i]], P[X[i+1]]] :=
+         R[P[X[i-1]], P[X[i]], P[X[i+1]]] +
+         (n^2)/(O[X[i-1]] * O[X[i]] * O[X[i+1]] * (n-2)/n);
+
+      "comment" Fill V with initial probabilities;
+      "for" k := 1 "step" 1 "until" f "do" move(j, f, V[j, k],
+                 E[T[j]] ^ O[T[k]] * (1-E[T[j]]) ^ (n - O[T[k]]));
+
+      "comment" Main iteration begins, copy V to U;
+again:
+      date time; limit := limit+1;
+      "if" limit>5 "then" stop;
+
+      "for" k := 1 "step" 1 "until" f "do"
+      "begin"
+         sum := sigma(j, f, V[j, k]);
+         move(j, f, U[j, k], V[j, k] / sum);
+         move(j, f, V[j, k], U[j, k])
+      "end";
+         
+      "comment" Print trial answer;
+      "for" i := 1 "step" 1 "until" n "do"
+      "begin"
+         max := 0; a := 0; Z[i] := LIT SPACE;
+         "for" b := 1 "step" 1 "until" f "do"
+         "if" max < U[b, P[X[i]]] "then"
+         "begin"
+            max := U[b, P[X[i]]]; a := b
+         "end";
+         "if" a "ne" 0 "then" Z[i] := ALPHABET[a]
+      "end";
+      "print" ''L@@; j := 1;
+      "for" i := 1 "step" 1 "until" n "do"
+      "begin"
+         "if" i = SPACE[j] "then"
+         "begin"
+            k := 2; outstring(LITERAL, k); j := j + 1
+         "end";
+         k := i; outstring(z, k)
+      "end" of output;
+      "print" ''L@@;
+
+      "comment" Actual iteration loop at last;
+      "for" i := 2 "step" 1 "until" n-1 "do"
+      "begin"
+         move(b, f, V[b, P[X[i]]], V[b, P[X[i]]] *
+              sigma(a, f, U[a, P[X[i-1]]] *
+              sigma(c, f, U[c, P[X[i+1]]] * R[a, b, c])));
+         sum := sigma(b, f, V[b, P[X[i]]]);
+         move(b, f, V[b, P[X[i]]], V[b, P[X[i]]] / sum)
+      "end";
+      "goto" again
+   "end"
+"end"
+
+'A@ ' @ 48 14 16
+'T@ 'H@ 'E@ ' @ 'M@ 'A@ 'N@ ' @ 'W@ 'H@ 'O@ ' @
+'L@ 'I@ 'V@ 'E@ 'S@ ' @ 'F@ 'R@ 'E@ 'E@ ' @ 'F@ 'R@ 'O@ 'M@ ' @
+'F@ 'O@ 'L@ 'L@ 'Y@ ' @ 'I@ 'S@ ' @ 'N@ 'O@ 'T@ ' @ 'S@ 'O@ ' @
+'W@ 'I@ 'S@ 'E@ ' @ 'A@ 'S@ ' @ 'H@ 'E@ ' @ 'T@ 'H@ 'I@ 'N@ 'K@ 'S@
+
+0.0781  0.0128  0.0293  0.0411  0.1305
+0.0288  0.0139  0.0585  0.0677  0.0023
+0.0042  0.0360  0.0262  0.0728  0.0821
+0.0215  0.0014  0.0664  0.0646  0.1082
+0.0277  0.0100  0.0149  0.0030  0.0151
+0.0009

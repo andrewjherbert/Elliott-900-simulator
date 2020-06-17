@@ -1,0 +1,268 @@
+﻿C line printer demo
+
+on 903 8K
+
+select out tty
+nonprinting off
+
+at ptr file SIR(ISS6)(5500).BIN
+j 8181
+
+at ptr inline
+
+*19
+
+((Line printer and card reader demonstration program)
+
+[LPCR QLPOUT QCHOP QDOUT QCARDIN QCINCH QERROR QL1ENT QL2ENT QL3ENT]
+
+LPCR	(initialize interrupt handling)
+	4	L2A
+	5	2		(set level 2 s-reg)
+	4	L4A		(set level 4 s-reg)
+	5	6
+	15	7168		(terminate)
+
+L4ENT	
+	(initialize devices)
+	4	+3
+	5	QDOUT
+	4	+1		(set up lp)
+	5	QLPOUT+4
+	4	-1
+	5	QCARDIN+2	(set up cr)
+	4	BUF1AD
+	5	QCARDIN+3	(first buffer)
+	4	BUF2AD
+	5	QCARDIN+4	(second buffer)
+	4	DECOAD
+	5	QCARDIN+5	(decode table)
+	4	+100
+	5	QCINCH+2	(current column)
+	4	+1		(type newline)
+	11	QCHOP
+	8	QCHOP+1
+
+	(line printer tests)
+
+	(print "A1")
+	4	+33		('A')
+	11	QLPOUT
+	8	QLPOUT+1
+	4	+17		('1')
+	11	QLPOUT
+	8	QLPOUT+1
+	4	+1		(newline)
+	11	QLPOUT
+	8	QLPOUT+1
+
+	(print 15 blank lines)
+	4	+15		(15 line feeds)
+	11	QLPOUT
+	8	QLPOUT+2
+
+	(print 512 * A followed by B)
+	4	+0
+	5	COUNT
+L1	4	+33		('A')
+	11	QLPOUT
+	8	QLPOUT+1
+	10	COUNT
+	4	COUNT
+	2	+512
+	7	;+2
+	8	L1
+	4	+34		('B')
+	11	QLPOUT
+	8	QLPOUT+1
+	4	+1		(newline)
+	11	QLPOUT
+	8	QLPOUT+1
+
+	(card reader tests)
+
+	(copy cards to teletype and line printer)
+L2	11	QCINCH		(read a card character)
+	8	QCINCH+1
+	9	CRDERR		(check for errors)
+	6	&77
+	5	CH
+	11	QCHOP		(send to teleprinter)
+	8	QCHOP+1
+	4	CH
+	11	QLPOUT		(send to line printer)
+	8	QLPOUT+1
+	4	QCINCH+2	(current column)
+	1	-79
+	7	ENDCAR
+	8	L2		(more to do)
+
+ENDCAR	4	+1		(output newline after each card) 
+	11	QCHOP
+	8	QCHOP+1
+	4	+1
+	11	QLPOUT
+	8	QLPOUT+1
+	8	L2
+
+	(card error)
+CRDERR	11	QERROR
+	8	QERROR+1
+	0	ERRM
+	8	;+0		(no resume)
+ERRM	0 0
+	0 1
+	\DEM	
+
+CH	>+1			(workspace)
+COUNT   >+1
+BUF1	>+80			(first card input buffer)
+BUF2	>+80			(second card input buffer)
+BUF1AD	0 BUF1			(address of first buffer)
+BUF2AD	0 BUF2			(address of second buffer)
+
+
+(binary lookup table for punched card code)
+(ms 12 bits are card image, ls 6 bits are )
+(corresponding SIR internal code.         )
+(NB card images are inverted, i.e., ms bit)
+(corresponds to bottom row of card column.)
+
+DECODE	&000000        (     +0  )
+        &000106        (    +70 &)
+        &000215        (   +141 -)
+        &000420        (   +272 0)
+        &001021        (   +529 1)
+        &001141        (   +609 A)
+        &001252        (   +682 J)
+        &001417        (   +783 /)
+        &002022        (  +1042 2)
+        &002142        (  +1122 B)
+        &002253        (  +1195 K)
+        &002463        (  +1331 S)
+        &004023        (  +2067 3)
+        &004143        (  +2147 C)
+        &004254        (  +2220 L)
+        &004464        (  +2356 T)
+        &010024        (  +4116 4)
+        &010144        (  +4196 D)
+        &010255        (  +4269 M)
+        &010465        (  +4405 U)
+        &020025        (  +8213 5)
+        &020145        (  +8293 E)
+        &020256        (  +8366 N)
+        &020466        (  +8502 V)
+        &040026        ( +16406 6)
+        &040146        ( +16486 F)
+        &040257        ( +16559 O)
+        &040467        ( +16695 W)
+        &100027        ( +32791 7)
+        &100147        ( +32871 G)
+        &100260        ( +32944 P)
+        &100470        ( +33080 X)
+        &200030        ( +65560 8)
+        &200150        ( +65640 H)
+        &200261        ( +65713 Q)
+        &200471        ( +65849 Y)
+        &202032        ( +66586 :)
+        &202173        ( +66683 [)
+        &202475        ( +66877 ])
+        &204003        ( +67587 #)
+        &204116        ( +67662 .)
+        &204204        ( +67716 $)
+        &204414        ( +67852 ,)
+        &210040        ( +69664 @)
+        &210134        ( +69724 <)
+        &210212        ( +69770 *)
+        &210405        ( +69893 %)
+        &220007        ( +73735 ')
+        &220110        ( +73800 open bracket)
+        &220211        ( +73865 close bracket)
+        &220477        ( +74047 _)
+        &240035        ( +81949 =)
+        &240113        ( +81995 +)
+        &240233        ( +82075 ;)
+        &240436        ( +82206 >)
+        &300002        ( +98306 ")
+        &300176        ( +98430 ^)
+        &300274        ( +98492 \)
+        &300437        ( +98591 ?)
+        &400031        (+131097 9)
+        &400151        (+131177 I)
+        &400262        (+131250 R)
+        &400472        (+131386 Z)
+        &777701        (+262081 exclamation)
+
+DECOAD	0 DECODE
+
+L2A	0 QL2ENT
+L4A	0 L4ENT
+
+((SSYS2 modular interrupt system)
+
+[QLEV1 QL1ENT QLEV2 QL2ENT QLEV3 QL3ENT QLPT2 QLPT3 QCARD2 QCARD3]
+
+QLEV1	15	7168		(dummy level 1 routine)
+QL1ENT 	8	QLEV1
+
+	(level 2 interrupt routine)
+L2A	>1
+L2Q	>1
+W	>1
+
+L2E	2	L2Q		(load q-reg)
+	14	1
+	4	L2A		(load a-reg)
+	15	7168		(terminate)
+QL2ENT	5	L2A		(start of level 2 interrupt routine)
+	3	L2Q		(save A and Q)
+QLEV2	15	1600		(read 4100 IMU status)
+	2	-1		(invert)
+	5	W
+	6	+3
+	7	NOINT		(no 4100 interrupt)
+	6	+2
+	7	QCARD2		(channel 1 interrupt: card reader)
+	8	QLPT2		(channel 2 interrupt: line printer)
+NOINT	4	W
+	6	&001400
+	7	L2E		(no 4100 attention, terminate)
+	6	&001000
+	7	QCARD3		(channel 1 attention: card reader)
+	8	QLPT3		(channel 2 attention: line printer)
+
+QLEV3	15	7168		(dummy level 3 routine)
+QL3ENT	8	QLEV3
+
+<! halt !><!!>
+j 8
+
+at ptr file QLPOUT(ISS1).900
+j 9
+
+at ptr file CARDIN(ISS1).900
+j 9
+
+at ptr file SSYS1(ISS1).900
+j 9
+
+at ptr inline
+%
+<! halt !><!!>
+j 9
+
+c run program
+sh t
+at lpr
+at crd inline
+CARD READER INPUT TEST LINE 1
+
+ #$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_
+CARD READER INPUT TEST LINE 3
+ #$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_
+CARD READER INPUT TEST LINE 5
+01234567890123456789012345678901234567890123456789012345678901234567890123456789ABCDEF
+CARD READER INPUT TEST LINE 7
+<!!>
+j 32
+sh t

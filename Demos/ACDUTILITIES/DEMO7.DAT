@@ -1,0 +1,33 @@
+﻿c Demonstrate DO-ALL-4 (copy long tape)
+
+on 903 8K
+
+c load do-all-4
+at ptr file DOALL4.BIN
+j 8181
+st 8175
+
+c read and sumcheck
+at ptr file ../HUNTER/ALG16KLG(HUNTER).BIN
+j 21
+st 254
+
+c read and punch
+rewind
+at ptp file DEMO7.BIN
+j 22
+de ptp
+st 1055
+
+c verify
+at ptr file DEMO7.BIN
+at ptp file demo7.txt legible
+j 23
+st 1055
+de ptp
+
+print demo7.txt
+delete demo7.txt
+delete DEMO7.BIN
+sh t
+

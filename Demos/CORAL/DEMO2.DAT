@@ -1,0 +1,241 @@
+C Demonstrate a multi-level program in Coral-66
+
+on 905 16K
+
+nonstop on
+newline off
+
+C LEVEL 1
+
+C Pass 1A
+at ptr file PASS1A.BIN
+at tty inline
+GO
+<!!>
+j ii
+at ptp file TEMP2.BIN
+at ptr file LEVELS1.900
+r
+de ptp
+st 6512^1
+
+C Pass 1B -- note needs run in same store as PASS1A
+at tty inline
+GO
+<!!>
+at ptr file PASS1B.BIN
+j ii
+at ptp file TEMP3.BIN
+at ptr file TEMP2.BIN
+r
+de ptp
+st 6512^1
+
+C Pass 2
+at ptr file PASS2.BIN
+at tty inline
+GO
+<!!>
+j ii
+at ptr file TEMP3.BIN
+at ptp file LEVELS1.BIN
+r
+de ptp
+st 6912^01
+
+reverse LEVELS1.BIN
+
+C LEVEL 2
+
+C Pass 1A
+at ptr file PASS1A.BIN
+at tty inline
+GO
+<!!>
+j ii
+at ptp file TEMP2.BIN
+at ptr file LEVELS2.900
+r
+de ptp
+st 6512^1
+
+C Pass 1B -- note needs run in same store as PASS1A
+at tty inline
+GO
+<!!>
+at ptr file PASS1B.BIN
+j ii
+at ptp file TEMP3.BIN
+at ptr file TEMP2.BIN
+r
+de ptp
+st 6512^1
+
+C Pass 2
+at ptr file PASS2.BIN
+at tty inline
+GO
+<!!>
+j ii
+at ptr file TEMP3.BIN
+at ptp file LEVELS2.BIN
+r
+de ptp
+st 6912^01
+
+reverse LEVELS2.BIN
+
+C LEVEL 3
+
+C Pass 1A
+at ptr file PASS1A.BIN
+at tty inline
+GO
+<!!>
+j ii
+at ptp file TEMP2.BIN
+at ptr file LEVELS3.900
+r
+de ptp
+st 6512^1
+
+C Pass 1B -- note needs run in same store as PASS1A
+at tty inline
+GO
+<!!>
+at ptr file PASS1B.BIN
+j ii
+at ptp file TEMP3.BIN
+at ptr file TEMP2.BIN
+r
+de ptp
+st 6512^1
+
+C Pass 2
+at ptr file PASS2.BIN
+at tty inline
+GO
+<!!>
+j ii
+at ptr file TEMP3.BIN
+at ptp file LEVELS3.BIN
+r
+de ptp
+st 6912^01
+
+reverse LEVELS3.BIN
+
+C LEVEL 4 
+
+C Pass 1A
+at ptr file PASS1A.BIN
+at tty inline
+GO
+<!!>
+j ii
+at ptp file TEMP2.BIN
+at ptr file LEVELS4.900
+r
+de ptp
+st 6512^1
+
+C Pass 1B -- note needs run in same store as PASS1A
+at tty inline
+GO
+<!!>
+at ptr file PASS1B.BIN
+j ii
+at ptp file TEMP3.BIN
+at ptr file TEMP2.BIN
+r
+de ptp
+st 6512^1
+
+C Pass 2
+at ptr file PASS2.BIN
+at tty inline
+GO
+<!!>
+j ii
+at ptr file TEMP3.BIN
+at ptp file LEVELS4.BIN
+r
+de ptp
+st 6912^01
+
+reverse LEVELS4.BIN
+
+C Extended loader
+
+at ptr file BIN_16K.BIN
+j ii
+st 8164
+
+at tty inline
+COR=1
+LEV=1
+GO
+<!!>
+at ptr file LEVELS1.BIN
+at ptp file TEMP4.BIN
+j 8
+at tty inline
+LEV=2
+GO
+<!!>
+at ptr file LEVELS2.BIN
+r
+at tty inline
+LEV=3
+GO
+<!!>
+at ptr file LEVELS3.BIN
+r
+at tty inline
+LEV=4
+GO
+END=YES
+<!!>
+at ptr file LEVELS4.BIN
+r
+de ptp
+
+st 7104^01
+
+c run the program
+clear
+at ptr file TEMP4.BIN
+skip
+j ii
+st 8175
+skip
+j ii
+st 8175
+skip
+j ii
+st 8175
+skip 
+j ii
+st 8175
+
+s 500
+j 7945
+interrupt 3
+s 100
+r
+interrupt 2
+s 100
+r
+interrupt 1
+r
+
+delete TEMP1.BIN
+delete TEMP2.BIN
+delete TEMP3.BIN
+delete TEMP4.BIN
+delete LEVELS1.BIN
+delete LEVELS2.BIN
+delete LEVELS3.BIN
+delete LEVELS4.BIN
+
+sh t

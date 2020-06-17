@@ -1,0 +1,93 @@
+﻿
+on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+at ptr inline
+
+newdate;
+"begin"
+   "comment" 24-apr-2005;
+   "integer" day, elapse, j, k, month, which, year;
+   "integer" "array" names[1:28], length[1:12];
+   "integer" "procedure" mod(a,b);
+      "value" a,b; "integer" a,b;
+   "begin"
+      "if" a < 0 "then" "print" ''GLOOM``, same line, a, stop;
+      mod := a - (a "div" b) * b;
+   "end";
+   "boolean" "procedure" leap(year);
+      "value" year; "integer" year;
+   "begin"
+      "if" year = 2000 "then" leap := "true"
+                       "else"
+      "if" mod(year,100) = 0 "then" leap := "false"
+                             "else"
+      "if" mod(year, 400) = 0 "then" leap := "true"
+                              "else"
+      "if" mod(year, 4) = 0 "then" leap := "true"
+                            "else" leap := "false";
+   "end";
+
+
+   "for" j := 1 "step" 1 "until" 12 "do" "read" length[j];
+   "for" j := 1 "step" 1 "until"  7 "do"
+   "begin"
+      k := 4 * j - 3; in string(names, k)
+   "end";
+
+again:
+   "read" day, month, year; 
+   "if" day<0 "and" month<0 "and" year< 0 "then" stop;
+   "print" digits(2), day, same line, month, digits(4), year;
+   "if" day<1 "or" month<1 "or" month>12 "or" year>2157
+      "then" "goto" again;
+   "if" day> length[month] "and" "not"
+      (day=29 "and" month=2 "and" leap(year))
+      "or" year < 1752 "then" "goto" again;
+
+   elapse:= 6;
+   "for" j:=1 "step" 1 "until" month-1 "do" elapse:=elapse+length[j];
+   elapse:=elapse+day; 
+   elapse:=elapse+year + (year "div" 4) - (year "div" 100) +
+          (year "div" 400);
+   "if" leap(year) "and" month<3 "then" elapse:=elapse-1;
+
+   which:=elapse-(elapse "div"7)*7+1;
+   "print" ' A `;
+   k:=4*which-3; out string(names, k); "goto" again
+"end"
+<!!>
+j 12
+st 1727
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+at ptr inline
+  31  28  31  30  31  30  31  31  30  31  30  31
+'sunday   `  'monday   `   'tuesday  `   'wednesday`   'thursday `
+'friday   `  'saturday `
+
+  08  01  1928
+  17  08  1928
+  21  05  1966
+  12  02  1969
+   9   6  1956
+  13   7  1965
+   5   4  2005
+  21  10  1805
+  18   6  1815
+  14   7  1789
+   8   2  1961
+  24   1  1328
+   1   1     1
+  14   9  1752
+  26   1  1975
+  21   1  2016
+   -1  -1  -1
+<!!>
+select out tty
+j 10
+st 1727
+sh t

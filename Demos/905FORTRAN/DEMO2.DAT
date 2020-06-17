@@ -1,0 +1,80 @@
+﻿c
+C McCracken A Guide to FORTRAN IV Programming Case Study 1
+C
+C Load Fortran system
+on 905 16K
+at ptr file 905FORT(ISS6).BIN
+j 8181
+
+C compile program
+nonstop on
+at ptp file DEMO2.BIN
+at ptr inline
+
+C  CASE STUDY 1
+C  ECONOMIC ORDER QUANTITY COMPUTATION
+C
+C
+C  READ THE DATA VALUES
+      READ (1, 100) R, S, C, XI
+  100 FORMAT (4F10.0)
+C
+C  COMPUTE THE ECONOMIC ORDER QUANTITY
+      EOQ = SQRT(2.0 * R * s / (C * XI))
+C
+C  WRITE A LINE CONTAINING DATA AND RESULT
+      WRITE (3, 110) R, S, C, XI, EOQ
+  110 FORMAT (1P5E16.6)
+      STOP
+      END
+<! Halt !>
+<!!>
+
+at tty inline
+O0R
+<!!>
+
+j 16
+
+c run out of tty input
+de ptp
+
+reverse DEMO2.BIN
+
+c load loader
+at ptr file ../MASIR/LOADER(ISS3).BIN
+j 8181
+st 8171
+
+c load program
+at ptr file DEMO2.BIN
+at tty inline
+O20L<!!>
+j 16
+
+c read unloads, load library tape 1
+at ptr file 905FORTLIB1(ISS4).BIN
+at tty inline
+O3L<!!>
+j 16
+
+c reader unloads, load library tape 2
+at ptr file 905FORTLIB2(ISS5).BIN
+r
+
+c reader unloads
+at ptr inline
+    8000.0      12.5       1.0       0.2
+
+<! halt !> 
+<!!>
+at tty inline
+MM<!!>
+j 16
+delete DEMO2.BIN
+sh t
+
+
+
+
+

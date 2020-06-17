@@ -1,0 +1,324 @@
+﻿
+C Demonstrate H. Thimbleby version of GPM
+
+on 903
+
+c assemble with 2-pass SIR
+at ptr file ..//ACDSIR/SIR2P71.BIN
+j 8181
+st 8175
+
+at ptr file TGPM.900
+select out tty
+j 12
+st 562
+
+rewind
+select out auto
+at ptp file TGPM.BIN
+j 10
+de ptp
+st 587
+
+c Functional tests
+at ptr file TGPM.BIN
+j 8181
+st 917
+
+select out tty
+
+at ptr inline
+<,[?!>]
+
+HGPM TESTS
+==========
+
+Examples from Thimbleby Thesis
+------------------------------
+
+Layout
+------
+
+[DEF,A,!ALL ON !
+ONE LINE]!
+[A] SB ALL ON ONE LINE
+
+NOTE Macro
+----------
+
+[NOTE,Hello World] SB MONITOR:  (Hello World)
+
+LEG Macro
+---------
+
+[DEF,TEST,<[LEG,?1,L,E,G]>][TEST,-1][TEST,0][TEST,+1] SB LEG
+Show all args are evaluated!
+[LEG,0,[NOTE,L],[NOTE,E],[NOTE,G]]
+Use DEF and quoting to make selective!
+[DEF,COND,[LEG,0,<[NOTE,L]>,<[NOTE,E]>,<[NOTE,G]>]][COND]
+
+DIV Macro
+---------
+
+[DEF,DIV,< 14 8176
+ 13 ?1
+ 14 8191
+>]
+<[DIV,12]: >!
+[DIV,12] SB 13 12
+
+Differentiation
+---------------
+
+[DEF,X,<X,1>]!
+[DEF,Y,<Y,DY/DX>]!
+[DEF,D,<D/DX?1 = ?2>]!
+[DEF,+,<(?1+?3),(?2+?4)>]!
+[DEF,SIN,<SIN(?1),?2*COS(?1)>]!
+[D,[+,[X],[Y]]] SB (1+DY/DX)
+
+IF Macro
+--------
+
+[DEF,IF,<[DEF,?1,?4][DEF,?2,?3][A]>]!
+[IF,A,B,TRUE,FALSE] SB FALSE
+[IF,A,A,TRUE,FALSE] SB TRUE
+
+FOR macro
+---------
+
+[DEF,FOR,<[DEF,?1,XXXXXXX][UPDATE,?1,1]!
+[DEF,SUBFOR,?3<[DEF,[?1],<[UPDATE,?1,[BAR,+,[?1],1]][SUBFOR,?1,?2,?3]>]!
+[DEF,?2,<>][[?1],?1,?2,?3]>][SUBFOR,?1,?2,?3]>]
+
+[FOR,J,4,< 4 X[J]
+ 5 P+[J]
+>]
+
+Delayed SIR Code
+----------------
+
+[DEF,POOLT,A VERY LONG STRING A VERY LONG STRING A VERY LONG STRING !
+A VERY LONG STRING A VERY LONG STRING A VERY LONG STRING A VERY LONG STRING !
+A VERY LONG STRING A VERY LONG STRING A VERY LONG STRING A VERY LONG STRING !
+A VERY LONG STRING A VERY LONG STRING A VERY LONG STRING]!
+[UPDATE,POOLT,<>]!
+[DEF,POOL,<[POOLT][UPDATE,POOLT,<>]>]!
+[DEF,NAME,131071][UPDATE,NAME,1]!
+[DEF,LOC,<L[NAME]!
+[UPDATE,POOLT,L[NAME] ?1
+[POOLT]]!
+[UPDATE,NAME,[BAR,+,1,[NAME]]]>]!
+
+	 0	+0
+	 4	WORD
+LOOP 	 9	[LOC,!
+	10	1
+	 8	SHIFT]
+	 7	[LOC,!
+	 4	1
+	 0	LINK
+	/8	1]
+SHIFT   14	1
+	 8	LOOP
+[POOL]   
+
+Functional Tests
+================
+
+Text processing
+---------------
+
+Isolated apply is just copied ].
+
+Isolated argument is just copied ?.
+
+<Nested <quotes < nested < again > > > .>
+
+End of text tests.
+
+Test DEF and UPDATE.
+
+<[DEF,abc,bluebell][abc] => [DEF,abc,bluebell][abc].
+
+<[DEF,x,<result is ?1>][x,3] => [DEF,x,<result is ?1>][x,3].
+
+<[DEF,y,<result is ?1 + ?2>][y,5,6] => [DEF,y,<result is ?1 + ?2>][y,5,6].
+
+<[DEF,z,<?12>][z,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] = >!
+[DEF,z,<?12>][z,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].
+
+<[DEF,abc,<pqrstuv>][UPDATE,abc,<xyz>][abc] = >!
+[DEF,abc,<pqrstuv>][UPDATE,abc,<xyz>][abc].
+
+End of DEF and UPDATE tests. 
+
+Test arithmetic.
+
+[DEF,+,<[BAR,+,?1,?2]>]!
+[DEF,-,<[BAR,-,?1,?2]>]!
+[DEF,*,<[BAR,*,?1,?2]>]!
+[DEF,/,<[BAR,/,?1,?2]>]!
+[DEF,%,<[BAR,%,?1,?2]>]!
+
+7+3=[+,7,3]
+7-3=[-,7,3]
+7*3=[*,7,3]
+7/3=[/,7,3]
+<7%3=[%,7,3]>
+
+End of arithmetic tests.
+
+Demonstrate how to construction conditional macros.
+
+Conditional
+<[DEF,IF,<[?1,[DEF,?1,?4][DEF,?2,?3]]>]>[DEF,IF,<[?1,[DEF,?1,?4][DEF,?2,?3]]>]
+IF X=Y = [IF,X,Y,T,F]
+IF X=X = [IF,X,X,T,F]
+
+This demonstrates a subtle bug in Strachey's GPM which is
+not present in BGPM.
+
+<[DEF,args,<arg0=?0 arg1=?1 arg2=?2 arg3=?3>]>
+[DEF,args,<arg0=?0 arg1=?1 arg2=?2 arg3=?3>]
+
+<[args,aaa[DEF,junk,junkbody]xxx,bbbyyy,ccczzz]> =
+[args,aaa[DEF,junk,junkbody]xxx,bbbyyy,ccczzz]
+
+<[args,aaaxxx,bbbyyy,ccczzz[DEF,junk,junkbody]]> =
+[args,aaaxxx,bbbyyy,ccczzz[DEF,junk,junkbody]]
+
+<[args,aaaxxx,bbbyyy,ccczzz,[DEF,junk,junkbody]]> =
+[args,aaaxxx,bbbyyy,ccczzz,[DEF,junk,junkbody]]
+
+This is to demonstrate that GPM macros can leave definitions
+behind.
+
+[DEF,defs,<!
+Define ?1a[DEF,?1a,<Macro ?0 called with argument ?1>]
+Define ?1b[DEF,?1b,<Macro ?0 called with argument ?1>]
+Define ?1c[DEF,?1c,<Macro ?0 called with argument ?1>]
+>]!
+
+<[defs,A]> = [defs,A]
+<[defs,B]> = [defs,B]
+<[defs,C]> = [defs,C]
+
+<[Aa,xxx]> = [Aa,xxx]
+<[Bb,yyy]> = [Bb,yyy]
+<[Cc,zzz]> = [Cc,zzz]
+
+<Calling [DEF,a,<[DEF,b,[c]xxx[d]]>]>  [DEF,a,<[DEF,b,[c]xxx[d]]>]
+
+<Calling [DEF,c,old c][DEF,d,old d]> [DEF,c,old c][DEF,d,old d]
+
+<Calling [a,[DEF,c,ccc][DEF,d,ddd]]>  [a,[DEF,c,ccc][DEF,d,ddd]]
+<Calling [b]> = [b]
+<Calling [c]> = [c]
+<Calling [d]> = [d]
+
+Examples from Strachey's Computer Journal Paper
+-----------------------------------------------
+
+General Purpose Macrogenerator
+by C. Strachey
+CJ Vol.8 No.3, Oct 1965
+
+Examples of macro expansion.
+
+<[DEF,A,<A?1A>]>[DEF,A,<A?1A>]
+<[DEF,B,<B[A,X?1X]B>]>[DEF,B,<B[A,X?1X]B>]
+<[DEF,APA,<P?1?1P>]>[DEF,APA,<P?1?1P>]
+
+<[A,C]>       = [A,C]
+<[A,ACA]>     = [A,ACA]
+<[A,[A,C]]>   = [A,[A,C]]
+<[A,XDX]>     = [A,XDX]
+<[B,D]>       = [B,D]
+<[A,P]>       = [A,P]
+<[APA,Y]>     = [APA,Y]
+<[[A,P],Y]>   = [[A,P],Y]
+
+<Q<[A,C]>R>   = Q<[A,C]>R
+<[A,<[A,X]>]> = [A,<[A,X]>]
+<[B,<[A,X]>]> = [B,<[A,X]>]
+<Q<[>R<]>>    = Q<[>R<]>
+<Q<<[A,C]>>R> = Q<<[A,C]>>R
+
+<[A,X,U,[DEF,A,<?1?2?1>]]> = [A,X,U,[DEF,A,<?1?2?1>]]
+
+Functional product example.
+
+<[DEF,Log,<log(?1)>] [DEF,Sin,<sin(?1)>]>!
+[DEF,Log,<log(?1)>] [DEF,Sin,<sin(?1)>]
+<[Log,x] [Sin,x] = >[Log,x] [Sin,x] 
+
+<[DEF,FNPROD,<[DEF,?1?2,<[>?1<,[>?2<,?1]]>]>] = >!
+[DEF,FNPROD,<[DEF,?1?2,<[>?1<,[>?2<,?1]]>]>]
+<[FNPROD,Log,Sin]> = [FNPROD,Log,Sin]
+<[LogSin,x]> = [LogSin,x]
+
+Modified version of Sum, correcting error in original.
+
+This version corrects the bug in Successor as defined
+in Strachey's paper.
+
+[DEF,Suc,<[1,2,3,4,5,6,7,8,9,10,[DEF,1,<?>?1]]>]!
+
+<[Suc,0]> = [Suc,0]
+<[Suc,1]> = [Suc,1]
+<[Suc,2]> = [Suc,2]
+<[Suc,9]> = [Suc,9]
+
+[DEF,Successor,<[?2,[DEF,?2,?1<<,>[Suc,>?2<]>]!
+[DEF,9,<[Suc,>?1<]<,>0>]]>]!
+
+<[Successor,3,4]> = [Successor,3,4]
+<[Successor,3,9]> = [Successor,3,9]
+
+[DEF,Sum,<[S,?1,?2,0,!
+[DEF,S,<[?3,[DEF,?3,<[S,>[Successor,?1,?2]<,>[Suc,?3]<]>]!
+[DEF,>?3<,?1<,>?2]]>]]>]!
+
+<[Sum,3,4,2] = > [Sum,3,4,2]
+<[Sum,3,8,3] = > [Sum,3,8,3]
+
+End of examples from CJ paper.
+
+Martin Richards Examples
+------------------------
+
+Towers of Hanoi.
+
+[DEF,H,<[?1,?2,?3,?4,
+[DEF,?1,<!
+[H,[-,?0,1],?1,?3,?2]!
+Move disc ?0 from tower ?1 to tower ?2
+[H,[-,?0,1],?3,?2,?1]>][DEF,0,]]>]
+
+<[H,1,A,B,C] = >
+[H,1,A,B,C]
+
+<[H,2,A,B,C] = >
+[H,2,A,B,C]
+
+<[H,3,A,B,C] = >
+[H,3,A,B,C]
+
+<[H,4,A,B,C] = >
+[H,4,A,B,C]
+
+End of Hanoi.
+
+END OF HGPM TESTS.
+<! halt !><!!>
+j 32
+st 1112
+
+c produce a traceback
+j 33
+st 917
+
+delete TGPM.BIN
+
+sh t

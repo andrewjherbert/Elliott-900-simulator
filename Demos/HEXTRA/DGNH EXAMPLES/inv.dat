@@ -1,0 +1,74 @@
+
+    OPBIN
+    JUMP 17
+    IPASC
+
+INV;
+"begin"
+   "comment" 08-DEC-1997; 
+
+   "comment" This is adapted from AP206 written by T.J. Dekker 
+             at the Matematisch Centrum in 1965. INV replaces the
+             elements of array LU[1:N,1:N] by the corresponding
+             elements of the inverse of L * U, where L is the lower
+             triangle and U the unit upper triangle which are given
+             in array LU such that the elements with first index <
+             second index are elements of U and the other elements
+             of LU are elements of L. The inverse is calculated by
+             forming the left inverse of L and solving the resulting
+             matrix equation. Subsequently the interchanges with
+             sign reversions, defined by the integer array P[1:N]
+             in correspondence with the pivoting administration
+             in DET, are carried out in reverse order on the columns
+             of LU. Hence a call of DET(A,N,P) followed by a call of 
+             INV(A,N,P) has the effect that matrix A is replaced
+             by its inverse.
+
+             "0.0" and "1.0" have been replaced by "0" and "1" 
+             for independent compilation, 08-DEC-1997;
+
+   "procedure" inv(lu,n,p);
+   "value" n; "integer" n;
+   "array" lu; "integer" "array" p;
+   "begin"
+      "integer" i,j,k;
+      "real" r,sum;
+      "array" v[1:n];
+      "for" k:=n "step" -1 "until" 1 "do"
+      "begin"
+         "for" j:=k+1 "step" 1 "until" n "do"
+         "begin"
+            v[j]:=lu[k,j];
+            lu[k,j]:=0
+         "end";
+         lu[k,k]:=1/lu[k,k];
+         "for" j:=k-1 "step" -1 "until" 1 "do"
+         "begin"
+            sum:=0;
+            "for" i:=j+1 "step" 1 "until" k "do"
+                   sum:=sum+lu[k,i]*lu[i,j];
+            lu[k,j]:= -sum/lu[j,j]
+         "end";
+         "for" j:=1 "step" 1 "until" n "do"
+         "begin"
+            sum:=0;
+            "for" i:=k+1 "step" 1 "until" n "do"
+                   sum:=sum+v[i]*lu[i,j];
+            lu[k,j]:=lu[k,j]-sum
+         "end"
+      "end";
+      "for" k:=n "step" -1 "until" 1 "do"
+      "begin"
+         "if" p[k] "ne" k 
+         "then"
+         "begin"
+            "for" i:=1 "step" 1 "until" n "do"
+            "begin"
+               r:=lu[i,k];
+               lu[i,k]:= -lu[i,p[k]];
+               lu[i,p[k]]:=r
+            "end"
+         "end"
+      "end"
+   "end" AP206;
+"end"

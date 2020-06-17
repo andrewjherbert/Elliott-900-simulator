@@ -1,0 +1,40 @@
+﻿on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+at ptr inline
+spin;
+"begin" "comment" 13-feb-2002;
+   "integer" j;
+   "real" f, g, g1, g2, omega, pi, r, t;
+
+   pi := 4*arctan(1);
+   "print" ''L`13=feb-2002`;
+   "print" ''L`time  bulge`;
+   r := 6367160.0; g := 9.81; f := 2 * sqrt(2);
+
+   "for" t := 24.0 "step" -1.0 "until" 3.0, 2.4 "do"
+   "begin"
+      omega := 2 * pi / (t*3600.0); g1 := 9.81;
+      "print" aligned(3,1), t;
+      "for" j := 1 "step" 1 "until" 8 "do"
+      "begin"
+         g2 := g1 * (6367160.0/r)^2;
+         g := (f*g1+g2)/(f+1.0);
+         r := 6367160.0  + (r*omega)^2/(2*g);
+         "print" aligned(5,1), same line, (r - 6367160.0) * 0.001
+      "end"
+   "end"
+"end"
+
+<!!>
+j 12
+st 1727
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+select out tty
+j 10
+st 1727
+sh t

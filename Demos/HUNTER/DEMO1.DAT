@@ -1,0 +1,48 @@
+﻿C
+C DEMO1
+C
+on
+telecode 903
+
+at ptr file ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+at ptr inline
+
+TABLE OF SQUARES;
+"BEGIN"
+   "COMMENT" 13-APR-1996.
+              Prints a table of squares;
+   "INTEGER" J;
+   PUNCH(3);
+   "PRINT" 'TABLE OF SQUARES`;
+   "FOR" J := 1 "STEP" 1 "UNTIL" 10 "DO"
+      "PRINT" DIGITS(3), J, SAME LINE, DIGITS(6), J^2
+"END"
+<! Halt Code !>
+<!!>
+c compile
+j 8
+st 7943
+c run
+j 10
+st 1727
+
+c lock the system
+j 25
+st 8000^1
+
+c run  a second time to confirm system not corrupted
+rewind
+
+c compile
+j 8
+st 7943
+c run
+j 10
+st 1727
+
+sh t
+
+
+

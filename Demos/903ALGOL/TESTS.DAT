@@ -1,0 +1,167 @@
+﻿C test various features of Elliott 903 Algol
+c 
+c
+c does not handle 900 telecode correctly
+c does not do overflow checks in comparisons
+c recovers correctly from sqrt error
+c handles integer procedure parameters correctly
+c 
+on 903 16K
+telecode 900
+at ptr file ALG16KLG(ISS5).BIN
+j 8181
+st 8171
+c translate string handling (produces errors)
+at ptr inline
+ERROR1;
+
+
+"BEGIN"
+
+"COMMENT" This section tests problems associated with
+certain symbol code differences between old 903 code
+& current 905 code, particularly regarding the two values
+of the HASHMARK=POUND=HALF=BACKSLASH symbol and the two
+values of the AT=CLOSEQUOTE symbol. The input & output
+routines of the translators and interpreters are
+all tested;
+
+"INTEGER" I,C,M;
+"INTEGER" "ARRAY" A[0:20];
+
+"PRINT" ''L`1`;
+"PRINT" ''L@2@;
+"PRINT" {{L}3};
+
+"PRINT" '{L}{Q}{U}4`;
+"PRINT" ''L@£\5`;
+
+
+"COMMENT" This line compiled to test translator output
+....'{}`@£\....;
+
+"FOR" C := 1 "STEP" 1 "UNTIL" 5 "DO"
+"BEGIN" M := 0; INSTRING (A,M);
+	M := 0; OUTSTRING (A,M);
+"END";
+
+"END";
+
+<! Halt !>
+<!!>
+select out tty
+nonprinting off
+j 8
+st 1640
+
+c translate arithmetic checks
+at ptr inline
+ERROR2;
+
+"BEGIN"
+
+"COMMENT" This program aims to test the various
+faults cured, present, or suspected, in the various
+issues of GECL 903 ALGOL;
+
+
+"BEGIN"
+
+"COMMENT" This section tests the integer subtraction
+implied in a condition, i.e. "IF" A>B "THEN" ....
+Normally this calculation is overflow checked, e.g.
+C := A-B will give an error on integer overflow.
+However in conditions this appears not to be tested;
+
+"INTEGER" A,B;
+A := +100000;
+B := -100000;
+
+"IF" A>B
+"THEN" "PRINT" ''L@ALGOL OK@
+"ELSE" "PRINT" ''L@ALGOL WRONG@;
+
+"END";
+
+"END"
+<!!>
+c compile program
+j 8
+st 7943
+c interpret program
+j 10
+st 1640
+
+at ptr inline
+ERROR3;
+
+"BEGIN"
+"BEGIN"
+
+"COMMENT" This section tries to invoke the
+error of SAN ALGOL/1 whereby re-entry at location
+9 after calling square root with a negative argument
+does not give SQRT(MODULUS(X)) as stated;
+
+"INTEGER" C;
+"FOR" C := 1 "STEP" 1 "UNTIL" 10 "DO"
+"PRINT" ''L@@,SQRT(-C), ''S@@,SQRT(C);
+
+"END";
+
+
+
+"BEGIN"
+
+"COMMENT" This section tries to invoke the
+error of SAN ALGOL/2 whereby the first call
+of an integer procedure as a parameter of
+an integer procedure gives an incorrect result;
+
+"INTEGER" C;
+
+"INTEGER" "PROCEDURE" ACTPROC;
+ACTPROC := +12345;
+
+"INTEGER" "PROCEDURE" CALL (FORMPROC);
+"INTEGER" "PROCEDURE" FORMPROC;
+"BEGIN" "PRINT" ''L@@,FORMPROC, ''S@@,FORMPROC;
+        CALL := 0;
+"END";
+
+C := CALL (ACTPROC);
+
+"END"
+
+"END"
+<!!>
+c compile program
+j 8
+st 7943
+c interpret program
+j 10
+st 1640
+c resume after errors
+j 9
+st 1640
+j
+st 1640
+j
+st 1640
+j
+st 1640
+j
+st 1640
+j
+st 1640
+j
+st 1640
+j
+st 1640
+j
+st 1640
+j
+st 1640
+select out auto
+sh t
+

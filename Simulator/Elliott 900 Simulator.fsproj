@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net471</TargetFramework>
+    <TargetType>EXE</TargetType>
+    <AssemblyName>SIM900</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Version.fs" />
+    <Compile Include="Bits.fs" />
+    <Compile Include="TeleCodes.fs" />
+    <Compile Include="Models.fs" />
+    <Compile Include="Devices.fs" />
+    <Compile Include="Memory.fs" />
+    <Compile Include="Formatting.fs" />
+    <Compile Include="Machine.fs" />
+    <Compile Include="Parameters.fs" />
+    <Compile Include="Legible.fs" />
+    <Compile Include="RLB.fs" />
+    <Compile Include="FileHandling.fs" />
+    <Compile Include="Loaders.fs" />
+    <Compile Include="Commands.fs" />
+    <Compile Include="Help.fs" />
+    <Compile Include="Shell.fs" />
+    <Compile Include="Gui.fs" />
+    <Compile Include="Main.fs" />
+    <Content Include="TBD and NOTES.txt" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+</Project>

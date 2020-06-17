@@ -1,0 +1,23 @@
+﻿c X1 - paper tape reader and punch test
+
+on 903 8K
+
+c n.b. requires a mode 1 reader
+at ptr file X1(ISS3).BIN mode1
+j 8181
+st 8174
+
+c punch short specimen tape
+at ptp file DEMOX1B.BIN 
+j 8000
+de ptp
+st 8090
+
+c test with prepared long specimen
+at ptr file DEMOX1A.BIN mode1
+at ptp file DEMOX1B.BIN
+nonstop on
+j 8031
+de ptp
+print DEMOX1B.BIN
+sh t

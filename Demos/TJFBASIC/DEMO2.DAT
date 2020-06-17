@@ -1,0 +1,43 @@
+﻿c demonstrate Terry Froggatt's BASIC system
+c
+c n.b. must run in a 903
+
+on 903 16K
+
+nonstop on
+newline off
+
+c run TICTACTOE program
+
+at ptr file BASIC16K.BIN
+
+c set up to demand teleprinter input on triggering
+at tty inline
+OLD
+<!!>
+J 8181
+
+c will have stopped awaiting paper tape and tty
+at ptr file 920-TIC-BAS.900
+r
+
+c runs off end of paper tape
+at tty inline
+RUN
+<!!>
+r
+
+c waits for console input
+at tty console
+r
+
+c program runs indefinitely
+
+sh t
+
+
+
+
+
+
+

@@ -1,0 +1,72 @@
+﻿c Demonstrate TATDOC
+
+on 920B
+
+c generate a label list
+
+at ptr file ../ACDSIR/SIR1P71.BIN
+j 8181
+st 8175
+
+at ptp file DEMO10.900
+
+c generate a label list
+at ptr inline
+
+*3
+<! halt !><!!>
+j &17740
+st 6852
+
+c assemble QF
+at ptr file ../ACDSIR/QF.900
+
+j &17742
+st 6852
+
+at ptr inline
+
+%
+<! halt !><!!>
+j &17742
+st 7573
+
+de ptp
+
+c load tatdoc
+at ptr file TATDOC.BIN
+j 8181
+st 55
+
+c select 900 telecode
+j 15
+st 103
+
+select out tty
+
+c document SIR label list
+at ptr file DEMO10.900
+j 11
+
+sh t
+delete DEMO10.900
+
+de tty
+
+c set up a top and tail
+at ptr inline
+
+TATDOC LISTING<! halt !><!!>
+j 12 
+st 140
+
+c document a QSMATH
+at ptr file ../ACDSIR/QSMATH.900
+j 13
+st 272
+
+c finalize
+j 10
+st 771
+sh t
+

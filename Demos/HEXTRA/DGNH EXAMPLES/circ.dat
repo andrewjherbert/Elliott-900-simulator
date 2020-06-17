@@ -1,0 +1,26 @@
+
+    OPASC
+    IPBIN
+    JUMP 8
+    IPASC
+
+circ;
+"begin"
+   "real" c, lat1, lat2, lon1, lon2, pi;
+
+   "print" ''L@Input lat1, lon1, lat2, lon2 (in degrees)'L2@@;
+
+   "read" lat1, lon1, lat2, lon2;
+   pi := 4 * arctan(1);
+
+   lat1 := lat1 * pi / 180;
+   lon1 := lon1 * pi / 180;
+   lat2 := lat2 * pi / 180;
+   lon2 := lon2 * pi / 180;
+   c := sin(lat1) * sin(lat2) +
+        cos(lat1) * cos(lat2) * cos(lon2 - lon1);
+   "print" arctan(sqrt(abs(1 - c^2))/c) * 180 / pi +
+           ("if" c < 0 "then" 180 "else" 0)
+"end"
+
+  45.99  130.21  55.97  154.83

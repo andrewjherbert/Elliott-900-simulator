@@ -1,0 +1,40 @@
+﻿C DEMONSTRATE COPYTAPE
+
+on 903 8K
+
+C load COPYTAPE
+at ptr file ../903UTILITIES/COPYTAPE(ISS4).BIN
+j 8181
+st 8171
+
+c copy MONITOR.900
+
+c read in original (copy COPYTAPE)
+nonstop on
+traceinterrupt 1 off
+at ptr file ../903UTILITIES/COPYTAPE(ISS4).BIN
+j 21
+traceinterrupt 1 off
+c tape will unload
+nonstop off
+
+c  reload and check
+rewind
+j 22
+st 124
+c tape will unload 
+
+c punch new copy header
+at ptp file DEMO7.BIN
+j 23
+st 152
+
+c load new tape in reader for punch and check
+rewind
+nonstop on
+j 24
+c runs off tape
+de ptp
+print DEMO7.BIN
+delete DEMO7.BIN
+sh t

@@ -1,0 +1,10 @@
+Independent compilation - 15-MAR-2005
+
+G.ALG is the procedure to be compiled and used independently as part
+of demo3.dat. When the initial jump is to 8 instead of 17 and OPASC
+replaces OPBIN, it compiles and runs all right. With OPBIN and JUMP 17
+you get G.LIS.
+
+Append G.LIS to MODULE.DAT and run it. You get G.BIN which can be added
+to LIBRARY.DAT, replacing the final line containing 112 at the end by
+a line of all 0s (at least ten of them).

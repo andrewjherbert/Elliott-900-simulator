@@ -1,0 +1,304 @@
+﻿C DEMONSTRATE MTALGOL
+
+C Create two scratch tapes
+
+on 903 16K
+
+c ensure tape file does not exist
+delete tape1
+
+at ptr file ../903UTILITIES/MTINIT(ISS3).BIN
+j 8181
+st 8171
+
+c mount tape with write permit ring fitted
+at mt 0 tape1 wp
+
+c initialize as  scratch tapes
+at tty inline
+ 0: TAPE1:
+<!!>
+j 32
+st 1395
+
+c load ALGOL load and go system
+at ptr file ALG16KLG(MASD).BIN
+j 8181
+st 8175
+
+select out tty
+at ptr inline
+gauss;
+"begin"
+
+    "code" "procedure" mtcheck (h, b, stat, l);
+    "value" h; "integer" h, b, stat; "label" l; "algol";
+
+    "code" "procedure" mtopen (h, a, t, s);
+    "value" h, t; "integer" h, t; "string" s; "integer" "array" a; "algol";
+
+    "code" "procedure" mtwrite (h, a, n);
+    "value" h, n; "integer" h, n; "integer" "array" a; "algol";
+
+    "code" "procedure" mtread (h, a, n);
+    "value" h, n; "integer" h, n; "integer" "array" a; "algol";
+
+    "code" "procedure" mtclose (h, t);
+    "value" h, t; "integer" h, t; "algol";
+
+    "code" "real" "procedure" raget (a, i);
+    "value" i; "integer" "array" a; "integer" i; "algol";
+
+    "code" "procedure" raput (a, i, r);
+    "value" i, r; "integer" "array" a; "integer" i; "real" r; "algol";
+	
+    "integer" "array" mtbuffer [0:801]; "comment" 400 reals + 2 words of header;
+
+    "integer" reading, updating, writing, wclose, wrclose, rclose, rewind;
+
+    "procedure" mterror (h, op);
+    "value" h, op; "integer" h, op;
+    "begin"
+        "integer" mtblock, mtstatus;
+        "switch" ss := PROBLEM, RETURN;
+        mtcheck (h, mtblock, mtstatus, PROBLEM);
+        "goto" RETURN;
+PROBLEM:
+        "print" digits(2), sameline, {MTERROR HANDLER=}, h, 
+                { OP=}, op, { BLK=}, mtblock,
+                { STATUS=}, digits(6), mtstatus;
+        stop;
+RETURN: 
+    "end" mterror;
+
+    "real" "array" x[1:200];
+    "integer"      n, maxit, iter, i, j, k, nplus1, blksiz, last; 
+    "real"         epslon;
+
+
+    "comment" procedures to acess a[i, j] from ia;
+
+    "real" "procedure" getai (j); "value" j; "integer" j;
+    "begin"
+	getai := raget (mtbuffer, j+j)
+    "end" getai;
+
+    "procedure" putai (j, r); "value" j, r; "integer" j; "real" r;
+    "begin"
+        raput (mtbuffer, J+j, r)
+    "end" putai;
+
+    "boolean" more;
+
+    "comment" types of mtopen;
+    reading := -1; updating := 0; writing := +1;
+
+    "comment" types of mtclose;
+    wclose := 1; wrclose := 2; rclose := 3; rewind := 0;
+
+    punch (3);
+    
+    "print" {Gauss-Seidel{l2}};
+
+    "comment" initialize the tape buffer for header block;
+    "for" i := 0 "step" 1 "until" 55 "do" mtbuffer[i] := 0;
+
+    "comment" open TAPE1 on handler 0 for updating;
+    mtopen  (0, mtbuffer, updating, {TAPE1});
+    mterror (0, 1);
+
+    "comment" read parameters from paper tape:
+	n	- number of unknowns, must be <= 400
+	maxit	- maximum number of iterations
+	esplon	- desired accuracy;
+
+    "read" n, maxit, epslon;
+    "if" n < 1 "or" n > 400
+    "then" "begin"
+           "print" {N must be between 1 and 400}; stop
+           "end";
+
+    "comment" calculate size of tape block needed;
+    nplus1 := n+1; blksize := 2+(n+1)*2;
+
+    "comment" read in data in the form of triples i, j, a[i, j].
+        i=999 or higher acts as an end of data sentinel and
+        the remainder of the triple is ignored.  The triples
+        must be in ascending row order. Within a row, columns
+        can be in any order;
+    
+    last := 0; "comment" index of previous row input;
+
+    "comment" zero mtbuffer;
+    "for" k := 2 "step" 1 "until" blksiz-1 "do" mtbuffer[k] := 0.0;
+
+    more := "true";
+    "for" k := 0, k+1 "while" more "do" "begin"
+        "real" aij;
+        "read" i, j, aij;
+        "if"   i "ne" last
+        "then" "begin" 
+               "if" last "ne" 0
+               "then" "begin" "comment" write previous row;
+                       mtwrite (0, mtbuffer, blksize);
+                       mterror (0, 2);
+                       "for" k := 2 "step" 1 "until" blksiz-1 "do" 
+                           mtbuffer[k] := 0
+                       "end";
+               last := last+1
+               "end";
+       "if"   i "ge" 999
+       "then" more := "false"
+       "else" "if" i < 1    "or" i > n 
+              "or" i < last "or" i > last 
+              "or" j < 1    "or" j > nplus1
+       "then" "begin"
+              "print" {Data problem at}, sameline, i, j, {{s4}}, aij;
+              stop
+              "end"
+       "else" putai (j, aij)
+    "end" while;
+
+    "comment" clear x;
+    "for" i := 1 "step" 1 "until" n "do" x[i] := 0.0;
+
+    "comment" begin iteration;
+    "for" iter := 1 "step" 1 "until" maxit "do" "begin"
+        
+        "real" resid; resid := 0.0;
+
+        "for" i := 1 "step" 1 "until" n "do" "begin"
+        
+            "real"    sum, temp, diff;    
+            "integer" iplus1; 
+
+	    sum := 0; iplus1 := i+1;
+            
+	    "comment" get i-th row of coefficients from block i+1;
+            mtread (0, mtbuffer, iplus1);
+            mterror (0, 3);
+
+	    "for" j := 1 "step" 1 "until" n "do"
+		"if"    i "ne" j
+                "then" sum := sum + getai (j) * x[j];
+	    
+	    "comment" compute new approximation to x[i];
+            temp := (getai (n+1) - sum) / getai (i);
+
+            "comment" computer largest residual this sweep;
+            diff := abs (temp - x[i]);
+            "if" diff > resid "then" resid := diff;
+            x[i] := temp
+	"end" for i;
+
+	"comment" output the current value of x;
+ 	"for" i := 1 "step" 1 "until" n "do"
+            "print" sameline, aligned (4, 5), x[i];
+        "print" {{l}};
+
+        "comment" if largest residual is less than epslon, stop;
+        "if"   resid "le" epslon
+        "then" "begin"
+               mtclose (0, wrclose);
+               stop
+               "end"
+    "end" for iter;
+
+    "comment" if here, more than maxit iterations needed for convergence;
+
+    "print" {Failed to converge within}, sameline, maxit, { iterations{l}}
+
+"end"
+<! halt !>
+<!!>
+j 8
+st 7943
+
+c read in mtalgol library
+at ptr file ../903ALGOL/MTALGOL(ISS3).RLB
+j 14
+st 7943
+at ptr file ../903ALGOL/RAGETPUT.RLB
+j 14
+st 7943
+
+sh t
+
+c run program
+at ptr inline
+
+   7  50       .000002
+
+   1   1     12.4180
+   1   2     -1.0610
+   1   3      2.6690
+   1   4      4.3610
+   1   5     -0.1190
+   1   6     -1.2090
+   1   7     -0.5000
+   1   8      8.2620
+   2   1     -1.5010
+   2   2     19.8320
+   2   3      0.6940
+   2   4     -4.8160
+   2   5      2.2740
+   2   6      2.0010
+   2   7     -1.9090
+   2   8    -33.8180
+   3   1      2.3080
+   3   2      1.7280
+   3   3    -15.1650
+   3   4     -2.0230
+   3   5      1.1040
+   3   6      2.1070
+   3   7     -1.0000
+   3   8    -52.6730
+   4   1      3.3590
+   4   2     -0.9130
+   4   3     -6.4410
+   4   4     27.8640
+   4   5      3.7370
+   4   6     -4.3750
+   4   7     -2.3750
+   4   8    -97.2840
+   5   1     -1.5620
+   5   2      1.1680
+   5   3     -2.0040
+   5   4      1.8180
+   5   5      9.4900
+   5   6      0.4010
+   5   7     -1.0730
+   5   8     20.3510
+   6   1     -1.1740
+   6   2      7.3180
+   6   3     -2.2780
+   6   4     -0.1430
+   6   5     -9.8350
+   6   6    -31.6700
+   6   7      4.1140
+   6   8    149.9190
+   7   1      0.1090
+   7   2     -1.3130
+   7   3     -0.9000
+   7   4     -1.9720
+   7   5     -3.5140
+   7   6     -1.1070
+   7   7     12.0940
+   7   8     81.6530
+ 999   0      0.0
+
+<! Halt !><!!>
+
+j 10
+st 1640
+
+de mt 0
+delete tape1
+
+sh t
+
+
+
+
+
+

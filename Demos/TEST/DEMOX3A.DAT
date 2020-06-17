@@ -1,0 +1,19 @@
+﻿c X3A - Function Test for 920A
+
+on 920A 8K
+
+nonstop on
+
+at ptr file X3A.BIN
+j 8181
+st 8175
+
+c start test
+j 8
+c wait for demand for tape punch
+at ptp file demox3a.txt legible
+step 1000000
+restart
+de ptp
+print demox3a.txt
+sh t

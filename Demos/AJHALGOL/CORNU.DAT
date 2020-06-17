@@ -1,0 +1,50 @@
+﻿on
+
+at ptr file ALG16KLG(AJH).BIN
+j 8181
+st 8175
+
+at ptr inline
+cornu;
+"begin"
+   "comment" 19-SEP-2000. A Cornu spiral;
+   "integer" j,k,n,scale;
+   "real" a,b,pi,v;
+   "code" "real" "procedure" simps(f, x, a, b, delta, v);
+          "value" a, b, delta, v; "real" f, x, a, b, delta, v;
+   "algol";
+
+   "print" {{L}19-SEP-2000}; pi := 4*arctan(1);
+   set origin(320, 240);
+   scale := 220; n := 150;
+   a := -0.5636312*scale; b := -0.4991914*scale;
+   move pen(0,0.714*scale); draw line(0,-0.714*scale);
+   move pen(-0.5*scale,-0.5*scale); cen character(1);
+   move pen(-0.779*scale,0); draw line(0.779*scale,0);
+   move pen(0.5*scale,0.5*scale); cen character(1);
+   way(0,4);
+   move pen(-150,50); "print" punch(5), {CORNU};
+   move pen(20, -60); "print" punch(5), {SPIRAL};
+   move pen(a,b);
+  
+   "for" k := 1-n "step" 1 "until" n "do"
+   "begin"
+      a:=a+scale*simps(cos(pi*v^2/2),v,5*(k-1)/n,5*k/n,0.0007,9);
+      b:=b+scale*simps(sin(pi*v^2/2),v,5*(k-1)/n,5*k/n,0.0007,9);
+      draw line(a,b)
+   "end"
+"end";
+<!!>
+k 12
+j
+st 1715
+at ptr file LIBRARY.RLB
+k 9
+j
+st 8000
+de ptr
+at plt
+select out tty
+k 10
+j
+de plt

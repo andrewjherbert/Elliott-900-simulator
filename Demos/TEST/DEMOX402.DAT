@@ -1,0 +1,35 @@
+﻿c X402 - Store On/Off Test for Extended Stores
+
+on 903 16K
+
+nonstop on
+
+at ptr file X402.BIN
+j 8181
+st 8177
+
+c patch to recognize 903/900 halt code
+e 8006 +20
+
+c start test
+at ptr file DEMOX402.BIN
+at ptp file demox402.txt legible
+j 7947
+c will run off tape
+
+c on physical machine should switch off and on here
+
+rewind
+j 8028
+
+c will run off tape
+at ptr inline
+<! H !>
+<!!>
+restart
+st 7997
+
+de ptp
+print demox402.txt
+
+sh t

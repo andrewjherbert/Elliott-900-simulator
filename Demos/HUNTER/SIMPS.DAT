@@ -1,0 +1,52 @@
+﻿on
+telecode 903
+at ptr file ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+at ptp file SIMPS.BIN
+at ptr inline
+
+SIMPS;
+"begin"
+   "comment" 30-SEP-1997.
+             Note the trick to create the constants
+             called two and four;
+ 
+   "real" "procedure" simps(f,x,a,b,delta,v);
+      "value" a,b,delta,v;
+      "real" f,x,a,b,delta,v;
+   "begin"
+      "procedure" local(n,k,h,j,i,dum,two,four);
+      "value" n,k,h,j,i,dum,two,four;
+      "integer" n,k,dum,two,four;
+      "real" h,j,i;
+      "begin"
+         v:=(b-a)*v; x:=a; j:=f; x:=b; j:=(j+f)*h;
+         "for" dum:=dum "while" dum=0 "do"
+         "begin"
+            b:=0;
+            "for" k:=1 "step" 1 "until" n "do"
+            "begin"
+               x:=(two*k-1)*h+a; b:=b+f
+            "end" of for k;
+            i:=four*h*b+j;
+            "if" abs(i-v)>abs(v)*delta "then"
+            "begin"
+               v:=i; j:=(i+j)/four;
+               n:=two*n; h:=h/two
+            "end" "else" dum:=1
+         "end" of for dum;
+         simps:=i/3
+      "end" of local;
+      local(1,0,(b-a)/(1+1),0,0,0,1+1,1+3)
+   "end" of simps; 
+"end"
+<! Halt !>
+<!!>
+k 17
+j
+st 8201
+de ptp
+c translate to rlb suitable for loading
+do module SIMPS.BIN SIMPS.RLB 

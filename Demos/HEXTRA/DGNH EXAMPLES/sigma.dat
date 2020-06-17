@@ -1,0 +1,22 @@
+
+    OPBIN
+    JUMP 17
+    IPASC
+
+SIGMA;
+"begin"
+   "comment" 30-SEP-1997, the use of procedure local is only
+             to make it able to be called recursively; 
+   "real" "procedure" sigma(j,n,z);
+      "value" n;
+      "integer" j,n;
+      "real" z;
+   "begin"
+      "procedure" local(s); "value" s; "real" s;
+      "begin"
+         "for" j:=1 "step" 1 "until" n "do" s:=s+z; 
+         sigma:=s
+      "end" of local;
+      local(0)
+   "end" of sigma; 
+"end"

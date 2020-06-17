@@ -1,0 +1,211 @@
+﻿c Create a library using MASIR and show use of LOADER library scan
+C and built-in routines.
+
+on 903 16K
+
+c assemble library with MASIR, input MASIR commands by teleprinter
+
+at ptr file MASIR(181175).BIN
+j  8181
+st 8164
+
+nonprinting off
+nonstop on
+select out auto
+
+at ptp file DEMO4_LIB.BIN
+
+c O4 output loader halt sequence
+c M to start MASIR, C to continue after halt
+
+c read in single, double and floating point maths routines
+at ptr file SGLPAKM.900
+at tty inline
+O4M<!!>
+j 16
+
+at ptr file DBLPAKM.900
+at tty inline
+O0M<!!>
+restart
+
+at ptr file FLTPAKM.900
+at tty inline
+O0M<!!>
+restart
+
+c falls off tty inline
+de ptp
+
+c assemble demo4 by MASIR, input MASIR commands by teleprinter
+
+at ptr inline
+*PROG MAIN		(use of MAIN forces this to execute first)
+((simple test program))
+
+^^1
+[QDOUT QCHOP QOUT1 QSQRT OUTSTRI NEWLIN]
+	4	+3	(select teletype output)
+	5 	QDOUT
+	4	+2	(output 2 newlines)
+	11	NEWLIN
+	8	NEWLIN+1
+	11	OUTSTR	(output string S1)
+	8	OUTSTR+1
+	\DEM
+	\O 4
+	\: S
+	\QRT
+	\ 0.
+	\25
+	\=^
+	4	+.25	(0.25 as double length fraction)
+	0	+0
+	11	QSQRT	(calculate square root)
+	8	QSQRT+1
+	11	QOUT1	(print as fraction)
+	8	QOUT1+2
+	0 0
+	4	+2	(output two newlines)
+	11	NEWLIN
+	8	NEWLIN+1
+	8	;+0
+
+[NEWLIN QCHOP]
+
+(subroutine to output newlines)
+NEWLIN	+0		(link)
+	2	+0
+	5	COUNT
+LOOP	9	;+3
+	0	NEWLIN
+	/8	1
+
+	4	+1
+	11	QCHOP
+	8	QCHOP+1
+	10 	COUNT
+	4	COUNT
+	8	LOOP
+
+COUNT 	>+1
+
+[OUTSTRI QCHOP]
+
+(subroutine to output a string)
+
+OUTSTR 	+0
+LOOP	0 	OUTSTR
+	/4 	1		(next word in string)
+	14 	8180		(first char)
+	6 	+63
+	1 	-1
+	7 	EXIT
+	1 	+1
+	11 	QCHOP
+	8 	QCHOP+1
+	0 	OUTSTR
+	/4 	1
+	14 	8186
+	6 	+63		(second char)
+	1 	-1
+	7 	EXIT
+	1 	+1
+	11 	QCHOP
+	8 	QCHOP+1
+	0 	OUTSTR
+	/4 	1
+	6 	+63		(third char)
+	1 	-1
+	7 	EXIT
+	1 	+1
+	11 	QCHOP
+	 8 	QCHOP+1
+	10 	OUTSTR
+	8 	LOOP
+EXIT	0 	OUTSTR
+	/8 	2
+%
+<! halt !>
+<!!>
+at ptp file DEMO4_RLB.BIN
+at tty inline
+O4M<!!>
+j 16
+de ptp
+	
+reverse DEMO4_RLB.BIN
+reverse DEMO4_LIB.BIN
+
+c load MASIR rlb tape with MASIR LOADER, input LOADER commands by teleprinter at 16
+
+at ptr file LOADER(ISS3).BIN
+j 8181
+st 8171
+
+c first load test program
+at ptr file DEMO4_RLB.BIN
+c LOADER commands
+c O120  - no built in routines required, list labels
+c L     - load tape
+at tty inline
+O120L<!!>
+j 16
+
+c halts on end of tape, library scan maths rlb
+
+at ptr file DEMO4_LIB.BIN
+c LOADER commands
+c O   - options (not changing options requires re-entry at 16)
+c 001 - do not (re-)initialize
+c 002 - library scan
+c 020 - no built in routines required
+c 100 - list labels
+c L   - load
+c MM  - indicate program complete, execute
+
+at tty inline
+O123LMM<!!>
+j 16
+st 16314
+
+c built-in libraries
+
+at ptr file DEMO4_LIB.BIN
+
+c LOADER commands
+c O
+c 020 - no built-in routines required
+c 100 - list labels
+c L   - load 
+c M   - program complete
+at tty inline
+O120LM<!!>
+j 16
+
+c reaches halt code, build routines into loader
+
+c LOADER commands
+c M   - program complete
+c O40 - built in routines just loaded
+c 001 - do not initialize
+at tty inline
+O41<!!>
+j 16
+
+c runs off tty
+
+at ptr file DEMO4_RLB.BIN
+C LOADER commands
+c L   - load 
+c O   - options
+c 100 - list labels
+c MM   - program complete, run program
+c note no 20 implies use built-in, 0 implies re-initialize
+at tty inline
+LO100MM<!!>
+j 16
+st 11978
+delete DEMO4_RLB.BIN
+c keep DEMO4_LIB.BIN for demo 6
+sh t

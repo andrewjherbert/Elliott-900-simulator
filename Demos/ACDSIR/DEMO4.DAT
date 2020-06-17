@@ -1,0 +1,86 @@
+﻿C
+C DEMONSTRATE CHIP, CHOP
+C
+
+C LOAD ASSEMBLER
+ON 920B 8K
+AT PTR FILE SIR1P71.BIN
+J 8181
+ST 8175
+
+C PROGRAM TO ASSEMBLE
+TELECODE 920
+SELECT OUT TTY
+NONPRINTING OFF
+
+AT PTR INLINE 920 MODE3
+
+*19      (1-pass SIR option: locate from 32, & print labels)
+
+((Example 8.5 from ACD 903/920 SIR Subroutines manual  )
+
+[START CHIPF CHIPL CHIPE CHIP CHOPC CHOPF CHOPL CHOPE ERRORL ERRORE]   
+
+(Delete comments from a SIR program)
+
+START	4	+1		(set ACD telecode for output)
+	5	CHOPC
+	4	+0
+	5	CHOPF		(start new output)
+	5	CHIPF		(start new input)
+
+TEXT	11	CHIPL
+	8	CHIPE
+	1	-40		(test open bracket)
+	7	COMMENT
+	4	CHIP
+	11	CHOPL
+	8	CHOPE
+	4	CHIP
+	1	-20		(stop on halt code)
+	7	;+0
+	8	TEXT
+
+COMMENT	11	CHIPL
+	8	CHIPE
+	1	-20		(test if halt)
+	7	ERROR
+	1	-21		(test if closing bracket)
+	7	TEXT
+	8	COMMENT
+
+ERROR	11	ERRORL
+	8	ERRORE
+	£TAP 
+	£E E
+	£NDS
+	£ IN
+	£ CO
+	£MME
+	£NT.
+<! halt !>       		
+<!!>
+J &17741
+ST 6852
+
+AT PTR FILE CHIOL.900
+J &17742
+ST 6852
+
+AT PTR INLINE
+
+%
+<! halt !>
+<!!>
+J &17742
+ST 7573
+
+AT PTR FILE CHIOL.900
+TELECODE 900
+J 8
+
+SH T
+
+
+
+

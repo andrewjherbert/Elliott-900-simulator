@@ -1,0 +1,68 @@
+﻿c solprocedure for separate compilation
+on
+telecode 903
+at ptr file ALG16KLG(AJH).BIN
+j 8181
+st 8175
+
+at ptp file SOL.BIN
+at ptr inline
+
+SOL;
+"begin"
+   "comment" 30-SEP-1997;
+ 
+   "comment" This is adapted from AP205 written by T.J. Dekker at 
+             the Matematisch Centrum in 1963. SOL replaces the vector
+             given in array B[1:N] by the solution vector X of the
+             linear system L*U*X = B with interchanged (and possibly
+             sign reversed) elements. Here L is the lower triangle
+             and U the unit upper triangle which are given in array
+             LU[1:N,1:N] such that the elements with first index <
+             second index are elements of U and the other elements of
+             LU are elements of L. The integer array P[1:N] defines
+             the interchanges with sign reversals of the elements
+             of B in correspondence with the pivoting administration
+             in DET. Hence a call DET(A,N,P), followed by a call
+             SOL(A,B,N,P), has the effect that B is replaced by the
+             solution vector X of the linear system
+             SIGMA(A[I,J]) * X[J]) = B[I]. 
+             The procedure SOL leaves the elements of LU and P 
+             unaltered;
+
+   "procedure" sol(lu,b,n,p);
+   "value" n; "integer" n;
+   "array" lu,b; "integer" "array" p;
+
+   "begin"
+      "integer" k,l;
+      "real" r,sum;
+
+      "for" k:=1 "step" 1 "until" n "do"
+      "begin"
+         r:=b[k];
+         sum:=0;
+         "for" l:=1 "step" 1 "until" k-1 "do"
+                 sum:=sum+lu[k,l]*b[l];
+         b[k]:=(b[p[k]]-sum)/lu[k,k];
+         "if" p[k] "ne" k "then" b[p[k]]:= -r
+      "end";
+
+      "for" k:=n "step" -1 "until" 1 "do"
+      "begin"
+         sum:=0;
+         "for" l:=k+1 "step" 1 "until" n "do"
+                sum:= sum+lu[k,l]*b[l];
+         b[k]:=b[k]-sum
+      "end"
+   "end";
+"end"
+<! Halt !>
+<!!>
+k 17
+j
+de ptp
+st 8201
+c translate to rlb suitable for loading
+do module SOL.BIN SOL.RLB
+delete SOL.BIN

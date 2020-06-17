@@ -1,0 +1,12 @@
+
+    OPBIN
+    JUMP 17
+    IPASC
+
+TAN;
+"begin"
+   "comment" 30-SEP-1997; 
+   "real" "procedure" tan(x);
+      "value" x; "real" x;
+      tan:=sin(x)/cos(x); 
+"end"

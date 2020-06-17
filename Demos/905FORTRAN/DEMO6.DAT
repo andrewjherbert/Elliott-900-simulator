@@ -1,0 +1,248 @@
+﻿c
+C McCracken A Guide to FORTRAN IV Programming Case Study 5
+C
+C load Fortran system
+on 905 16K
+at ptr file 905FORT(ISS6).BIN
+j 8181
+
+c single precision version
+
+nonstop on
+
+at ptp file DEMO6.BIN
+at ptr inline
+
+C  CASE STUDY 5
+C  COMPUTATION OF SINE FROM TAYLOR'S SERIES
+C
+C  SINGLE PRECISION VERSION
+C
+C
+C  WRITE COLUMN HEADINGS
+      WRITE (3, 100)
+ 100  FORMAT(2X, 6HDEGREE, 12X, 1HX, 9X, 11HSERIES-SINE,5X,
+     1       13HFUNCTION-SINE//)
+C
+C  READ A VALUE OF THE ANGLE
+  10  READ (1, 110) DEGREE
+ 110  FORMAT (F23.0)
+C
+C  TEST FOR END-OF-DECK SENTINEL
+      IF ( DEGREE .EQ. 0.0 ) STOP
+C
+C  CONVERT FROM DEGREES TO RADIANS
+      X = DEGREE / 57.29578
+C
+C  SET UP INITIAL VALUES
+      SUM = X
+      TERM = X
+      DENOM = 3.0
+      XSQ = X**2
+C
+C  COMPUTE NEW TERM FROM PREVIOUS TERM
+  20  TERM = - TERM * XSQ / (DENOM * (DENOM - 1.0))
+C
+C  GET SUM OF TERMS SO FAR
+      SUM = SUM + TERM
+C
+C  TEST FOR CONVERGENCE
+      IF ( ABS(TERM) .LT. 1.0D-17 ) GO TO 30
+C
+C  PREPARE TO GO AROUND AGAIN
+      DENOM = DENOM + 2.0
+      GO TO 20
+C
+C GET VALUE FROM SUPPLIED DP SINE ROUTINE FOR COMPARISON
+  30  TEST = SIN(X)
+C
+C  PRINT RESULTS
+      WRITE (3, 120) DEGREE, X, SUM, TEST
+ 120  FORMAT (F8.0, 3F16.7)
+C
+C GO TO READ ANOTHER ANGLE
+      GO TO 10
+      END
+<! Halt !>
+<!!>
+
+at tty inline
+O0R
+<!!>
+j 16
+
+c run out of tty input
+de ptp
+
+reverse DEMO6.BIN
+
+c load loader
+at ptr file ../MASIR/LOADER(ISS3).BIN
+j 8181
+st 8171
+
+c load program
+at ptr file DEMO6.BIN
+at tty inline
+O20L<!!>
+j 16
+
+c read unloads, load library tape 1
+at ptr file 905FORTLIB1(ISS4).BIN
+at tty inline
+O3L<!!>
+j 16
+
+c reader unloads, load library tape 2
+at ptr file 905FORTLIB2(ISS5).BIN
+r
+
+c reader unloads
+at tty inline
+MM<!!>
+at ptr inline
+                    30.
+                   390.
+                   750.
+                  1110.
+                  1470.
+                  1820.
+                  2190.
+                  2550.
+                  2910.
+                   -30.
+                  -390.
+                      0
+<! halt !>
+<!!>
+j 16
+
+sh t
+
+c double precision version
+
+C load Fortran system
+
+at ptr file 905FORT(ISS6).BIN
+j 8181
+
+C compile program
+
+nonstop on
+
+at ptp file DEMO6.BIN
+at ptr inline
+
+C  CASE STUDY 5
+C  COMPUTATION OF SINE FROM TAYLOR'S SERIES
+C
+C  DOUBLE PRECISION VERSION
+C
+C
+      DOUBLE PRECISION X, TERM, SUM, XSQ, DENOM, TEST, DEGREE
+C
+C  WRITE COLUMN HEADINGS
+      WRITE (3, 100)
+ 100  FORMAT(2X, 6HDEGREE, 14X, 1HX, 16X, 11HSERIES-SINE,11X,
+     1       13HFUNCTION-SINE//)
+C
+C  READ A VALUE OF THE ANGLE
+  10  READ (1, 110) DEGREE
+ 110  FORMAT (D23.16)
+C
+C  TEST FOR END-OF-DECK SENTINEL
+      IF ( DEGREE .EQ. 0.0D0 ) STOP
+C
+C  CONVERT FROM DEGREES TO RADIANS
+      X = DEGREE / (180.0/3.141592653897932)
+C
+C  SET UP INITIAL VALUES
+      SUM = X
+      TERM = X
+      DENOM = 3.0
+      XSQ = X**2
+C
+C  COMPUTE NEW TERM FROM PREVIOUS TERM
+  20  TERM = - TERM * XSQ / (DENOM * (DENOM - 1.0))
+C
+C  GET SUM OF TERMS SO FAR
+      SUM = SUM + TERM
+C
+C  TEST FOR CONVERGENCE
+      IF ( DABS(TERM) .LT. 1.0d-17 ) GO TO 30
+C
+C  PREPARE TO GO AROUND AGAIN
+      DENOM = DENOM + 2.0
+      GO TO 20
+C
+C GET VALUE FROM SUPPLIED DP SINE ROUTINE FOR COMPARISON
+  30  TEST = DSIN(X)
+C
+C  PRINT RESULTS
+      RDEG = SNGL(DEGREE)
+      WRITE (3, 120) RDEG, X, SUM, TEST
+ 120  FORMAT (F8.0, 3D23.14)
+C
+C GO TO READ ANOTHER ANGLE
+      GO TO 10
+      END
+<! Halt !>
+<!!>
+
+at tty inline
+O0R
+<!!>
+j 16
+
+c run out of tty input
+de ptp
+
+reverse DEMO6.BIN
+
+c load loader
+at ptr file ../MASIR/LOADER(ISS3).BIN
+j 8181
+st 8171
+
+c load program
+at ptr file DEMO6.BIN
+at tty inline
+O20L<!!>
+j 16
+
+c read unloads, load library tape 1
+at ptr file 905FORTLIB1(ISS4).BIN
+at tty inline
+O3L<!!>
+j 16
+
+c reader unloads, load library tape 2
+at ptr file 905FORTLIB2(ISS5).BIN
+r
+
+c reader unloads
+at tty inline
+MM<!!>
+at ptr inline
+                    30.
+                   390.
+                   750.
+                  1110.
+                  1470.
+                  1820.
+                  2190.
+                  2550.
+                  2910.
+                   -30.
+                  -390.
+                      0
+<! halt !>
+<!!>
+j 16
+delete DEMO6.BIN
+sh t
+
+
+
+
+

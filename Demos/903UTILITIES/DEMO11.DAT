@@ -1,0 +1,200 @@
+﻿C DEMONSTRATE MAGNETIC TAPE UTILITIES
+
+on 903 8K
+
+c create a new tape
+
+at ptr file MTINIT(ISS3).BIN
+j 8181
+st 8171
+
+delete tape1.raw
+at mt 0 tape1.raw wp
+at tty inline
+ 0: PROGRAMS:<!!>
+j 32
+st 1395
+
+c assemble MSDUMP
+at ptr file ../903SIR/SIR(ISS6)(5500).BIN
+j 8181
+st 8171
+
+select out tty
+nonprinting off
+
+at ptr inline
+*22
+<! halt !><!!>
+j 8
+st 6927
+
+at ptr file MSDUMP(ISS3).900
+j 9
+st 6927
+
+at ptr file MTBLOC(ISS4).900
+j 9
+st 6927
+
+at ptr file ../903SIR/SYSPAK.900
+j 9
+st 6927
+
+at ptr inline
+%
+
+[B1]
+B1 0 ;+1
+%
+<! halt !><!!>
+j 9
+st 6927
+
+c run MSDUMP to dump sir assembler to tape
+at tty inline
+ 0, PROGRAMS, SIR, 8, 31, 5500, 6499, 6500, 7499, 7500, 8179:
+)<!!>
+j 32
+st 1387
+
+c assemble MTLIST and explore tape
+
+c reload a clean copy of SIR - original damaged by MSDUMP
+at ptr file ../903SIR/SIR(ISS6)(5500).BIN
+j 8181
+st 8171
+
+at ptr inline
+*22
+<! halt !><!!>
+j 8
+st 6927
+
+at ptr file MTLIST(ISS3).900
+j 9
+st 6927
+
+at ptr file MTBLOC(ISS4).900
+j 9
+st 6927
+
+at ptr file ../903SIR/SYSPAK.900
+j 9
+st 6927
+
+at ptr inline
+
+%
+(THIS SECTION OF TAPE MUST BE ASSEMBLED AFTER ALL OTHER TAPES
+HAVE BEEN ASSEMBLED
+  TO LOCATE BUFFER B1  FROM B1 TO B1+2048
+ LENGTH OF B1 SET BY 4 +2048  NEAR BEGINNING)
+
+[B1]
+B1 0 ;+1
+%
+
+<! Halt !><!!>
+j 9
+st 6927
+
+c run MTLIST to show contents of tape
+at tty inline
+ 0, PROGRAMS,
+L,
+)<!!>
+j 32
+st 1575
+
+c assemble MTCALL
+
+at ptr inline
+*22
+<! halt !><!!>
+j 8
+st 6927
+
+at ptr file MTCALL(ISS3).900
+j 9
+st 6927
+
+at ptr file MTBLOC(ISS4).900
+j 9
+st 6927
+
+at ptr file ../903SIR/SYSPAK.900
+j 9
+st 6927
+
+at ptr inline
+(THIS SECTION OF TAPE MUST BE ASSEMBLED AFTER ALL
+  OTHER TAPES HAVE BEEN ASSEMBLED
+ TO GIVE HIGHEST ADDRESS INMTCALL)
+%
+[TOP]
+TOP 0 ;+1
+%
+<! Halt !><!!>
+j 9
+st 6927
+
+c damage copy of SIR in store to prove loading from tape
+e 8 =8 8
+e 9 =8 9
+
+c run MTCALL to fetch new copy of assembler
+at tty inline
+ 0: PROGRAMS, SIR:)
+<!!>
+j 32
+st 1366
+
+c verify SIR by re-assembling MTLIST
+
+at ptr inline
+*22
+<! halt !><!!>
+j 8
+st 6927
+
+at ptr file MTLIST(ISS3).900
+j 9
+st 6927
+
+at ptr file MTBLOC(ISS4).900
+j 9
+st 6927
+
+at ptr file ../903SIR/SYSPAK.900
+j 9
+st 6927
+
+at ptr inline
+
+
+%
+(THIS SECTION OF TAPE MUST BE ASSEMBLED AFTER ALL OTHER TAPES
+HAVE BEEN ASSEMBLED
+  TO LOCATE BUFFER B1  FROM B1 TO B1+2048
+ LENGTH OF B1 SET BY 4 +2048  NEAR BEGINNING)
+
+[B1]
+B1 0 ;+1
+%
+
+<! Halt !><!!>
+j 9
+st 6927
+
+c run MTLIST to show contents of tape
+at tty inline
+ 0, PROGRAMS,
+)<!!>
+j 32
+st 1575
+
+de mt 0
+
+sh t
+

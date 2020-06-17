@@ -1,0 +1,83 @@
+﻿C Demonstrate 903 Algol
+C
+ON
+
+C
+C DEMO1: Load and Go System
+C
+DO DEMO1
+PAUSE
+
+C
+C DEMO2: 2-pass System
+C
+DO DEMO2
+PAUSE
+
+C
+C DEMO3: 2-pass system & library mode
+C
+DO DEMO3
+PAUSE
+
+C
+C DEMO4: 2-pass large program system
+C
+DO DEMO4
+PAUSE
+
+C
+C DEMO5: Almat package
+C
+DO DEMO5
+PAUSE
+
+C
+C DEMO6: ESP Simulation Package
+C
+DO DEMO6
+PAUSE
+
+C
+C DEMO7: ESP Simulation Package
+C
+DO DEMO7
+PAUSE
+
+C
+C DEMO8: Code procedures and formal parameters
+C
+DO DEMO8
+PAUSE
+
+C
+C DEMO9: Building in procedures
+C
+DO DEMO9
+PAUSE
+
+C
+C DEMO10: curve plotting
+C
+DO DEMO10
+PAUSE
+
+C
+C DEMO11: line printer
+C
+DO DEMO11A
+PAUSE
+DO DEMO11B
+PAUSE
+
+C
+C DEMO12: magnetic tape
+C
+Do DEMO12
+PAUSE
+
+C
+C  TESTS: Test for bug fixes and extensions
+C
+DO TESTS
+PAUSE

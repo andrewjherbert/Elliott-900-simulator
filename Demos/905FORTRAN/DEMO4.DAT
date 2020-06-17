@@ -1,0 +1,94 @@
+﻿c
+C McCracken A Guide to FORTRAN IV Programming Case Study 3
+C
+C Load Fortran system
+on 905 16K
+at ptr file 905FORT(ISS6).BIN
+j 8181
+
+C compile program
+
+nonstop on
+
+at ptp file DEMO4.BIN
+at ptr inline
+
+C  CASE STUDY 3
+C  COLUMN DESIGN - MODIFIED VERSION
+C
+C
+C  TENR IS ALWAYS A WHOLE NUMBER IN THIS VERSION, AND WHOLE NUMBERS
+C  OF THIS SIZE ARE REPRESENTED EXACTLY IN THE COMPUTER USED.
+C  THEREFORE ERRORS DO NOT ACCUMULATE.  TENR IS DIVIDE DBY 10
+C  TO SET THE VALUE OF R.
+C
+C
+C  GIVE TENR ITS INITIAL VALUE - THIS STATEMENT IS NOT REPEATED
+      TENR = 200.0
+C
+C  DIVIDE BY 10.0 TO GET VALUE OF R - PROGRAM REPEAST FROM HERE
+   10 R = TENR / 10.0
+C
+C  CHOOSE BETWEEN THE TWO FORMULAS
+      IF ( R .LT. 120.0 ) S = 1.7E4 - 0.485 * R * R
+      IF ( R .GE. 120.0 ) S = 1.8E4 / (1.0 + R * R / 1.8E4)
+C
+C  WRITE VALUES OF R AND S
+      WRITE (3, 101) R, S
+  101 FORMAT (F10.4, 1PE15.3)
+C
+C  TEST FOR COMPLETION
+      IF ( R .GE. 200.0 ) STOP
+C
+C  INCREMENT TENR
+      TENR = TENR + 1.0
+C
+C  GO AROUND AGAIN
+      GO TO 10
+      END
+<! Halt !>
+<!!>
+
+at tty inline
+O0R
+<!!>
+
+j 16
+
+c run out of tty input
+de ptp
+
+reverse DEMO4.BIN
+
+c load loader
+at ptr file ../MASIR/LOADER(ISS3).BIN
+j 8181
+st 8171
+
+c load program
+at ptr file DEMO4.BIN
+at tty inline
+O20L<!!>
+j 16
+
+c read unloads, load library tape 1
+at ptr file 905FORTLIB1(ISS4).BIN
+at tty inline
+O3L<!!>
+j 16
+
+c reader unloads, load library tape 2
+at ptr file 905FORTLIB2(ISS5).BIN
+r
+
+c reader unloads
+at tty inline
+MM<!!>
+j 16
+delete DEMO4.BIN
+sh t
+
+
+
+
+

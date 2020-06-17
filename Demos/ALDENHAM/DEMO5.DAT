@@ -1,0 +1,41 @@
+﻿C Demonstrate U.5 - ALDCOPY
+
+on 903 16K
+
+nonstop on
+at tty inline
+LC<!!>
+at ptr file ALDCOPY.BIN
+j 8181
+
+c L: read ourselves
+rewind
+r
+
+c C: check ourselves
+at ptp file DEMO5A.BIN
+rewind
+j 8
+de ptp
+
+c P: punch a copy
+at tty inline
+PC<!!>
+at ptp file DEMO5.BIN
+r
+de ptp
+
+c C check copy
+at ptr file DEMO5.BIN
+at ptp file DEMO5B.BIN
+r
+de ptp
+
+
+print DEMO5A.BIN
+print DEMO5B.BIN
+
+delete DEMO5.BIN
+delete DEMO5A.BIN
+delete DEMO5B.BIN
+sh t

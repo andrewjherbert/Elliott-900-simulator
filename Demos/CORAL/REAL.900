@@ -1,0 +1,25 @@
+
+'CORAL'
+'PROGRAM' REAL
+'SEGMENT' REAL
+'BEGIN'
+
+   'PROCEDURE' PUNCH ('VALUE''INTEGER' CHAR); 'BEGIN'
+      'INTEGER' P; P := CHAR;
+      'FOR' P := P 'WHILE' P > 0 'DO' 'BEGIN'
+         P := P 'MASK' 'INTEGER'(P-1);
+         CHAR := CHAR 'DIFFER' 128;
+      'END';
+      'CODE''BEGIN' 4,CHAR; 15,6148; 'END';
+   'END' PUNCH;
+
+  'FLOATING' R;
+
+  PUNCH (13); PUNCH (10); PUNCH (10);
+
+  'FOR' R := 1.0 'STEP' 0.5 'UNTIL' 10.0 'DO'
+      PUNCH (65);
+
+'END'
+'FINISH'
+<! halt !>

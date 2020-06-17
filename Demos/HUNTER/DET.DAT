@@ -1,0 +1,99 @@
+﻿c det procedure for separate compilation
+on
+telecode 903
+
+at ptr file ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+at ptp file DET.BIN 
+at ptr inline
+
+DET;
+"begin"
+      "comment" 30-SEP-1997;
+
+      "comment" This is adapted from AP204 written by T.J. Dekker 
+                at the Matematisch Centrum in 1963.
+                DET := determinant on the N-th order matrix given in
+                array A[1:N,1:N]. The first index of the array 
+                elements is the row, the second is the column index 
+                as usual. The method is triangular decomposition
+                according to Crout with row interchanges. This process
+                yields a lower triangle L and a unit upper triangle
+                U such that L*U equals matrix A with interchanged
+                rows. Together with each row interchange the sign of
+                the non-pivotal row is reversed, so that the
+                determinant equals the product of the diagonal
+                elements of L. At each stage the pivot is chosen in a
+                column of L such that its modulus divided by the
+                Euclidean norm of the corresponding row of A is 
+                maximal. The integer array P[1:N] is an output vector
+                in which the pivotal row indices are recorded. The
+                elements of A are replaced by the corresponding
+                calculated elements of L and U. So enough information
+                is retained for subsequent solution of linear systems
+                and for matrix inversion;
+
+      "real" "procedure" det(a,n,p);
+      "value" n; "integer" n;
+      "array" a; "integer" "array" p;
+
+      "begin"
+         "integer" i,j,k,l;
+         "real" d,r,s,sum;
+         "array" v[1:n];
+         "for" i:=1 "step" 1 "until" n "do"
+         "begin"
+            d:=0;
+            "for" j:=1 "step" 1 "until" n "do"
+                  d:=d+a[i,j]*a[i,j];
+            v[i]:=sqrt(d)
+         "end";
+         d:=1;
+         "for" k:=1 "step" 1 "until" n "do"
+         "begin"
+            r:= -1;
+            "for" i:=k "step" 1 "until" n "do"
+            "begin"
+               sum:=0;
+               "for" l:=1 "step" 1 "until" k-1 "do"
+                     sum:=sum+a[i,l]*a[l,k];
+               a[i,k]:=a[i,k]-sum;
+               s:=abs(a[i,k])/v[i];
+               "if" s>r "then"
+               "begin"
+                  r:=s;
+                  p[k]:=i
+               "end"
+            "end" lower;
+            v[p[k]]:=v[k];
+            "for" j:=1 "step" 1 "until" n "do"
+            "begin"
+               r:=a[k,j];
+               "if" j "le" k 
+               "then" a[k,j]:=a[p[k],j]
+               "else"
+               "begin"
+                  sum:=0;
+                  "for" l:=1 "step" 1 "until" k-1 "do"
+                        sum:=sum+a[k,l]*a[l,j];
+                  a[k,j]:=(a[p[k],j]-sum)/a[k,k]
+               "end";
+               "if" p[k] "ne" k 
+               "then" a[p[k],j]  := -r
+            "end" upper;
+            d:=a[k,k]*d
+         "end" LU;
+         det:=d
+      "end" of AP204;
+"end"
+<! Halt Code !>
+<!!>
+j 17
+de ptp
+st 8201
+c translate to rlb suitable for loading
+do module DET.BIN DET.RLB
+delete DET.BIN
+

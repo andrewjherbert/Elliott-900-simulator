@@ -1,0 +1,26 @@
+﻿c Run BIGRAPH demonstration application using 16K LG ALGOL
+
+on 903 16K
+
+select out tty
+nonprinting off
+
+at ptr file ../903ALGOL/ALG16KLG(ISS5).BIN
+j 8181
+st 8171
+
+c translate program part 1
+at ptr file BGIRAH_P.900
+j 8
+st 1640
+
+c translate program part 2
+j 9
+st 7943
+
+c run program
+at ptr file BGIRAH_D.900
+j 10
+st 1640
+
+sh t

@@ -1,0 +1,125 @@
+﻿c
+c DEMO2: demonstrate MASD 2 Pass Algol system
+c
+c
+c MASD TAPES
+c
+on 903 8K
+c load translator
+at ptr file ALG1(MASD).BIN
+j 8181
+st 8171
+c program - note use of {} for strings
+at ptr inline
+
+TAYLOR;
+"BEGIN"
+   "COMMENT" 30-MAR-2011.
+              Computes sines using Taylor's series;
+   "REAL" X, TERM, SUM, XSQ, DENOM, DEGREE, TEST;
+   "REAL" "PROCEDURE" READINT;
+   "BEGIN"
+      "READ" READER (1), READINT;
+   "END" READINT;
+   "PRINT" { DEGREE {S10}X{S12}SERIES-SINE{S7}FUNCTION-SINE{L2}};
+   "FOR" DEGREE := READINT, READINT "WHILE" DEGREE "NE" 0.0 "DO"
+   "BEGIN" 
+      "COMMENT" CONVERT DEGREES TO RADIANS;
+      X := DEGREE / 57.29587;
+      SUM := TERM := X;
+      XSQ := X^2;
+      "FOR" DENOM := 3.0, DENOM+2.0 "WHILE" (ABS (TERM) "GE" 1.0?-8) "DO"
+      "BEGIN" "COMMENT" COMPUTE NEW TERM FROM PREVIOUS TERM;
+         TERM := -TERM * XSQ / (DENOM * (DENOM - 1.0));
+         "COMMENT" GET SUM OF TERMS SO FAR;
+         SUM := SUM + TERM;
+      "END" SERIES LOOP;
+      TEST := SIN (X);
+      "PRINT" FREEPOINT (5), DEGREE, PREFIX ({{s4}}), SCALED(8), X, SUM, TEST;
+   "END" READINT LOOP;
+"END"
+
+  30.0  390.0  750.0 
+1110.0 1470.0 1830.0 
+2190.0 2550.0 2910.0
+-30.0 -390.0    
+0.0
+<! Halt Code !>
+<!!>
+c translate to rlb file
+at ptp file DEMO2.BIN 
+j 14
+st 9
+de ptp
+c load interpreter
+at ptr file ALG2(MASD).BIN
+j 8181
+st 8171
+c read in rlb file
+at ptr file DEMO2.BIN
+j 8
+st 7943
+c run program
+
+select out tty
+nonprinting off
+j 10
+st 1727
+c continue after errors
+j 9
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+delete DEMO2.BIN
+sh t
+

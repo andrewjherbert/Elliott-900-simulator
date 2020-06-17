@@ -1,0 +1,512 @@
+﻿
+*SETDIC 512 2000 1000
+((SETDIC))
+
+(SETDIC must be used before any identifiers are defined)
+(Set up 512 word stack, macro space of 2000 words and  )
+(dictionary of 1000 words)
+
+((DIRECTIVES))
+
+((PROG))
+(PROG directive names a program unit and becomes global label
+for first location assembled)
+*PROG DEMO6
+[DEMO6 NEWLIN OUTSTR QDOUT]
+	8	DEMO6+1		(note use of program name as a global)
+	4	+3		(select teleprinter output)
+	5	QDOUT
+	4	+1
+	11	NEWLIN
+	8	NEWLIN+1
+	11	OUTSTR
+	8	OUTSTR+1
+	\DEM
+	\O6^
+	4	+2
+	11	NEWLIN
+	8	NEWLIN+1
+
+
+(MASIR titles are enclosed in double round brackets)
+((DEMO6 20/06/2012))	
+
+	11	OUTSTR
+	8	OUTSTR+1
+	\TIT
+	\LES
+	\^
+	4   	+2
+	11	NEWLIN
+	8	NEWLIN+1
+
+(NOTITLE directive suppresses title listing)
+*NOTITLE
+((This won't be listed))
+*TITLE	
+
+	11	OUTSTR
+	8	OUTSTR+1
+	\LAB
+	\ELS
+	\^
+	4	+2
+	11	NEWLIN
+	8	NEWLIN+1
+
+(LISTLA directive turns on label listing, NOLIST turns listing off)
+(show listing of global, sub-global and local labels)
+*LISTLA
+[A "B D "E NEWLIN OUTSTR]
+
+A	8	;+1
+B	8	;+1
+C	8	;+1
+*NOLIST
+D	8	;+1
+E	8	;+1
+F	8	;+1
+
+((MNEMONICS))
+
+	11	OUTSTR
+	8	OUTSTR+1
+	\MNE
+	\MON
+	\ICS
+	\^
+	4	+2
+	11	NEWLIN
+	8	NEWLIN+1
+
+(NOMEM turns off mnemonic function codes, MEM turns then on)
+(with mnemonics on J is a function)
+	J	;+1
+(with mnemonics off J can be used as a label)
+*NOMEM
+J	8	J+1
+*MEM
+
+[NEWLIN	OUTSTR L4 QOUT1]
+	LD	:L4	(set up for terminate instruction in 15 group)
+	SAB		(absolute addressing)
+	ST	6
+	SRL		(restore relative addressing)
+
+	LDB	+1	( 0 - load B)
+	ADD	-.5	( 1 - add to A)
+	NEG	+0	( 2 - negate A and add)
+	STQ	WS	( 3 - store Q)
+	LD 	WS	( 4 - load A)
+	ST	WS	( 5 - store A)
+	COL	&77	( 6 - collate A)
+	JZ	;+1	( 7 - jump if zero)
+	J	;+1	( 8 - jump)
+	JZ	;+1	( 9 - jump if negative)
+	INC	WS	(10 - increment)
+	STS	WS	(11 - save S)
+	MUL	+1	(12 - multiply A)
+	DIV	+1	(13 - divide A)
+	SH	1	(14 - shift)
+	SHL	1	(14 - shift left)
+	SHR	1	(14 - shift right)
+	TER		(15 7168 - terminate)
+
+L4	STS	OUTSTR
+	J	OUTSTR+1
+	\L4^
+	ATB		(15 7174 - A to B)
+	BTA		(15 7175 - B to A)
+	ATQ		(15 7172 - A to Q)
+	QTA		(15 7173 - Q to A)
+	SKS		(15 7169 - skip if standardised)
+	SKB		(15 7170 - skip if B is zro after count)
+	RWG		(15 7171 - read word generator)
+	SRL		(15 7176 - set relative addressing)
+	SAB		(15 7177 - set absolute addressing)
+
+	SRL		(restore relative addressing)
+	J	;+2	(skip over workspace)
+
+WS	>+1
+
+((MACROS))
+
+(DEFINE declares a macro)
+
+*DEFINE NL (N) [	4	+N	(N newlines)
+	11	NEWLIN
+	8	NEWLIN+1]
+
+*DEFINE STRPUT [	11	OUTSTR]
+
+(ADDMAC adds further text to a macro)
+*ADDMAC STRPUT [
+	8	OUTSTR+1]
+
+(ADDMAC can be used inside parent macro)
+*DEFINE GROW [
+	8	;+1
+*ADDMAC GROW [
+	4	+0
+	8	;+1
+]]
+
+GROW
+GROW
+GROW
+
+
+(show macro expansion)
+	NL(2)
+	STRPUT
+	\MAC
+	\ROS
+	\ CA
+	\N B
+	\E D
+	\ECL
+	\ARE
+	\D^
+
+(show macro read in from peripheral)
+*DEFINE FROMTT [PERIPH 3]
+	NL(2)
+	STRPUT
+	\MAC
+	\ROS
+	\ CA
+	\N B
+	\E R
+	\EAD
+	\ IN
+	\ AT
+FROMTT
+	\^
+
+(labels can be generated)
+*DEFINE NEWLAB [+*$]
+	NL(2)
+	STRPUT
+	\LAB
+	\ELS
+	\ CA
+	\N B
+	\E G
+	\ENE
+	\RAT
+	\ED^
+	4	NEWLAB
+	11	QOUT1
+	8	QOUT1+1
+	0 0
+	4	NEWLAB
+	11	QOUT1
+	8	QOUT1+1
+	0 0
+	4	NEWLAB
+	11	QOUT1
+	8	QOUT1+1
+	0 0
+
+(macros can be redefined)
+*DEFINE NL (N) [LAB*$	4	+N	(N newlines)
+	11	NEWLIN
+	8	NEWLIN+1]
+	NL(1)
+	NL(1)
+	STRPUT
+	\MAC
+	\ROS
+	\ CA
+	\N B
+	\E R
+	\EDE
+	\FIN
+	\ED^
+	NL(2)
+
+(macros can be deleted)
+*DELETL
+NL	11	OUTSTR	(this would fail if NL still active)
+	8	OUTSTR+1
+	\MAC
+	\ROS
+	\ CA
+	\N B
+	\E D
+	\ELE
+	\TED
+	\^
+
+(macros can be made global)
+*GDEFINE NL (N) [ 4 +N
+LBL*$	11	NEWLIN
+	8 	NEWLIN+1]
+*DELETL
+	NL(2)		(macro is global so not deleted)
+	11	OUTSTR
+	8	OUTSTR+1
+	\MAC
+	\ROS
+	\ CA
+	\N B
+	\E G
+	\LOB
+	\AL^	
+
+(macros can call macros)
+*DEFINE NLSTR (N) [
+	NL (N)
+	11	OUTSTR
+	8	OUTSTR+1]
+
+	NLSTR(2)
+	\MAC
+	\ROS
+	\ CA
+	\N B
+	\E N
+	\EST
+	\ED^
+
+((CHANGE))
+(special characters can be changed)
+	NLSTR (2)
+	\CHA
+	\NGE
+	\ SY
+	\MBO
+	\LS
+*CHANGE ^:<>
+
+^DEFINE TEXT <X: Y>  [
+X
+Y
+]
+(before - note work around for bug - macro call still wants a
+round bracket to introduce the parameter list)
+	TEXT (P: Q> 
+(after)
+
+^CHANGE *,()
+	\OK^
+
+((CONDITIONAL ASSEMBLY))
+*DEFINE TEST1 [TRUE]
+*IF TEST1=TRUE [
+	NLSTR (2)
+	\CON
+	\DIT
+	\ION
+	\AL
+	\ASS
+	\EMB
+	\LY
+	\ (I
+	\F)^]
+*DEFINE TEST2 [FALSE]
+*IFNOT TEST2=TRUE [
+  	NLSTR (2)
+	\CON
+	\DIT
+	\ION
+	\AL
+	\ASS
+	\EMB
+	\LY
+	\ (I
+	\FNO
+	\T)^]
+*IFNOT TEST1=TRUE & *IF TEST2=FALSE [
+	NLSTR (2)
+	\ERR
+	\OR^]
+
+((ADDRESSING))
+
+	NLSTR(2)
+	\ADD
+	\RES
+	\SIN
+	\G^
+	NL(2)
+
+[QOUT1 QCHOP XL NEWLIN OUTSTR SUB]
+	
+(addresses can be written in "module" form)
+	11	OUTSTR
+	8	OUTSTR+1
+	\MOD
+	\ULE
+	\ RE
+	\LAT
+	\IVE
+	\
+	\
+	\  ^
+	4	+XL	(module relative address)
+	11	QOUT1
+	8	QOUT1+1
+	0 0
+	NL(1)
+ 	11	OUTSTR
+	8	OUTSTR+1
+	\MOD
+	\ULE
+	\ AD
+	\DRE
+	\SS
+	\REL
+	\ATI
+	\VE^
+	4	+XL/	(module address relative)
+	11	QOUT1
+	8	QOUT1+1	
+	0 0
+	NL(1)
+	11	OUTSTR
+	8	OUTSTR+1
+	\ABS
+	\OLU
+	\TE
+	\
+	\
+	\
+	\
+	\  ^
+	4	:XL	(absolute address)
+	11	QOUT1
+	8	QOUT1+1
+	0 0
+	NL(1)
+	11	OUTSTR
+	8	OUTSTR+1
+	\MOD
+	\ULE
+	\ AD
+	\RES
+	\S A
+	\BSO
+	\LUT
+	\E ^
+	4	:XL/	(module address absolute)
+	11	QOUT1
+	8	QOUT1+1
+	0 0
+	NL(1)
+	11	OUTSTR
+	8	OUTSTR+1
+	\/15
+	\ N
+	\
+	\
+	\
+	\
+	\
+	\  ^
+	4	MOD15	(special /15 form)
+	11	QOUT1
+	8	QOUT1+1
+	0 0
+	8	;+2
+
+MOD15	/15 XL
+
+
+((REPEATED DATA))
+	NLSTR(2)
+	\REP
+	\EAT
+	\ED
+	\DAT
+	\A
+	>5:\123
+	\^
+
+((CROSS MODULE CALLS))
+	NLSTR(2)
+	\CRO
+	\SS
+	\MOD
+	\ULE
+	\ CA
+	\LL
+	\^
+	CALLG(SUB)
+        QPARAM(MSG)
+	5	;+3
+	11	OUTSTR
+	8	OUTSTR+1
+	\XX^
+
+((END OF EXAMPLES))
+DONE	NLSTR(2)
+	\DON
+	\E^
+
+	8 ;+0
+
+XL 	>+1
+
+MSG     \OK^		(PARAMETER TO SUB)
+
+((UTILITY ROUTINES))
+*DEFINE MQCHOP [
+	11	QCHOP
+	8	QCHOP+1]
+
+[NEWLIN QCHOP]
+
+(subroutine to output newlines)
+NEWLIN	+0		(link)
+	2	+0
+	5	COUNT
+LOOP	9	;+3
+	0	NEWLIN
+	/8	1
+
+	4	+1
+	MQCHOP		
+	10 	COUNT
+	4	COUNT
+	8	LOOP
+
+COUNT 	>+1
+
+[OUTSTRI QCHOP]
+
+(subroutine to output a string)
+
+OUTSTR 	+0
+LOOP	0 	OUTSTR
+	/4 	1		(next word in string)
+	14 	8180		(first char)
+	6 	+63
+	1 	-1
+	7 	EXIT
+	1 	+1
+	MQCHOP
+	0 	OUTSTR
+	/4 	1
+	14 	8186
+	6 	+63		(second char)
+	1 	-1
+	7 	EXIT
+	1 	+1
+	MQCHOP
+	0 	OUTSTR
+	/4 	1
+	6 	+63		(third char)
+	1 	-1
+	7 	EXIT
+	1 	+1
+	MQCHOP	
+	10 	OUTSTR
+	8 	LOOP
+EXIT	0 	OUTSTR
+	/8 	2
+	
+	
+%
+<! H !>

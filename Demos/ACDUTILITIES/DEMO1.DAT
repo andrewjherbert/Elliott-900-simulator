@@ -1,0 +1,33 @@
+﻿c demonstrate ACD BINCOP utility
+
+
+on 903 8K
+runout on
+c load BINCOP
+at ptr file BINCOP.BIN
+j 8181
+st 8175
+
+c copy ASCII tape with parity check
+at ptr file MONITOR.900
+nonstop on
+j 8
+st 85
+
+c verify tape just read and punch new
+at ptp file DEMO1.900
+rewind
+j 10
+st 133
+de ptp
+
+c verify tape just punched
+at ptr file DEMO1.900
+nonstop on
+j 10
+
+c should complain punch is offline
+
+print DEMO1.900
+delete DEMO1.900
+sh t

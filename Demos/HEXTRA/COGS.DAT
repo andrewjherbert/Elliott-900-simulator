@@ -1,0 +1,211 @@
+﻿
+on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+at ptr inline
+
+cogs;
+"begin"
+   "comment" 27-MAR-2003;
+   "code" "procedure" date time; "algol";
+   "integer" lim, i, m, n, z;
+   "read" lim, i, m, n, z;
+   "begin"
+      "integer" j, k, l, r, xa, xb, xc; "boolean" f, g;
+      "integer" "array" p, q, t[1:m], a, b, c, one, w, zero[1:n];
+
+      "integer" "procedure" mod(x, y); "value" x, y; "integer" x, y;
+         mod := x - (x "div" y) * y; 
+
+      "procedure" addi(a, b, c); "integer" "array" a, b, c;
+      "begin"
+         "integer" j, carry, sum;
+         carry := 0;
+         "for" j:= n "step" -1 "until" 1 "do"
+         "begin"
+            sum := b[j] + c[j] + carry;
+            "if" sum "ge" lim "then"
+            "begin"
+               a[j] := sum - lim;
+               carry := 1
+            "end"
+                    "else"
+            "begin"
+               a[j] := sum;
+               carry := 0
+            "end"
+         "end"
+      "end" of addi;
+
+      "procedure" subi(a, b, c); "integer" "array" a,b,c;
+      "begin"
+         "integer" j, borrow, diff;
+         borrow := 0;
+         "for" j := n "step" -1 "until" 1 "do"
+         "begin"
+            diff := b[j] - c[j] - borrow;
+            "if" diff < 0 "then"
+            "begin"
+               a[j] := diff + lim;
+               borrow := 1
+            "end"
+                        "else"
+            "begin"
+               a[j] := diff;
+               borrow := 0
+            "end"
+         "end"
+      "end" of subbi;
+
+      "procedure" mpyi(a, x); "value" x;
+      "integer" "array" a; "integer" x;
+      "begin"
+         "integer" prod, j, carry;
+         carry := 0;
+         "for" j := n "step" -1 "until" 1 "do"
+         "begin"
+            prod := a[j] * x + carry;
+            carry := prod "div" lim;
+            a[j] := mod(prod, lim)
+         "end";
+      "end" of mpyi;
+
+      "procedure" divi(a, x); "value" x;
+      "integer" "array" a; "integer" x;
+      "begin"
+         "integer" j, quot, rem;
+         rem := 0;
+         "for" j := 1 "step" 1 "until" n "do"
+         "begin"
+            quot := (rem * lim + a[j]) "div" x;
+            rem := mod(rem * lim + a[j], x);
+            a[j] := quot
+         "end";
+      "end" of divi;
+
+      "procedure" puti(a); "integer" "array" a;
+      "begin"
+         "integer" j;
+         "print" ''L``;
+         "for" j := 1 "step" 1 "until" n "do" "print" same line, digits(3), a[j];
+      "end" of puti;
+
+      "procedure" geti(a);
+      "integer" "array" a;
+      "begin"
+         "integer" j;
+         "for" j := 1 "step" 1 "until" n "do" "read" a[j];
+      "end" of geti;
+
+      "procedure" resid(xa, a, p); "value" p; "integer" xa, p; "integer" "array" a;
+      "begin"
+         addi(w,a,zero); divi(w,p); mpyi(w,p);
+         subi(w,a,w); xa := w[n]+lim*w[n-1]
+      "end" of resid;
+
+      "boolean" "procedure" sq(x); "value" x; "integer" x;
+      "begin"
+         "integer" h, v; "boolean" f;
+         h := -1; f := "false"; v := p[j] "div" 2;
+         "for" h := h+1 "while" ("not" f "and" (h "le" v)) "do"
+            "if" mod(h*h, p[j]) = x "then" f := "true";
+         sq := f
+      "end" of sq;
+
+      "comment" program start;
+      date time;
+      "for" j := 1 "step" 1 "until" n "do"
+      "begin"
+         one[j] := 0; zero[j] := 0
+      "end";
+      one[n] := 1;
+      geti(a); geti(b); geti(c);
+      puti(a); puti(b); puti(c);
+      "print" ''L2`    3    5`;
+      p[1] := 3; p[2] := 5; q[1] := 0; q[2] := 3;
+      "for" k := 3 "step" 1 "until" m "do"
+      "begin"
+         p[k] := p[k-1] + 2; f := "false"; j := 0;
+         "for" j := j+1 "while" (("not" f) "and" (j<k)) "do"
+         "begin"
+            "if" mod(p[k], p[j]) = 0 "then" f := "true";
+            "if" f "then"
+            "begin"
+               p[k] := p[k] + 2;
+               j := 0;
+               f := "false"
+            "end"
+         "end";
+         q[k] := q[k-1] + p[k-1];
+         "if" mod(k, 10) = 1 "then" "print" ''L``;
+         "print" digits(4), same line, p[k]
+      "end" of prime set up;
+
+      "begin"
+         "boolean" "array" s[0:q[m]+p[m]-1];
+         "for" j := 1 "step" 1 "until" m "do"
+         "begin"
+            L := t[j] := 0;
+            resid(xa,a,p[j]);
+            resid(xb,b,p[j]);
+            resid(xc,c,p[j]);
+            "for" k := 0 "step" 1 "until" p[j] - 1 "do"
+            "begin"
+               "if" mod(L, 70) = 0 "then" "print" ''L``;
+               L := L + 1;
+               g := s[q[j]+k] := sq(mod(mod(xa*k, p[j]) * k +
+                         xb * k + xc, p[j]));
+               "if" g "and" z=1 "then" "print" same line, 'T`;
+               "if" "not" g "and" z=1 "then" "print" same line, 'F`
+            "end"
+         "end" of teeth set up;
+
+         date time;
+         "print" ''L2`start for 1000`;
+
+         r := 0; f := "false";
+         "for" r := r+1 "while" "not" f "do"
+         "begin"
+            g := "true";
+            "for" j := 1 "step" 1 "until" m "do"
+            "begin"
+               t[j] := t[j] + 1;
+               "if" t[j] = p[j] "then" t[j] := 0;
+               "if" g "then"
+               "begin"
+                  "if" "not" s[q[j]+t[j]] "then" g := "false"
+               "end"
+            "end" of teeth on all cogs;
+
+            f := g;
+            "if" mod(r, i) = 0 "then" "print" r, date time;
+            "if" g "then" "print" ''L`x = `, same line, r, date time;
+            "if" r=1000 "then" "print" ''L`x = `, same line, r, date time, stop
+         "end" of r loop
+      "end" of s block
+   "end" of a, b, c block
+"end"
+
+<!!>
+j 12
+st 1727
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+select out tty
+at ptr inline
+
+
+    1000  10000  30  10  1
+
+    00 00 00 91 89 47 70 30 29 76
+    00 28 77 22 52 88 67 02 18 24
+    00 25 65 27 59 65 41 06 47 68
+
+<!!>
+j 10
+st 1727
+sh t

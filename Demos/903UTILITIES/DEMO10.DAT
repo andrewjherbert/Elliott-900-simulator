@@ -1,0 +1,66 @@
+﻿C DEMONSTRATE MAGNETIC TAPE UTILITIES
+
+on 903 8K
+
+c create a new tape
+
+at ptr file MTINIT(ISS3).BIN
+j 8181
+st 8171
+
+delete tape1.raw
+at mt 0 tape1.raw wp
+at tty inline
+/ 0: DEMO10:<!!>
+j 32
+st 1395
+
+c assemble mtlist
+at ptr file ../903SIR/SIR(ISS6)(5500).BIN
+j 8181
+st 8171
+
+select out tty
+nonprinting off
+
+at ptr inline
+*18
+<! halt !><!!>
+j 8
+st 6927
+
+at ptr file MTLIST(ISS3).900
+j 9
+st 6927
+
+at ptr file ../903SIR/MTBLOC(ISS4).900
+j 9
+st 6927
+
+at ptr file ../903SIR/SGLPAK.900
+j 9
+st 6927
+
+at ptr inline
+%
+
+[B1]
+B1 0 ;+1
+%
+<! halt !><!!>
+j 9
+st 6927
+
+c run mtlist
+at tty inline
+/ 0: DEMO10:
+L,
+B,1,5:
+)<!!>
+j 32
+st 1575
+
+de mt 0
+
+sh t
+

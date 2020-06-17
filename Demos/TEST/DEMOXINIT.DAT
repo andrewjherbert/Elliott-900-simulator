@@ -1,0 +1,27 @@
+﻿c XINIT - nitial instructions test
+
+on 903 16K
+
+
+at ptr file XINIT(ISS1).BIN
+j 8181
+st 8171
+
+c test to ensure initial instructions protected in level 1
+c enter phases 1-3
+c Phase 1 checks initial instructions are protected at level 1.
+c Phase 2 checks they are unprotected at level 4
+c Phase 3 checks program can be execute from code written into
+c initial instructions.
+j 21
+st 219
+c enter phase 4
+c Checks instructions from Phase 3 persist over a reset at level 4.
+j 22
+st 219
+reset
+c enter phase 5
+c Checks initial instructions persist at level 1.
+j 23
+
+sh t

@@ -1,0 +1,68 @@
+﻿c
+C Demonstrate 905 Fortran
+C
+C Load Fortran system
+on 905 16K
+at ptr file 905FORT(ISS6).BIN
+j 8181
+
+C compile program
+nonstop on
+at ptp file DEMO1.BIN
+at ptr inline
+
+[ TABLE OF SQUARES
+WRITE (3, 90)
+DO 10 I = 1,  10
+ISQ = I * I
+10  WRITE (3, 91) I, ISQ
+STOP
+90  FORMAT (17H TABLE OF SQUARES)
+91  FORMAT (I7, I6)
+END
+<! Halt Code !>
+<!!>
+
+at tty inline
+O0R
+<!!>
+
+j 16
+
+c run out of tty input
+de ptp
+
+reverse DEMO1.BIN
+
+c load loader
+at ptr file ../MASIR/LOADER(ISS3).BIN
+j 8181
+st 8171
+
+c load program
+at ptr file DEMO1.BIN
+at tty inline
+O20L<!!>
+j 16
+
+c read unloads, load library tape 1
+at ptr file 905FORTLIB1(ISS4).BIN
+at tty inline
+O3L<!!>
+j 16
+
+c reader unloads, load library tape 2
+at ptr file 905FORTLIB2(ISS5).BIN
+r
+
+c reader unloads
+at tty inline
+MM<!!>
+j 16
+delete DEMO1.BIN
+sh t
+
+
+
+
+

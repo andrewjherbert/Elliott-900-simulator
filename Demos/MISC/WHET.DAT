@@ -1,0 +1,562 @@
+﻿c whetstone benchmark -- compare 903 Algol and Fortran
+
+c Algol version, Hunter Algol compiler
+on 903 16K
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+select out tty
+at ptr inline
+whetstone;
+"begin"
+	"comment"
+		The Whetstone Benchmark.
+
+		See:
+		A Synthetic Benchmark, 
+		H.J. Curnow and B.A. Wichmann, 
+		The Computing Journal, Volume 19  Number 1
+					Feb 1976, P. 43-49
+
+		Some results
+		(in thousands of Whetstone Instructions per second):
+
+		IBM 3090:  	(Delft ?) Algol Compiler	5000
+		Sun 3/60: 	Nase Algol Interpreter		  10
+				Nase Algol2C			 400
+		Sparc 2: 	Nase Algol Interpreter		  63
+				Nase Algol2C			4200
+		Pyramid ??: 	Nase Algol Interpreter		  20
+
+		Nase indicates NASE A60.
+                Elliott 903 Algol on 80486 Ada simulator       0.345
+                Elliott 903 Algol on Pentium dual core E5300 @ 2.6GHz 
+                                           F£  simulator      137363
+                
+	;
+
+        "real" x1, x2, x3, x4, x, y, z, t, t1, t2;
+	"array" e1[1:4];
+	"integer" i, j, k, l, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11;
+
+	"procedure" pa(e);
+	"array" e;
+	"begin"
+		"integer" j;
+		
+		j := 0;
+	lab:
+		e[1] := (e[1] + e[2] + e[3] - e[4]) * t;
+		e[2] := (e[1] + e[2] - e[3] + e[4]) * t;
+		e[3] := (e[1] - e[2] + e[3] + e[4]) * t;
+		e[4] := (- e[1] + e[2] + e[3] + e[4]) / t2;
+		j := j + 1;
+		"if" j < 6 "then"
+			"goto" lab;
+	"end";
+
+	"procedure" p0;
+	"begin"
+		e1[j] := e1[k];
+		e1[k] := e1[l];
+		e1[l] := e1[j];
+	"end";
+
+	"procedure" p3(x, y, z);
+	"value" x, y;
+	"real" x, y, z;
+	"begin"
+		x := t * (x + y);
+		y := t * (x + y);
+		z := (x + y) / t2;
+	"end";
+
+	"procedure" pout (n, j, k, x1, x2, x3, x4);
+	"value" n, j, k, x1, x2, x3, x4;
+	"integer" n, j, k;
+	"real" x1, x2, x3, x4;
+	"begin"
+                "print" digits(5), n, same line, j, k, '   @,
+                 aligned(1,4), x1, '   @, x2, '   @, x3, '   @, x4, ''L@@;
+	"end";
+
+	"comment" initialize constants ;
+
+	t := 0.499975;
+	t1 := 0.50025;
+	t2 := 2.0;
+
+	"comment" read the value of i, controlling total weight: if i = 10 the
+		  total weight is one million Whetstone instructions ;
+
+	"comment" inreal (2, i) ;
+
+	i := 10;
+
+        "print" ''L2@whetstone benchmark with n = @,
+                same line, digits(3), i, ''L@@;
+
+	n1 := 0;		n2 := 12 * i;		n3 := 14 * i;
+	n4 := 345 * i;		n5 := 0;		n6 := 210 * i;
+	n7 := 32 * i;		n8 := 899 * i;		n9 := 616 * i;
+	n10 := 0;		n11 := 93 * i;
+
+	"comment" module 1: simple identifiers ;
+
+	x1 := 1.0;
+	x2 := x3 := x4 := - 1.0;
+
+	"for" i := 1 "step" 1 "until" n1 "do"
+	"begin" "PRINT" I;
+		x1 := (x1 + x2 + x3 - x4) * t;
+		x2 := (x1 + x2 - x3 + x4) * t;
+		x3 := (x1 - x2 + x3 + x4) * t;
+		x4 := (- x1 + x2 + x3 + x4) * t;
+	"end";
+
+	pout (n1, n1, n1, x1, x2, x3, x4);
+
+	"comment" module 2: array elements ;
+
+	e1[1] := 1.0;
+	e1[2] := e1[3] := e1[4] := -1.0;
+
+	"for" i := 1 "step" 1 "until" n2 "do"
+	"begin"
+		e1[1] := (e1[1] + e1[2] + e1[3] - e1[4]) * t;
+		e1[2] := (e1[1] + e1[2] - e1[3] + e1[4]) * t;
+		e1[3] := (e1[1] - e1[2] + e1[3] + e1[4]) * t;
+		e1[4] := (- e1[1] + e1[2] + e1[3] + e1[4]) * t;
+	"end";
+
+	 pout (n2, n3, n2, e1[1], e1[2], e1[3], e1[4]);
+	
+	"comment" module 3: as array parameter ;
+
+	"for" i:= 1 "step" 1 "until" n3 "do"
+		pa(e1);
+
+	pout (n3, n2, n2, e1[1], e1[2], e1[3], e1[4]);
+
+	"comment" module 4: conditional jumps ;
+
+	j := 1;
+	"for" i := 1 "step" 1 "until" n4 "do"
+	"begin"
+		"if" j = 1 "then"
+			j := 2
+		"else"
+			j := 3;
+
+		"if" j > 2 "then"
+			j := 0
+		"else"
+			j := 1;
+
+		"if" j < 1 "then"
+			j := 1
+		"else"
+			j := 0;
+	"end";
+
+	pout (n4, j, j, x1, x2, x3, x4);
+
+	"comment" module 5: omitted ;
+
+	"comment" module 6: integer arithmetik ;
+
+	j := 1;	k := 2;	l := 3;
+
+	"for" i := 1 "step" 1 "until" n6 "do"
+	"begin"
+		j := j * (k - j) * (l - k);
+		k := l * k - (l - j) * k;
+		l := (l - k) * (k + j) ;	 "comment" typo in TCJ ;
+		e1[l-1] := j + k + l;
+		e1[k-1] := j * k * l;
+	"end";
+
+	pout (n6, j, k, e1[1], e1[2], e1[3], e1[4]);
+
+	"comment" module 7: trig functions ;
+
+	x := y := 0.5;
+
+	"for" i := 1 "step" 1 "until" n7 "do"
+	"begin"
+		x := t * arctan (t2 * sin (x) * cos (x) / (cos (x + y) + cos (x - y) - 1.0));
+		y := t * arctan (t2 * sin (y) * cos (y) / (cos (x + y) + cos (x - y) - 1.0));
+	"end";
+
+	pout (n7, j, k, x, x, y, y);
+
+	"comment" module 8: procedure calls ;
+
+	x := y := z := 1.0;
+
+	"for" i := 1 "step" 1 "until" n8 "do"
+		p3 (x, y, z);
+
+	pout (n8, j, k, x, y, z, z);
+
+	"comment" module 9: array references ;
+
+	j := 1;  k := 2;  l := 3;
+	e1[1] := 1.0;  e1[2] := 2.0;  e1[3] := 3.0;
+
+	"for" i := 1 "step" 1 "until" n9 "do"
+		p0;
+
+	pout (n9, j, k, e1[1], e1[2], e1[3], e1[4]);
+
+	"comment" module 10: integer arithmetic ;
+
+	j := 2;  k := 3;
+
+	"for" i := 1 "step" 1 "until" n10 "do"
+	"begin"
+		j := j + k;
+		k := j + k;
+		j := k - j;
+		k := k -j -j;
+	"end";
+
+	pout (n10, j, k, x1, x2, x3, x4);
+
+	"comment" module 11: standard functions ;
+
+	x := 0.75;
+	"for" i := 1 "step" 1 "until" n11 "do"
+		x := sqrt (exp (ln (x) / t1));
+	
+	pout (n11, j, k, x, x, x, x)
+
+"end"
+<!!>
+j 8
+sh t
+st 7943
+j 10
+st 1727
+sh t
+
+C FORTRAN Version
+on 903 16K
+
+C Load Fortran translator
+at ptr file ..\903FORTRAN\903FORT1(ISS4C).BIN
+J 8181
+st 8171
+
+C translate - compile to SIR
+at ptp file WHET.903
+at ptr inline
+GLOBAL, WHET, SIN, COS, ATAN, SQRT, EXP, ALOG, PA, P0, P3, POUT]
+
+      DIMENSION	E1(4)
+      
+      COMMON J, K, L, T, T2, E1
+	
+      T  = 0.499975
+      T1 = 0.50025
+      T2 = 2.0
+
+C  READ THE VALUE OF I CONTROLLING TOTAL WEIGHT: IF I = 10
+C  THE TOTAL WEIGHT IS ONE MILLION WHETSONE INSTRUCTIONS 
+
+      I = 10
+
+      WRITE (3, 900) I
+  900 FORMAT (//, 28HWHETSTONE BENCHMARK WITH N = , I4, //)
+
+      N1  =       0
+      N2  =  12 * I		
+      N3  =  14 * I
+      N4  = 345 * I
+      N5  =       0
+      N6  = 210 * I
+      N7  =  32 * I
+      N8  = 899 * I
+      N9  = 616 * I
+      N10 =       0
+      N11 =  93 * I
+
+C  MODULE 1: SIMPLE IDENTIFIERS
+
+      X1 =  1.0
+      X2 = -1.0
+      X3 = -1.0
+      X4 = -1.0
+
+      IF (N1) 12, 12, 10
+  10      DO 11 I = 1, N1
+
+              X1 = (X1 + X2 + X3 - X4) * T
+              X2 = (X1 + X2 - X3 + X4) * T
+              X3 = (-X1 + X2 + X3 + X4) * T
+
+  11      CONTINUE  
+
+  12    CALL POUT (N1, N1, N1, X1, X2, X3, X4)
+
+C  MODULE 2: ARRAY ELEMENTS
+
+      E1(1) =  1.0
+      E1(2) = -1.0
+      E1(3) = -1.0
+      E1(4) = -1.0
+
+      IF (N2) 22, 22, 20
+
+   20     DO 21 I = 1, N2
+
+              E1(1) = (E1(1) + E1(2) + E1(3) - E1(4)) * T
+              E1(2) = (E1(1) + E1(2) - E1(3) + E1(4)) * T
+              E1(3) = (E1(1) - E1(2) + E1(3) + E1(4)) * T
+              E1(4) = (-E1(1) + E1(2) + E1(3) + E1(4)) * T
+
+  21      CONTINUE
+
+  22  CALL POUT (N2, N3, N2, E1(1), E1(2), E1(3), E1(4))
+
+C  MODULE 3: AS ARRAY PARAMETER
+
+      IF (N3) 32, 32, 30
+
+  30      DO 31 I = 1, N3
+
+              CALL PA (E1)
+
+  31      CONTINUE
+
+  32  CALL POUT (N3, N2, N2, E1(1), E1(2), E1(3), E1(4))
+
+C   MODULE 4: CONDITIONAL JUMPS
+
+      J = 1
+
+      IF (N4) 50, 50, 40
+
+  40    DO 49 I = 1, N4
+
+            IF (J - 1) 42, 41, 42
+  41        J = 2
+            GOTO 43
+  42        J = 3
+   
+  43        IF (J - 2) 45, 45, 44
+  44        J = 0
+            GOTO 46
+  45        J = 1
+
+  46        IF (J - 1) 47, 48, 48
+  47        J = 1
+            GOTO 49
+  48        J = 0
+
+  49   CONTINUE
+
+  50   CALL POUT (N4, J, J, X1, X2, X3, X4)
+
+C  MODULE 5: OMITTED
+
+C  MODULE 6: INTEGER ARITHMETIC
+
+      J = 1
+      K = 2
+      L = 3
+
+        IF (N6) 62, 62, 60
+        
+  60      DO 61 I = 1, N6
+          
+              J = J * (K - J) * (L - K)
+              K = L * K - (L - J) * K
+              L = (L - K) * (K + J)
+              E1(L-1) = J + K + L
+              E1(K-1) = J * K * L
+
+  61  CONTINUE
+
+  62 CALL POUT (N6, J, K, E1(1), E1(2), E1(3), E1(4))
+
+C  MODULE 7: TRIG FUNCTIONS
+
+      X = 0.5
+      Y = 0.5
+
+      IF (N7) 72, 72, 70
+
+  70      DO 71 I = 1, N7
+
+              X = T * ATAN (T2 * SIN (X) * COS (X) / (COS (X + Y) + COS (X - Y) - 1.0))
+	      Y = T * ATAN (T2 * SIN (Y) * COS (Y) / (COS (X + Y) + COS (X - Y) - 1.0))
+
+  71      CONTINUE
+
+  72  CALL POUT (N7, J, K, X, X, Y, Y)
+
+C  MODULE 8: PROCEDURE CALLS
+
+      X = 1.0
+      Y = 1.0
+      Z = 1.0
+
+      IF (N8) 82, 82, 80
+
+  80      DO 81 I = 1, N8
+
+              CALL P3 (X, Y, Z)
+
+  81      CONTINUE
+
+  82  CALL POUT (N8, J, K, X, Y, Z, Z)
+
+C  MODULE 9: ARRAY REFERENCES 
+
+      J = 1
+      K = 2
+      L = 3
+
+      E1(1) = 1.0
+      E1(2) = 2.0
+      E1(3) = 3.0
+
+      IF (N9) 92, 92, 90
+
+  90      DO 91 I = 1, N9
+
+              CALL P0
+
+  91      CONTINUE
+
+  92  CALL POUT (N9, J, K, E1(1), E1(2), E1(3), E1(4))
+
+C  MODULE 10: INTEGER ARITHMETIC
+
+      J = 2
+      K = 3
+
+      IF (N10) 102, 102, 100
+
+ 100      DO 101 I = 1, N10
+
+              J = J + K
+              K = J + K
+              J = K - J
+              K = K - J - J
+
+ 101      CONTINUE
+
+ 102  CALL POUT (N10, J, K, X1, X2, X3, X4)
+
+C  MODULE 11: STANDARD FUNCTIONS
+
+      X = 0.75
+
+      IF (N11) 112, 112, 110
+
+ 110      DO 111 I = 1, N11
+
+              X = SQRT (EXP (ALOG (X) / T1))
+
+ 111      CONTINUE
+
+ 112  CALL POUT (N11, J, K, X, X, X, X0)
+
+      STOP
+      END
+
+
+
+      SUBROUTINE PA (E)
+
+      DIMENSION E(4)
+
+      COMMON J, K, L, T, T2, E1
+      
+      J = 0
+
+  10  E(1) = (E(1) + E(2) + E(3) - E(4)) * T
+      E(2) = (E(1) + E(2) - E(3) + E(4)) * T
+      E(3) = (E(1) - E(2) + E(3) + E(4)) * T
+      E(4) = (-E(1) + E(2) + E(3) + E(4)) / T2
+
+      J = J + 1
+      IF (J - 6) 10, 11, 11
+  
+  11  RETURN
+      END
+
+      SUBROUTINE P0
+
+      DIMENSION E1(4)
+
+      COMMON J, K, L, T, T2, E1
+
+      E1(J) = E1 (K)
+      E1(K) = E1 (L)
+      E1(L) = E1 (J)
+
+      RETURN
+      END
+
+      SUBROUTINE P3 (X, Y, Z)
+
+      COMMON J, K, L, T, T2, E1
+
+      X1 = X
+      Y1 = Y
+      X1 = T * (X1 + Y1)
+      Y1 = T * (X1 + Y1)
+      Z1 = (X1 + Y1) / T2
+
+      RETURN
+      END
+      
+      SUBROUTINE POUT (N, J, K, X1, X2, X3, X4)
+      
+      WRITE (3, 900) N, J, K, X1, X2, X3, X4
+ 900  FORMAT (3I6, 4F10.4, /)
+
+      RETURN
+      END
+
+<! Halt !>
+<!!>
+j 8
+de ptp
+st 2449
+
+nonprinting off
+
+C Load Fortran interpreter 
+at ptr file ..\903FORTRAN\903FORT2(ISS4A).BIN
+j 8181
+st 8171
+
+C load compiled program
+at ptr file WHET.903
+at ptp file WHET.RLB
+j 13
+st 6926
+
+C indicate program complete
+j 10
+de ptp
+st 6238
+
+C load rlb
+at ptr file WHET.RLB
+j 14
+st 161
+
+C run program
+select out tty
+sh t
+j 11
+st 1919
+
+delete WHET.903
+delete WHET.RLB
+sh t

@@ -1,0 +1,178 @@
+
+    IPBIN
+    OPASC
+    JUMP 8
+    IPASC
+normeq;
+"begin"
+   "comment" 01-JUN-1986;
+   "integer" c,n;
+   "real" "procedure" read; "read" read;
+   "procedure" copy(j,m,n,z,v);
+      "value" m,n;
+      "integer" j,m,n;
+      "real" z,v;
+      "for" j:=m "step" 1 "until" n "do" z:=v;
+   "real" "procedure" sigma(j,n,z);
+      "value" n;
+      "integer" j,n;
+      "real" z;
+   "begin"
+      "real" s;
+      s:=0;
+      "for" j:=1 "step" 1 "until" n "do" s:=s+z; sigma:=s
+   "end" of sigma; 
+
+   "print" '04-SEP-1997'L@@;
+   "read" c, n; 
+
+   "begin"
+      "real" "array" alpha[1:c,1:n],a[1:n,1:n],b[1:n],beta[1:c];
+      "integer" "array" p[1:n];
+      "real" deter; "integer" i,j,k;      
+
+      "comment" AP204 written by T.J. Dekker at the Matematisch
+                Centrum in 1963;
+      "real" "procedure" det(a,n,p);
+      "value" n; "integer" n;
+      "array" a; "integer" "array" p;
+      "begin"
+         "integer" i,j,k,l;
+         "real" d,r,s,sum;
+         "array" v[1:n];
+         "for" i:=1 "step" 1 "until" n "do"
+         "begin"
+            d:=0;
+            "for" j:=1 "step" 1 "until" n "do"
+                  d:=d+a[i,j]*a[i,j];
+            v[i]:=sqrt(d)
+         "end";
+         d:=1;
+         "for" k:=1 "step" 1 "until" n "do"
+         "begin"
+            r:= -1;
+            "for" i:=k "step" 1 "until" n "do"
+            "begin"
+               sum:=0;
+               "for" l:=1 "step" 1 "until" k-1 "do"
+                     sum:=sum+a[i,l]*a[l,k];
+               a[i,k]:=a[i,k]-sum;
+               s:=abs(a[i,k])/v[i];
+               "if" s>r "then"
+               "begin"
+                  r:=s;
+                  p[k]:=i
+               "end"
+            "end" lower;
+            v[p[k]]:=v[k];
+            "for" j:=1 "step" 1 "until" n "do"
+            "begin"
+               r:=a[k,j];
+               "if" j "le" k 
+               "then" a[k,j]:=a[p[k],j]
+               "else"
+               "begin"
+                  sum:=0;
+                  "for" l:=1 "step" 1 "until" k-1 "do"
+                        sum:=sum+a[k,l]*a[l,j];
+                  a[k,j]:=(a[p[k],j]-sum)/a[k,k]
+               "end";
+               "if" p[k] "ne" k 
+               "then" a[p[k],j]  := -r
+            "end" upper;
+            d:=a[k,k]*d
+         "end" LU;
+         det:=d
+      "end" of AP204;
+      
+      "comment" AP205 written by T.J. Dekker at the Matematisch
+                Centrum in 1963;
+      "procedure" sol(lu,b,n,p);
+      "value" n; "integer" n;
+      "array" lu,b; "integer" "array" p;
+      "begin"
+         "integer" k,l;
+         "real" r,sum;
+         "for" k:=1 "step" 1 "until" n "do"
+         "begin"
+            r:=b[k];
+            sum:=0;
+            "for" l:=1 "step" 1 "until" k-1 "do"
+                    sum:=sum+lu[k,l]*b[l];
+            b[k]:=(b[p[k]]-sum)/lu[k,k];
+            "if" p[k] "ne" k "then" b[p[k]]:= -r
+         "end";
+         "for" k:=n "step" -1 "until" 1 "do"
+         "begin"
+            sum:=0;
+            "for" l:=k+1 "step" 1 "until" n "do"
+                   sum:= sum+lu[k,l]*b[l];
+            b[k]:=b[k]-sum
+         "end"
+      "end" of AP205;
+                  
+      "comment" PROGRAM START;
+
+      "for" k:=1 "step" 1 "until" c "do" 
+      "begin"
+         copy(j,1,n,alpha[k,j],read); beta[k]:=read
+      "end";
+
+      "for" i:=1 "step" 1 "until" n "do"
+      "begin"
+         copy(j,i,n,a[i,j],sigma(k,c,alpha[k,i]*alpha[k,j]));
+         copy(j,i+1,n,a[j,i],a[i,j]);
+         b[i]:=sigma(k,c,alpha[k,i]*beta[k])
+      "end";
+
+      deter:=det(a,n,p); sol(a,b,n,p);
+      "for" j:=1 "step" 1 "until" n "do" "print" ''L@X@, same line,
+          digits(1), j, ' = @, aligned(3,2), b[j],
+         '  secs.@;
+      "print" ''L2@ACTUAL      ERR %'L@------      -----@;
+      "for" k:=1 "step" 1 "until" c "do" "print" '  @, digits(5), 
+         entier(beta[k] + 0.5),
+         same line, '     @, aligned(3,1), 
+         100*((beta[k] - sigma(j,n,alpha[k,j]*b[j]))/beta[k])
+   "end"
+"end"
+
+
+   36  2
+  131   18   146
+ 2283 1998  7736
+  289   75   374
+  222   43   537
+  208   19   139
+ 1078  810  3154
+  306   54   348
+  259   78   448
+  952  629  2582
+  331   24   166
+  311   82   434
+  762  539  2514
+  231   14   118
+  222   26   182
+  200   48   389
+  163   14   139
+ 1902 1681  8299
+  252   35   277
+  229   41   321
+  194   20   179
+ 1138  927  5138
+  229   14   173
+  231   54   410
+  196   35   309
+  177   22   183
+  907  728  4402
+  193   16   182
+  191   65   482
+  139   17   183
+  131   29   214
+  455  342  2290
+ 1272 1096  6256
+  850  681  4299
+  184   51   329
+  142   14   116
+  792  652  4171
+

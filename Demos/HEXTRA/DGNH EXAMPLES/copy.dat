@@ -1,0 +1,16 @@
+
+    OPBIN
+    JUMP 17
+    IPASC
+
+COPY;
+"begin"
+   "comment" 30-SEP-1997; 
+   "procedure" copy(j,m,n,z,v);
+      "value" m,n;
+      "integer" j,m,n;
+      "real" z,v;
+   "begin"
+      "for" j:=m "step" 1 "until" n "do" z:=v;
+   "end" of copy; 
+"end"

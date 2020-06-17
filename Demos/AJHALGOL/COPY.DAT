@@ -1,0 +1,30 @@
+﻿c copy procedure for separate compilation
+on
+
+at ptr file ALG16KLG(AJH).BIN
+j 8181
+st 8175
+
+at ptp file COPY.BIN 
+at ptr inline
+
+COPY;
+"begin"
+   "comment" 04-MAR-1998; 
+   "procedure" copy(j,m,n,z,v);
+      "value" m,n;
+      "integer" j,m,n;
+      "real" z,v;
+   "begin"
+      "for" j:=m "step" 1 "until" n "do" z:=v;
+   "end" of copy; 
+"end"
+<! Halt !>
+<!!>
+k 17
+j
+de ptp
+st 8201
+c translate to rlb suitable for loading
+do module COPY.BIN COPY.RLB
+delete COPY.BIN

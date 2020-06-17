@@ -1,0 +1,26 @@
+﻿C Test C and G Assembler - Simple Program
+on 903
+at ptr file CANDG.BIN
+j 8181
+
+at ptr inline
+(TITLE)
+SIMPLE TEST
+(STORE 12)
+LDAN 1
+ARC 16
+MLTN 4
+PNT 1,6
+JST
+(EXECUTE 12)
+<! halt !><!!>
+
+select out tty
+
+j 8
+st 590
+
+j 9
+st 952
+
+sh t

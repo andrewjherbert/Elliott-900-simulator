@@ -1,0 +1,44 @@
+﻿
+on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+at ptr inline
+
+fall2;
+"begin"
+   "comment" 04-NOV-1999.
+             Time for stationary Earth to fall into Sun;
+
+   "real" au, eps, factor, r, rs, safety;
+
+   "code" "real" "procedure" simps(f, x, a, b, delta, v);
+          "value" a, b, delta, v; "real" f, x, a, b, delta, v;
+   "algol";
+
+   "read" au, eps, factor, rs;
+
+   safety := 1.0+eps;
+
+   "print" ''L`weeks = `, same line, aligned(3,2), factor * 
+       SIMPS(sqrt(abs(r/(r-au))), r, rs, safety*au, eps, 3.5/eps)/
+            (7.0 * 24.0 * 3600.0)
+"end"
+
+<!!>
+j 12
+st 1727
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+at ptr inline
+
+1.496?11  0.001  2.37?-5  6.96?8
+
+<!!>
+select out tty
+j 10
+st 1727
+sh t

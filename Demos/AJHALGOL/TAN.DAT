@@ -1,0 +1,25 @@
+﻿c tan procedure for separate compilation
+on
+telecode 903
+at ptr file ALG16KLG(AJH).BIN
+j 8181
+st 8175
+
+at ptp file TAN.BIN 
+at ptr inline
+
+tan;
+"begin"
+   "comment" 30-SEP-1997; 
+   "real" "procedure" tan(x);
+      "value" x; "real" x;
+      tan:=sin(x)/cos(x); 
+"end"
+<! Halt !>
+<!!>
+j 17
+de ptp
+st 8201
+c translate to rlb suitable for loading
+do module TAN.BIN TAN.RLB
+delete TAN.BIN

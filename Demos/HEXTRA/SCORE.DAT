@@ -1,0 +1,70 @@
+﻿on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+telecode 903
+at ptr inline
+score;
+"begin"
+   "comment" 25-NOV-2000;
+
+   "integer" i,j,k,x,y,z; "real" s,t;
+   "integer" "array" a,b[1:70]; "real" "array" score[1:20]; 
+   "real" "procedure" Wichmann;
+   "begin"
+      "comment" The Wichmann-Hill portable Wichmann number
+                generator. B. A. Wichmann and I. D. Hill,
+                An Efficient and Portable Pseudo-Wichmann Number
+                Generator, Applied Statistics, 31 (No. 2),
+                188-190 (1982) ;
+      "real" w;
+      x := 171 * (x - (x "div" 177) * 177) -  2 * (x "div" 177);
+      y := 172 * (y - (y "div" 176) * 176) - 35 * (y "div" 176);
+      z := 170 * (z - (z "div" 178) * 178) - 63 * (z "div" 178);
+      "if" x < 0 "then" x := x + 30269;
+      "if" y < 0 "then" y := y + 30307;
+      "if" z < 0 "then" z := z + 30323;
+      w := x/30269.0 + y/30307.0 + z/30323.0;
+      Wichmann := w - entier(w) 
+   "end" of Wichmann;
+
+   "integer" "procedure" ranlet;
+   ranlet := entier(26.0*Wichmann + 0.5);
+
+   "comment" program start;   
+
+   digits(4); aligned(2,3); "print" ''L`25-NOV-2000'L``;
+   "read" x,y,z;
+   "print" x,same line,y,z;
+   "for" j := 1 "step" 1 "until" 20 "do"
+   "begin"
+      score[j] := 0; "print" j;
+      "for" k := 1 "step" 1 "until" 70 "do"
+      "begin"
+         a[k]:=ranlet; b[71-k]:=ranlet
+      "end";
+      "for" k:=1 "step" 1 "until" 70 "do"
+         "if" a[k]=b[k] "then" score[j]:=score[j]+1;
+   "end" of j block;
+   s:=0.0;
+   "for" j:=1 "step" 1 "until" 20 "do" s:=s+score[j];
+   s:=s*0.05;
+   "for" j:=1 "step" 1 "until" 20 "do" score[j]:=score[j]-s;
+   t:=0;
+   "for" j:=1 "step" 1 "until" 20 "do" t:=t+score[j]^2;
+   "print" ''L`average = `, same line, s, '  variance = `, sqrt(t/19)
+"end" of program
+<!!>
+j 12
+st 1727
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+at ptr inline
+  123  71  23 
+<!!>
+select out tty
+j 10
+st 1727
+sh t

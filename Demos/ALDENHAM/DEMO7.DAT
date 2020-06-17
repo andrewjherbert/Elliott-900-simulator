@@ -1,0 +1,31 @@
+﻿c Demonstrate U.7 - UNIDUMP-B
+
+on 903 16K
+
+c load 16K LP Algol
+at ptr file ../AJHALGOL/ALG16KLG(AJH).BIN
+j 8181
+
+c now load UNIDUMP-B
+at ptr file UNIDUMP-B.BIN
+at ptp file DEMO7.BIN
+at tty inline
+2<!!>
+j 8181
+de ptp
+st 8172
+
+c check dumped tape is 16KLG Algol
+at ptr file DEMO7.BIN
+j 8181
+st 8171
+at ptr inline
+demo7; "begin" "print" punch(3), {demo7 ok} "end"
+<! halt !><!!>
+j 8
+st 8000
+j 10
+st 1715
+
+delete DEMO7.BIN
+sh t

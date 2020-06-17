@@ -1,0 +1,139 @@
+﻿C
+C USE OF CODE SECTIONS IN 905 FORTRAN
+C
+
+C Load Fortran system
+on 905 64K
+at ptr file 905FORT(ISS6).BIN
+j 8181
+
+C compile program
+
+nonstop on
+
+at ptp file DEMO16.BIN
+at ptr inline
+C  MAIN PROGRAM
+C
+      DIMENSION X (5, 5), Y (5, 5)
+      COMMON Y
+C
+C     ...INITIALIZE X AND Y
+      DO 10 I = 1, 5
+           DO 10 J = 1, 5
+	        X(I, J) = I + J
+10  		Y(I, J) = I * J
+C
+C     ...LOCAL ARRAY
+      Z = DSUMSQ (X)
+      WRITE (3, 900) Z
+900   FORMAT (21H LOCAL ARRAY         , F8.2)
+C
+C     ...COMMON ARRAY
+      Z = DSUMSQ (Y)
+      WRITE (3, 901) Z
+901   FORMAT (21H COMMON ARRAY        , F8.2)
+C
+C     ...FORMAL LOCAL ARRAY
+      Z = FORMAL (X)
+      WRITE (3, 902) Z
+902   FORMAT (21H FORMAL LOCAL ARRAY  , F8.2)   
+C
+C     ...FORMAL COMMON ARRAY
+      Z = FORMAL (Y)
+      WRITE (3, 903) Z
+903   FORMAT (21H FORMAL COMMON ARRAY , F8.2)   
+C
+      STOP
+      END
+C
+C  FORMAL
+C
+      FUNCTION FORMAL (X)
+C     ...CALL DSUMSQ ON FORMAL PARAMETER
+      FORMAL = DSUMSQ (X)
+      RETURN
+      END
+C   
+C  DSUMSQ: FIND SUM OVER I OF A(I,I)**2
+C
+      FUNCTION DSUMSQ (A)
+      DIMENSION A (5, 5)
+      CODE
+	(SET UP ITERATION OVER MATRIX)
+	4	A		(ADDRESS OF ACTUAL ARRAY)
+	5	MODA
+	4	-5
+	5	ICOUNT
+	4	+12
+	5	INCREM
+	4	+0		(SUM = 0.0)
+	5	SUM
+	5	SUM+1
+	8	Q2
+
+      Q1
+	4	MODA		(ADVANCE TO NEXT ELEMENT ON DIAGONAL)
+	1	INCREM
+	5	MODA
+
+      Q2
+	0	MODA		(SUM=SUM+A[I,I]*A[I,I])
+	/4	0
+	5	TERM
+	/4	1
+	5	TERM+1
+      FORTRAN
+      SUM = SUM + TERM*TERM
+      CODE
+	10	ICOUNT		(MORE TO DO?)
+	4	ICOUNT
+	9	Q1
+       FORTRAN
+ C PICK UP RESULT     
+      DSUMSQ = SUM
+      RETURN
+      END
+<! Halt !>
+<!!>
+at tty inline
+O12R
+<!!>
+j 16
+
+c run out of tty input
+de ptp
+
+reverse DEMO16.BIN
+
+c load loader
+at ptr file ../MASIR/LOADER(ISS3)(64K).BIN
+j 8181
+st 8171
+
+c load program
+at ptr file DEMO16.BIN
+at tty inline
+O20L<!!>
+j 16
+
+c reader unloads, load library tape 1
+at ptr file 905FORTLIB1(ISS4).BIN
+at tty inline
+O3L<!!>
+j 16
+
+c reader unloads, load library tape 2
+at ptr file 905FORTLIB2(ISS5).BIN
+r
+
+c reader unloads
+at tty inline
+MM<!!>
+
+j 16
+delete DEMO16.BIN
+sh t
+
+
+

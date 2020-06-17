@@ -1,0 +1,53 @@
+﻿C
+C DEMO3 - MASD Algol Library mode
+C
+on 903 8K
+C load translator
+at ptr file ALG1(MASD).BIN
+j 8181
+c translate program in library mode
+c note use of {} for strings
+at ptr inline
+sine table;
+"begin"
+   "comment" 31-MAR-2011;
+   "integer" x; "real" pi;
+   "real" "procedure" readint;
+   "begin"
+      "read" reader(1), readint;
+   "end" readint;          
+   punch(3);
+   "print" {{LS3}X{S4}SIN(X)};
+   pi := 4 * arctan(1);   
+   "for" x := readint, readint "while" x "ge" 0 "do" 
+      "print" digits(3), x, same line,
+         aligned(2, 6), sin(x * pi / 180);
+"end"
+<!!>
+at ptp file DEMO3.BIN
+j 12
+st 5368
+c add library routines
+at ptr file ALG3(MASD).RLB
+j 9
+de ptp
+st 9
+
+c load interpreter
+at ptr file ALG2(MASD).BIN
+j 8181
+st 8171
+c load rlb overwriting library
+at ptr file DEMO3.BIN
+j 13
+st 7943
+c run program
+at ptr inline
+ 10 20 30 40 50 60 70 80 90 -1
+<!!>
+select out tty
+nonprinting off
+j 10
+st 1727
+delete DEMO3.BIN
+sh t

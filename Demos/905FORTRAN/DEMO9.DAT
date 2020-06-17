@@ -1,0 +1,486 @@
+﻿c
+C McCracken A Guide to FORTRAN IV Programming Case Study 8
+C
+C Load Fortran system
+on 905 16K
+at ptr file 905FORT(ISS6).BIN
+j 8181
+
+C Compile program
+
+nonstop on
+
+at ptp file DEMO9.BIN
+at ptr inline
+
+C  CASE STUDY 8
+C  MEANS, STANDARD DEVIATIONS, AND CORRELATION COEFFICIENT
+C  FOR TWO DISTRIBUTIONS READ FROM CARDS
+C  
+C  THE INPUT DATA APPEARS ON A DECK OF CARDS.  EACH CARD CONTAINS AN
+C  X VALUE IN COLUMNS 1-10 AND ITS ASSOCIATED Y VALUE IN 11-20.
+C  CARDS ARE READ UNTIL DETECTING AN X-VALUE GREATER THAT 1e+08,
+C  WHICH IS USED AS AN END-OF-DECK SENTINEL.
+C
+C  SUMMATIONS ARE MADE AS CARDS ARE READ.  MEANS AND STANDARD
+C  DEVIATIONS ARE THEN COMPUTED FOR BOTH DISTRIBUTIONS, AND BOTH ARE
+C  CHECKED FOR VALUES GREATER THAN 3.0 STANDARD DEVIATIONS AWAY
+C  FROM THE MEAN.  ANY SUCH VALUES ARE DISCARDED, AND UNLESS MORE
+C  THAN 3 PER CENT OF SUCH VALUES WERE DISCARDED, THE MEANS
+C  AND STANDARD DEVIATIONS ARE RECOMPUTED USING ONLY THE GOOD
+C  DATA POINTS.  THE COEFFICIENT OF CORRELATION BETWEEN THE TWO
+C  DISTRIBUTIONS IS THEN COMPUTED AND THE VARIOUS VALUES PRINTED.
+C
+C
+C
+      DIMENSION X(200), Y(200)
+      REAL MEANX, MEANY
+      LOGICAL LX, LY, LXY
+C
+C  INITIALIZE DATA POINT INDEX (I), VARIOUS SUMMATION VARIABLES,
+C  AND DATA POINT COUNTER
+      I      = 1
+      SUMX   = 0.0
+      SUMY   = 0.0
+      SUMXSQ = 0.0
+      SUMYSQ = 0.0
+      SUMXY  = 0.0
+      N      = 0
+C
+C  READ A CARD
+  10  READ (1, 100) X(I), Y(I)
+ 100  FORMAT (2F10.0)
+C
+C  WAS THIS A SENTINEL?
+      IF ( ABS (X(I)) .GT. 1E8 ) GO TO 20
+C
+C  NO -- FORM SUMS, INCREMENT INDEX, AND COUNT THE DATA POINT
+      SUMX   = SUMX   + X(I)
+      SUMY   = SUMY   + Y(I)
+      SUMXSQ = SUMXSQ + X(I)**2
+      SUMYSQ = SUMYSQ + Y(I)**2
+      SUMXY  = SUMXY  + X(I) * Y(I)
+      I = I + 1
+      N = N + 1
+      GO TO 10
+C
+C COMPUTE TENTATIVE DISTRIBUTION MEANS AND STANDARD DEVIATIONS
+  20  MEANX = SUMX / N
+      MEANY = SUMY / N
+      SDEVX = SQRT(N*SUMXSQ - SUMX**2) / N
+      SDEVY = SQRT(N*SUMYSQ - SUMY**2) / N
+C
+C  INITIALIZE FOR CHECKING DATA
+      I    = 1
+      NBAD = 0
+C
+C  CHECK ALL DATA POINTS, SUBTRACTING OFF BAD ONES FROM SUMS
+ 900  FORMAT (4F10.2)
+  30  IF (       ABS(X(I) - MEANX) .LE. 3.0*SDEVX
+     1     .AND. ABS(Y(I) - MEANY) .LE. 3.0*SDEVY) GO TO 40
+C
+C  IF WE GET HERE THE DATA POINT WAS BAD -- SUBTRACT IT AND COUNT IT
+      SUMX   = SUMX   - X(I)
+      SUMY   = SUMY   - Y(I)
+      SUMXSQ = SUMXSQ - X(I)**2
+      SUMYSQ = SUMYSQ - Y(I)**2
+      SUMXY  = SUMXY  - X(I) * Y(I)
+      NBAD   = NBAD + 1
+C
+C  INCREMENT INDEX AND CHECK FOR COMPLETION OF LIST
+  40  I = I + 1
+      IF ( I .LE. N ) GO TO 30
+C      
+C  CHECK WHETHER THERE WERE TOO MANY ERRORS
+C  PRINT COMMENT AND STOP IF SO
+      IF ( NBAD .LT. 0.03 * N) GO TO 50
+      WRITE (3, 200) NBAD
+ 200  FORMAT (I5, 28H ERRORS FOUND -- JOB ABORTED)
+      STOP
+C
+C  SUBTRACT NUMBER OF BAD POINTS FROM N
+  50  N = N - NBAD
+C
+C  COMPUTE ALL VALUES
+      MEANX  = SUMX / N
+      MEANY  = SUMY / N
+      XFACTR = SQRT(N*SUMXSQ - SUMX**2)
+      YFACTR = SQRT(N*SUMYSQ - SUMY**2)
+      SDEVX  = XFACTR / N
+      SDEVY  = YFACTR / N
+      CORRLN = (N*SUMXY - SUMX*SUMY) / (XFACTR*YFACTR)
+C
+C  WRITE OUTPUT
+      WRITE (3, 300) N, MEANX, MEANY, SDEVX, SDEVY, CORRLN
+ 300  FORMAT (29HNUMBER OF GOOD DATA POINTS = , I5/
+     1  25HMEAN OF X DISTRIBUTION = , 1PE14.6/
+     2  25HMEAN OF Y DISTRIBUTION = , E14.6/
+     3  39HSTANDARD DEVIATION OF X DISTRIBUTION = , E14.6/
+     4  39HSTANDARD DEVIATION OF Y DISTRIBUTION = , E14.6/
+     5  29HCOEFFICIENT OF CORRELATION = , E14.6)
+      STOP
+      END
+<! Halt !>
+<!!>
+
+at tty inline
+O0R
+<!!>
+
+j 16
+
+c run out of tty input
+de ptp
+
+reverse DEMO9.BIN
+
+c load loader
+at ptr file ../MASIR/LOADER(ISS3).BIN
+j 8181
+st 8171
+
+c load program
+at ptr file DEMO9.BIN
+at tty inline
+O20L<!!>
+j 16
+
+c read unloads, load library tape 1
+at ptr file 905FORTLIB1(ISS4).BIN
+at tty inline
+O3L<!!>
+j 16
+
+c reader unloads, load library tape 2
+at ptr file 905FORTLIB2(ISS5).BIN
+r
+
+c reader unloads
+at tty inline
+MM<!!>
+at ptr inline
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+99999999999999999999
+<!!>
+j 16
+
+c re-run with added bad data
+at tty inline
+MM<!!>
+at ptr inline 
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+        72       174
+        68       152
+        66       154
+        74       180
+        62       135
+        70       161
+        64       140
+        76       174
+        64       157
+     59999     59999
+99999999999999999999
+<!!>
+j 16
+delete DEMO9.BIN
+sh t
+
+
+
+
+

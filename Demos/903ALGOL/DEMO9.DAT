@@ -1,0 +1,97 @@
+﻿c demonstrate building routines into 2-pass system
+on 903
+telecode 903
+nonprinting off
+at ptr file ALG1(ISS6).BIN
+j 8181
+st 8171
+
+c build double into translator
+at ptr inline
+title;
+"begin" 
+"code" "integer" "procedure" double(i); 
+"value" i; "integer" i; "algol";
+<! h !><!!>
+sel out tty
+j 10
+st 5368
+
+c dump out revised translator
+sel out auto
+at ptp file DEMO9_TRANS.BIN
+j 16
+st 8097
+de ptp
+
+c assemble code procedure
+at ptr file ../903SIR/SIR(ISS6)(5500).BIN
+j 8181
+st 8171
+at ptp file DEMO9_PROC.BIN
+at ptr inline
+
+*0
+[DOUBLE]
+DOUBLE	/14 1		(one parameter)
+		>1		(link)
+		0	138	(FP)
+		/4	3	(first parameter)
+		/1	3
+		/5	0	(result)
+		0	DOUBLE+1
+		/8	1
+%
+<! H !><!!>
+j 8
+st 6239
+de ptp
+
+c build double into interpreter
+at ptr file ALG2(ISS6).BIN
+j 8181
+st 8171
+at ptr file DEMO9_PROC.BIN
+j 12
+st 7943
+at ptp file DEMO9_INT.BIN
+j 14
+de ptp
+
+c run translator with program calling built in function
+clear
+at ptr file DEMO9_TRANS.BIN
+j 8181
+st 8171
+
+at ptr inline
+test;
+"begin" 
+	"print" punch(3), sameline, ''l2`double(1) =`, double(1), ''l2`` "end"
+<! h !><!!>
+
+at ptp file DEMO9.RLB
+j 8
+de ptp
+st 9
+
+c load interpreter
+at ptr file DEMO9_INT.BIN
+j 8181
+st 8171
+
+select out tty
+at ptr file DEMO9.RLB
+j 8
+st 7943
+j 10
+
+c tidy up
+delete DEMO9_INT.BIN
+delete DEMO9_PROC.BIN
+delete DEMO9_TRANS.BIN
+delete DEMO9.RLB
+
+sh t
+
+

@@ -1,0 +1,54 @@
+﻿c GPM10
+
+on 903
+
+c assemble GPM10
+nonprinting off
+select out tty
+at ptr file ../ACDSIR/SIR2P71.BIN
+j 8181
+st 8175
+
+at ptr file GPM10.900
+j 12
+st 562
+
+rewind
+select out auto
+at ptp file GPM10.BIN
+j 10
+st 587
+de ptp
+
+c load gpm10
+at ptr file GPM10.BIN
+j 8181
+st 8175
+
+select out tty
+
+at ptr file GPM10DATA.900
+
+c Statchey examples
+j 8
+st 21
+
+c Strachey examples with original warning characters
+j 11
+st 21
+j 8
+st 21
+
+c GPM quirks
+j 11
+st 21
+j 8 
+st 635
+
+c Hanoi
+j 8
+st 21
+
+delete GPM10.BIN
+
+sh t

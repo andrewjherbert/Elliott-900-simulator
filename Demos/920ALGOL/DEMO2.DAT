@@ -1,0 +1,66 @@
+﻿C
+C DEMO2 - Library mode
+C
+C read in translator
+on 920m 8K
+
+nonprinting off
+
+telecode 920
+
+at ptr file ALG1(920ISS6).BIN mode1
+j  8181
+st 8174
+
+c program source
+Attach ptr inline 920
+
+EXPONENTIAL;
+~BEGIN~
+   ~COMMENT~ 31-MAR-2011.
+              Computes exponentials using Taylor's series;
+   ~REAL~ X, TERM, SUM, DENOM, TEST;
+   ~PRINT~ ''L2` X'S15`SERIES-EXP'S8`FUNCTION-EXP'L2``;
+   ~FOR~ X := 1.0 ~STEP~ 1.0 ~UNTIL~ 20.0 ~DO~
+   ~BEGIN~ 
+      TERM := X;
+      SUM := TERM + 1;
+      ~FOR~ DENOM := 2.0, DENOM+1.0 ~WHILE~ (ABS (TERM) ~GE~ 1.0º-8) ~DO~
+      ~BEGIN~ ~COMMENT~ COMPUTE NEW TERM FROM PREVIOUS TERM;
+         TERM := TERM * (X / DENOM);
+         ~COMMENT~ GET SUM OF TERMS SO FAR;
+         SUM := SUM + TERM;
+      ~END~ SERIES LOOP;
+      TEST := EXP (X);
+      ~PRINT~ FREEPOINT (5), X, ''S5``, PREFIX (''S4``), SCALED(8), SUM, TEST;
+   ~END~ READINT LOOP;
+~END~;
+<! halt !>
+<!!>
+at ptp file DEMO2.RLB
+j 12
+st 9
+
+c copy required library procedures 
+at ptr file ALG3(920ISS7).RLB mode1
+j 9
+de ptp
+st 9
+
+c read in interpreter 
+at ptr file ALG2(920ISS6).BIN mode1
+j 8181
+st 8174
+c read in rlb in large program mode
+at ptr file DEMO2.RLB mode1
+j 13
+st 7943
+
+c run program
+select out tty
+
+j 10
+st 1727
+delete DEMO2.RLB
+sh t
+

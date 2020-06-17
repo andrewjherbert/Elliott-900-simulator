@@ -1,0 +1,28 @@
+﻿c X4 - Store On/Off Test
+
+on 903 8K
+
+nonstop on
+
+at ptr file X4(ISS1).BIN
+j 8181
+st 8174
+
+c start test
+at ptr inline
+<! halt !>
+<!!>
+at ptp file demox4.txt legible
+j 8000
+st 7999
+
+c on physical machine should switch off and on here
+
+rewind
+j 8009
+st 7999
+
+de ptp
+print demox4.txt
+
+sh t

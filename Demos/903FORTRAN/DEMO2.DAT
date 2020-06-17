@@ -1,0 +1,82 @@
+﻿c
+C Demonstrate 2 pass Fortran - batch mode
+C
+C load Fortran translator
+on 903 8K
+telecode 903
+at ptr file 903FORT1(ISS4C).BIN
+j 8181
+st 8171
+
+select out tty
+at ptr inline 903
+      GLOBAL, TAYLOR, ABS, EXP]
+C  BASED ON CASE STUDY 5 (ERROR ANALYSIS IN DOUBLE PRECISION SINE)
+C  IN D.D. MCCRAKEN "A GUIDE TO FORTRAN IV PROGRAMMING".
+      WRITE(2, 90)
+C     LOOP THROUGH VALUES OF X
+      DO 40 I = 1, 20
+C        INITIALIZE
+         X = I
+         TERM = X
+         SUM = TERM + 1
+         DENOM = 2.0
+C        CALCULATE AND SUM NEXT TERM
+10       TERM = TERM * (X / DENOM)
+         SUM = SUM + TERM
+         IF (ABS(TERM) - 1.0E-8) 30, 30, 20
+20       DENOM = DENOM + 1.0
+         GOTO 10
+30       TEST = EXP(X)
+         WRITE(2, 91) I, SUM, TEST
+C      GO ON TO NEXT X
+40     CONTINUE
+       WRITE(2,92)
+       STOP
+90     FORMAT (//, 11HEXPONENTIAL, //, 4H  X , 6X, 10HSERIES-EXP, 
+£              10X, 12HFUNCTION-EXP, //)
+91    FORMAT(I4, 2E20.8)
+92    FORMAT(//)
+      END
+<! Halt !>
+<!!>
+
+C Translate - Report mode
+j 10
+de ptp
+st 2449
+
+C report mode
+rewind
+select out ptp
+C Translate - compile
+at ptp file DEMO2.903
+j 8
+de ptp
+st 2449
+
+C load Fortran runtime
+at ptr file 903FORT2(ISS4A).BIN
+j 8181
+st 8171
+
+C load compiled program with store map
+at ptr file DEMO2.903
+select out tty
+nonprinting off
+j 12
+st 6926
+
+c indicate program complete
+j 10
+st 161
+
+C run program
+j 11
+st 1919
+delete DEMO2.903
+delete DEMO2.BIN
+sh t
+
+
+

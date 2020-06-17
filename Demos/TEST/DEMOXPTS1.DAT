@@ -1,0 +1,28 @@
+﻿c XPTS1 - paper tape reader and punch test
+
+on 903 8K
+
+nonprinting off
+at ptr file XPTS1(ISS1).BIN 
+j 8181
+st 7820
+nonprinting on
+
+c select 8 channel tape
+j 21
+st 23
+
+c produce test tape
+at ptp file DEMOXPTS1A.BIN 
+j 30
+de ptp
+st 137
+
+at ptr file DEMOXPTS1A.BIN 
+at ptp file DEMOXPTS1B.BIN
+nonstop on
+j 32
+de ptp
+st 387
+print DEMOXPTS1B.BIN
+sh t

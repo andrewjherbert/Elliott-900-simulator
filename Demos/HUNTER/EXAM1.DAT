@@ -1,0 +1,45 @@
+﻿c compile program
+on
+telecode 903
+at ptr file ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+at ptr inline
+
+EXAM1;
+"begin"
+   "comment" 30-SEP-1997;
+   "integer" j; "real" pi;
+
+   "code" "real" "procedure" tan(x); "value" x; "real" x;
+   "algol";
+
+   "comment" pretend to have a procedure QATRIG;
+   "code" "procedure" qatrig; "algol";
+
+   "comment" pretend to call QATRIG at the start so 
+             as to ensure that cos and sin are loaded;
+   "if" "false" "then" qatrig;
+
+   pi:=4*arctan(1);
+   "for" j:=0 "step" 1 "until" 8 "do" 
+      "print" digits(4), j, same line, '  `, tan(2*pi*j/18)
+"end"
+<!!>
+j 12
+
+st 1727
+c link in library (which includes tan)
+at ptr file LIBRARY.RLB
+j 9
+
+
+de ptr
+st 7943
+c execute
+sel out tty
+j 10
+st 1727
+sh t
+

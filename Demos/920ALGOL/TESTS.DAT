@@ -1,0 +1,106 @@
+﻿C test various features of elliott algol
+c 
+c does not do overflow checks in comparisons
+c recovers correctly from sqrt error
+c does not handle integer procedure parameters (won't translate)
+c
+
+on 920m
+
+nonprinting off
+telecode 920
+
+c translate program
+at ptr file ALG1(920ISS6).BIN mode1
+j 8181
+st 8174
+at ptr inline 920
+
+ERRORS;
+
+~BEGIN~
+
+~COMMENT~ This program aims to test the various
+faults cured, present, or suspected, in the various
+issues of GECL 903 ALGOL;
+
+
+~COMMENT~ String handling omitted as not relevant for 920 telecode;
+
+~BEGIN~
+~BEGIN~
+
+~COMMENT~ This section tests the integer subtraction
+implied in a condition, i.e. ~IF~ A>B ~THEN~ ....
+Normally this calculation is overflow checked, e.g.
+C := A-B will give an error on integer overflow.
+However in conditions this appears not to be tested;
+
+~INTEGER~ A,B;
+A := +100000;
+B := -100000;
+
+~IF~ A>B
+~THEN~ ~PRINT~ |<|<L|>ALGOL OK|>
+~ELSE~ ~PRINT~ |<|<L|>ALGOL WRONG|>;
+
+~END~;
+
+~BEGIN~
+
+~COMMENT~ This section tries to invoke the
+error of SAN ALGOL/1 whereby re-entry at location
+9 after calling square root with a negative argument
+does not give SQRT(MODULUS(X)) as stated;
+
+~INTEGER~ C;
+~FOR~ C := 1 ~STEP~ 1 ~UNTIL~ 10 ~DO~
+~PRINT~ |<|<L|>|>,SQRT(-C), |<|<S|>|>,SQRT(C);
+
+~END~
+
+
+~COMMENT~ Integer procedure parameter test omitted -- translator give error message; 
+
+~END~
+~END~
+<!!>
+at ptp file TESTS.BIN
+j 8
+de ptp
+st 9
+
+select out tty
+
+c interpret program
+at ptr file ALG2(920ISS6).BIN mode1
+j 8181
+st 8174 
+at ptr file TESTS.BIN mode1
+j 8
+st 7943
+j 10
+
+st 1727
+j 9
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+j
+st 1727
+delete TESTS.BIN
+sh t

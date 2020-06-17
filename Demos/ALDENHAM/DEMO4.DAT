@@ -1,0 +1,15 @@
+﻿C Demonstrate U.4 - MAP
+
+on 903 16K
+
+c Fill store with Algol
+at ptr file ../AJHALGOL/ALG16KLG(AJH).BIN
+j 8181
+
+c now map the store
+at ptr file MAP.BIN
+at tty inline
+5<!!>
+j 8181
+
+sh t

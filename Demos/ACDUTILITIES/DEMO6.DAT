@@ -1,0 +1,87 @@
+﻿c Demonstrate DO-ALL-4
+
+on 903 8K
+runout on
+c load do-all-4
+at ptr file DOALL4.BIN
+j 8181
+st 8175
+
+c demonstrate code conversion and tape joining
+
+at ptp file DEMO6A.920
+at ptr file ..\ESP\ESP1(AJH).903
+
+c set 920 telecode output
+j 9
+st 68
+
+c set clean (4 blanks after newline)
+j 11
+st 74
+
+c read first tape
+j 16
+st 96
+
+c read next tape
+at ptr file ..\ESP\ESP2(ISS2A).900
+j 17
+st 96
+
+c terminate with a halt code
+j 18
+st 57
+
+de ptp
+
+c repeat
+
+at ptp file DEMO6B.920
+at ptr file ..\ESP\ESP1(AJH).903
+
+c set 920 telecode output
+j 9
+st 68
+
+c set clean (4 blanks after newline)
+j 11
+st 74
+
+c read first tape
+j 16
+st 96
+
+c read next tape
+at ptr file ..\ESP\ESP2(ISS2A).900
+j 17
+st 96
+
+c terminate with a halt code
+j 18
+st 57
+
+de ptp
+
+c read and sum check first copy
+at ptr file DEMO6A.920
+j 20
+st 254
+
+c read and compare sum check of second copy
+at ptp file demo6.txt legible
+at ptr file DEMO6B.920
+j 23
+de ptp
+st 1055
+
+print DEMO6B.920
+
+de tty
+
+print demo6.txt
+delete DEMO6A.920
+delete DEMO6B.920
+delete demo6.txt
+
+sh t

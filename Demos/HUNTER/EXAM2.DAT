@@ -1,0 +1,49 @@
+﻿on
+telecode 903
+at ptr file ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+at ptr inline
+
+EXAM2;
+"BEGIN"
+   "COMMENT" 30-SEP-1997.
+             One of the original examples re-written
+             to use the library.
+             What Everybody should know about Algol.
+             Bryan Higman, Computer Journal Vol. 6
+             No. 1, April 1963, pages 50-55.
+             PI equals six times the volume of a
+             one eighth of a unit sphere.
+             Note the use of parameter comments;
+   "REAL" X, Y;
+
+   "code" "REAL" "PROCEDURE" SIMPS(F, X, A, B, DELTA, V);
+          "VALUE" A, B, DELTA, V; "REAL" F, X, A, B, DELTA, V;
+   "algol";
+
+   "PRINT" PUNCH(3), 'PI = `, SAME LINE, 6 * 
+       SIMPS(SIMPS(SQRT(ABS(1 - X^2 - Y^2)))
+             WITH RESPECT TO:(X)
+             FROM:(0)TO:(SQRT(ABS(1 - Y^2)))
+             WITH AN ACCURACY OF:(0.0001)
+             AND DELTA EQUAL TO:(99))
+       WITH RESPECT TO:(Y)
+       FROM:(0)TO:(1)
+       WITH AN ACCURACY OF:(0.0001)
+       AND DELTA EQUAL TO:(99)
+"END"
+<!!>
+j 12
+st 1727
+c link in library (which includes simps)
+at ptr file LIBRARY.RLB
+j 9
+
+de ptr
+st 7943
+c execute
+j 10
+st 1727
+sh t

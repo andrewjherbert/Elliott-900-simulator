@@ -1,0 +1,87 @@
+﻿C DEMONSTRATE QBINOUT (T.17)
+
+on 903 8K
+
+nonprinting off
+
+C load SIR source
+at ptr file ../903SIR/SIR(ISS6)(5500).BIN
+j 8181
+st 8171
+
+
+c patch for QBINOUT
+at ptr inline
+^32
+*3
+<! halt !>
+<!!>
+j 8
+st 6927
+
+c QBINOUT
+at ptr file QBINOUT(ISS1).900
+j 9
+st 6927
+
+
+c QBINOUT parameters and program
+at ptr inline
+^QBINOUT+39
+-29
++1024
+
+^1024
+START	4	8176	(8151)
+	5	8178
+LOOP	0	8178
+	/4	8159
+	7	8155	(8155)
+	15 	6148
+	10 	8178
+	8	8153
+
+
+MSG	+141		
+	+10		(8160)
+	+209	(QBINOUT FECIT)
+	+66
+	+201
+	+78
+	+207		(8165)
+	+85
+	+212
+	+160
+	+198
+	+197		(8170)
+	+195
+	+201
+	+212
+	+141
+	+10		(8175)
+ZERO	+0
+
+	8	8151	(8177)
+COUNT	+0		
+	+0
+
+%
+<! halt !>
+<!!>
+j 9
+st 6927
+
+c run QBINOUT
+at ptp file DEMO4.BIN
+j 32
+de ptp
+st 50
+
+c run output scb tape
+at ptr file DEMO4.BIN
+j 8181
+st 8155
+
+delete DEMO4.BIN
+
+sh t

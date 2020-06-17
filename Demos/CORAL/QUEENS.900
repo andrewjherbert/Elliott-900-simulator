@@ -1,0 +1,67 @@
+
+'CORAL'
+'PROGRAM' EIGHTQUEENS
+'SEGMENT' EIGHTQUEENS
+'BEGIN'
+
+   'PROCEDURE' PUNCH ('VALUE''INTEGER' CHAR); 'BEGIN'
+      'INTEGER' P; P := CHAR;
+      'FOR' P := P 'WHILE' P > 0 'DO' 'BEGIN'
+         P := P 'MASK' 'INTEGER'(P-1);
+         CHAR := CHAR 'DIFFER' 128;
+      'END';
+      'CODE''BEGIN' 4,CHAR; 15,6148; 'END';
+   'END' PUNCH;
+
+   'DEFINE' TRUE^<1>^;
+   'DEFINE' FALSE^<0>^;
+
+   'INTEGER''ARRAY' A [1:8];
+   'INTEGER''ARRAY' B [2:16];
+   'INTEGER''ARRAY' C [-7:7];
+   'INTEGER''ARRAY' X [1:8];
+   'INTEGER' K;
+
+   'PROCEDURE' TRYX; 'BEGIN'
+      'INTEGER' N;
+      'FOR' N := 1 'STEP' 1 'UNTIL' 8 'DO' 'BEGIN'
+         PUNCH (X[N]+48); PUNCH (32);
+      'END';
+      PUNCH (13); PUNCH (10);
+   'END';
+
+   'DEFINE' TRY (THIS, I, THAT) ^<
+   'PROCEDURE' THIS; 'BEGIN'
+      'INTEGER' J;
+      'FOR' J := 1 'STEP' 1 'UNTIL' 8 'DO' 'BEGIN'
+         'IF' A [J] = TRUE 'AND' B [I+J] = TRUE
+         'AND' C [I-J] = TRUE 'THEN' 'BEGIN'
+            X [I] := J;
+            A [J] := FALSE;
+            B [I+J] := FALSE;
+            C [I-J] := FALSE;
+            THAT;
+            A [J] := TRUE;
+            B [I+J] := TRUE;
+            C [I-J] := TRUE;
+         'END';
+      'END';
+   'END' >^;
+
+   TRY (TRY8, 8, TRYX);
+   TRY (TRY7, 7, TRY8);
+   TRY (TRY6, 6, TRY7);
+   TRY (TRY5, 5, TRY6);
+   TRY (TRY4, 4, TRY5);
+   TRY (TRY3, 3, TRY4);
+   TRY (TRY2, 2, TRY3);
+   TRY (TRY1, 1, TRY2);
+
+   'FOR' K :=  1 'STEP' 1 'UNTIL'  8 'DO' A [K] := TRUE;
+   'FOR' K :=  2 'STEP' 1 'UNTIL' 16 'DO' B [K] := TRUE;
+   'FOR' K := -7 'STEP' 1 'UNTIL'  7 'DO' C [K] := TRUE;
+   TRY1;
+
+'END'
+'FINISH'
+<! halt !>

@@ -1,0 +1,28 @@
+
+'CORAL'
+'LIBRARY' EXAMPLE CORAL PROGRAM
+
+'COMMENT'
+        THIS PROGRAM HAS BEEN WRITTEN TO DEMONSTRATE THE
+        USE OF AND INFORMATION SUPPLIED BY THE 920C CORAL
+        COMPILER AND LOADER ;
+
+'PROCEDURE' ADDTHEM       / 2 ('VALUE''INTEGER' W;
+                               'LOCATION''INTEGER' X) ;
+                X:=W+3 ;
+
+'PROCEDURE' SUBTRACTTHEM  / 4 ('VALUE''INTEGER' Y;
+                               'LOCATION''INTEGER' Z) ;
+                Z:=Y-3 ;
+
+'PROCEDURE' PUNCH         / 8 ('VALUE''INTEGER' CHAR); 'BEGIN'
+      'INTEGER' P; P := CHAR;
+      'FOR' P := P 'WHILE' P > 0 'DO' 'BEGIN'
+         P := P 'MASK' 'INTEGER'(P-1);
+         CHAR := CHAR 'DIFFER' 128;
+      'END';
+      'CODE''BEGIN' 4,CHAR; 15,6148; 'END';
+   'END' PUNCH;
+
+'FINISH'
+<! HALT !>

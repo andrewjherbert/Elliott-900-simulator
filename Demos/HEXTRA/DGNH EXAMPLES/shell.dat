@@ -1,0 +1,73 @@
+   OPASC
+   IPBIN
+   ^8273
+   8 86   (no call by name)
+   ADLIB
+   JUMP 12
+   IPASC
+shell;
+"begin"
+   "comment" 18-OCT-1999;
+ 
+   "integer" dots, j, x, y, z;
+   "real"    alpha, dist, eyesep, offset, pi,
+             radius, size, squash,
+             w, w1, w2, w3, x1, y1, z1;
+   "code" "procedure" unsigned; "algol";
+
+   "real" "procedure" Wichmann;
+   "begin"
+      "comment" The Wichmann-Hill portable random number
+                generator. B. A. Wichmann and I. D. Hill,
+                An Efficient and Portable Pseudo-Random Number
+                Generator, Applied Statistics, 31 (No. 2),
+                188-190 (1982) ;
+      "real" w;
+      x := 171 * (x - (x "div" 177) * 177) -  2 * (x "div" 177);
+      y := 172 * (y - (y "div" 176) * 176) - 35 * (y "div" 176);
+      z := 170 * (z - (z "div" 178) * 178) - 63 * (z "div" 178);
+      "if" x < 0 "then" x := x + 30269;
+      "if" y < 0 "then" y := y + 30307;
+      "if" z < 0 "then" z := z + 30323;
+      w := x/30269.0 + y/30307.0 + z/30323.0;
+      Wichmann := w - entier(w) 
+   "end" of Wichmann;
+
+   unsigned;
+   pi := 4 * arctan(1); 
+   "read"  dist, dots, eyesep, offset, radius,
+           size, squash,   x, y, z;
+   "print" ''L@dist, dots, eyesep, offset, radius@;
+   "print" ''L@size, squash, x, y, z = @;
+   "print" digits(3), aligned(3, 1), dist, same line, '  @, dots,
+           '  @, eyesep, '  @, offset, '  @, radius;
+   "print" digits(3), aligned(3, 1), size, same line, '  @, squash,
+           '  @, x, '  @, y, '  @, z;
+   w1 := arctan(eyesep / (2.0 * (dist + radius))); 
+   w2 := arctan(eyesep / (2.0 * (dist - radius)));
+   w3 := dist * (w2 - w1) * 0.5;
+   alpha := (w3 / radius) * squash; 
+   "for" j := 1 "step" 1 "until" dots "do"
+   "begin"
+      x1 := 2.0 * radius * (Wichmann - 0.5);
+      y1 := 2.0 * radius * (Wichmann - 0.5);
+      z1 := 2.0 * radius * (Wichmann - 0.5);
+      w := sqrt(x1 * x1 + y1 * y1 + z1 * z1);
+      w := radius / w;
+      x1 := x1 * w;
+      y1 := y1 * w;
+      z1 := z1 * w;      
+      w1 := x1 + radius;
+      w2 := y1 + radius;
+      "print" ''Lb92b@put(@, same line, aligned(3,1),
+              offset + w1 - alpha * z1, ',@, w2,
+              ')'b123b92@circle*'b123@@,size,''b125b125@@;
+      "print" ''Lb92b@put(@, same line, aligned(3,1),
+              offset + eyesep + w1 + alpha * z1, ',@, w2,
+              ')'b123b92@circle*'b123@@,size,''b125b125@@;
+   "end"
+"end"
+
+  300.0  70  58.0  5.0  15.0  0.6  0.5  123  75  113
+
+  

@@ -1,0 +1,25 @@
+﻿c X8 - trace facility test
+
+on 903 8K
+
+c load test program
+at ptr file X8(ISS3).BIN
+j 8181
+st 8174
+
+select out tty
+
+c load parameter tape
+at ptr file DEMOX8.BIN 
+
+c start test
+nonstop on
+step 1000
+j 8
+
+c here on step limit
+traceinterrupt 1 on
+restart
+
+c should run off tape here after about 2' 48''
+sh t

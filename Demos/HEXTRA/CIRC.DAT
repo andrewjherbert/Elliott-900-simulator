@@ -1,0 +1,35 @@
+﻿
+on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+at ptr inline
+circ;
+"begin"
+   "real" c, lat1, lat2, lon1, lon2, pi;
+
+   "print" ''L`Input lat1, lon1, lat2, lon2 (in degrees)'L2``;
+
+   "read" lat1, lon1, lat2, lon2;
+   pi := 4 * arctan(1);
+
+   lat1 := lat1 * pi / 180;
+   lon1 := lon1 * pi / 180;
+   lat2 := lat2 * pi / 180;
+   lon2 := lon2 * pi / 180;
+   c := sin(lat1) * sin(lat2) +
+        cos(lat1) * cos(lat2) * cos(lon2 - lon1);
+   "print" arctan(sqrt(abs(1 - c^2))/c) * 180 / pi +
+           ("if" c < 0 "then" 180 "else" 0)
+"end"
+
+  45.99  130.21  55.97  154.83
+<!!>
+j 8
+st 7943
+select out tty
+j 10
+st 1727
+sh t

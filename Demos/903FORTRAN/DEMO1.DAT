@@ -1,0 +1,37 @@
+﻿c
+C Demonstrate load and go Fortran
+C
+C Load Fortran system
+on 903 16K
+telecode 903
+at ptr file 903FORT16KLG(ISS5).BIN
+j 8181
+st 8171
+
+C Translate program with store map
+select out tty
+nonprinting off
+at ptr inline
+      GLOBAL, SQUARE ]
+C     TABLE OF SQUARES
+      WRITE (2, 90)
+      DO 10 I = 1,  10
+10    WRITE (2, 91) I, I**2
+      STOP
+90    FORMAT (17H TABLE OF SQUARES)
+91    FORMAT (I7, I6)
+      END
+<! Halt !>
+<!!>
+j 12
+st 6926
+j 10
+
+st 161
+j 11
+
+st 1919
+sh t
+
+
+

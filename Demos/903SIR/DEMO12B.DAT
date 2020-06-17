@@ -1,0 +1,276 @@
+﻿c demonstrate QPLOT
+
+on 903 8K
+
+at ptr file SIR(ISS6)(5500).BIN
+j 8181
+st 8171
+
+nonprinting off
+select out tty
+
+
+at ptr inline
+
+*19
+
+[PLOT QPLOT]
+(initialize QPLOT)
+
+PLOT	4	+0
+	5	QPLOT+4	(y1)
+	5	QPLOT+6	(y2)
+	4	+4000
+	5	QPLOT+3	(x1)
+	5	QPLOT+5	(x2)
+	(lower pen, no movement as x1=x2, y1=y2)
+	11	QPLOT	
+	8	QPLOT+1
+	+2
+	(raise and move pen until margin stop is reached)
+	4	-10
+	5	QPLOT+3
+	11	QPLOT
+	8	QPLOT+1
+	+1
+        (move pen to the origin, just clear of the margin)
+	4	+0
+	5	QPLOT+3
+	11	QPLOT
+	8	QPLOT+1
+	+1
+	(move to 100, 500)
+	4	+100
+	5	QPLOT+3
+	4	+500
+	5	QPLOT+4
+	11	QPLOT
+	8	QPLOT+1
+	+1
+	(draw character A on line y=500, default size [20])
+	4	\  A
+	11	QPLOT
+	8	QPLOT+2
+	+0
+	(draw B, C following, increasing in size)
+	4	\  B
+	11	QPLOT
+	8	QPLOT+2
+	+24
+	4	\  C
+	11	QPLOT
+	8	QPLOT+2
+	+30
+        (draw a box around A - 20 by 20)
+ 	4	+100	(reposition at 100, 500)
+	5	QPLOT+3
+	4	+500
+	5	QPLOT+4
+	11	QPLOT
+	8	QPLOT+1 
+        +1
+        4	+120
+        5	QPLOT+3
+	11	QPLOT
+	8	QPLOT+1
+	+2
+	4	+520
+	5	QPLOT+4
+	11	QPLOT
+	8	QPLOT+1
+	+2
+	4	+100
+	5	QPLOT+3
+	11	QPLOT
+	8	QPLOT+1
+	+2
+	4	+500
+	5	QPLOT+4
+	11	QPLOT
+	8	QPLOT+1
+	+2
+
+	(draw character X centred on 300, 600)
+	4	+300	(x1)
+	5	QPLOT+3
+	4	+600	(y1)
+	5	QPLOT+4
+	11	QPLOT	(move)
+	8	QPLOT+1
+	+1
+	4	\  X
+	11	QPLOT	(plot character)
+	8	QPLOT+2
+	-40		(centre on x1, y1, size 40 steps)
+	(position and draw Y, Z following increasing in size)
+	4	+400	(x1)
+	5	QPLOT+3
+	4	+600	(y1)
+	5	QPLOT+4
+	11	QPLOT	(move)
+	8	QPLOT+1
+	+1
+	4	\  Y
+	11	QPLOT	(plot character)
+	8	QPLOT+2
+	-60		(centre on x1, y1, size 60)
+	4	+500	(x1)
+	5	QPLOT+3
+	4	+600	(y1)
+	5	QPLOT+4
+	11	QPLOT	(move)
+	8	QPLOT+1
+	+1		
+	4	\  Z
+	11	QPLOT	(plot character)
+	8	QPLOT+2
+	-80		(centre on x1, y1 size 80 steps)
+	(plot a box around character note 160 by 160)
+	4	+420	(movepen 420, 520)
+	5	QPLOT+3
+	4	+520
+	5	QPLOT+4
+	11	QPLOT
+	8	QPLOT+1
+	+1
+	4	+680	(drawline 420, 680)
+	5	QPLOT+4
+	11	QPLOT
+	8	QPLOT+1
+	+2
+	4	+580	(drawline 580, 680)
+	5	QPLOT+3
+	11	QPLOT
+	8	QPLOT+1
+	+0		(no pen change required)
+	4	+520	(drawline 540, 520)
+	5	QPLOT+4
+	11	QPLOT
+	8	QPLOT+1
+	+2
+	4	+420	(drawline 420, 520)
+	5	QPLOT+3
+	11	QPLOT
+	8	QPLOT+1
+	+2
+
+        (plot same size, along y, boxed)
+        (size = 80)
+	4	+580
+	5	QPLOT+3
+	4	+520
+	5	QPLOT+4
+	11	QPLOT
+	8	QPLOT+1
+	+1
+	4	\  P
+        11	QPLOT
+	8	QPLOT+2
+	+80
+	4	+580
+	5	QPLOT+3
+	4	+600
+	5	QPLOT+4
+	11	QPLOT
+	8	QPLOT+1
+	+1
+	4	+660
+	5	QPLOT+3
+	11	QPLOT
+	8	QPLOT+1
+	+2
+	4	+520
+	5	QPLOT+4
+	11	QPLOT
+	8	QPLOT+1
+	+2
+	4	+580
+	5	QPLOT+3
+	11	QPLOT
+	8	QPLOT+1
+	+2
+
+	(demonstrate adding characters to QPLOT table)
+
+	4	+300
+	5	QPLOT+3
+	5	QPLOT+4
+	11	QPLOT
+	8	QPLOT+1
+	+1
+	4	\  M
+	11	QPLOT
+	8	QPLOT+2
+	+60
+        4	SLASHP
+	5	QPLOT+198
+        4	\  /
+	11	QPLOT
+	8	QPLOT+2
+	+60
+        4	BRAP
+	5	QPLOT+191
+        4	\  (
+	11	QPLOT
+	8	QPLOT+2
+	+60
+        4	KETP
+	5	QPLOT+192
+	4	\  )
+	11	QPLOT
+	8	QPLOT+2
+	+60
+	4	\  N
+	11	QPLOT
+	8	QPLOT+2
+	+60
+        
+	8	;+0
+
+SLASHP	0 SLASH
+SLASH	&773767 		(turning points for /)
+	&005031
+
+BRAP	0 BRA
+BRA	&003767			(turning points for open bracket)
+	&001770
+	&776774
+	&775776
+	&775002
+	&776004
+	&001010
+	&003031
+
+KETP    0 KET
+KET     &775767			(turning points for close bracket)
+	&777770
+	&002774
+	&003776
+	&003002
+	&002004
+	&777010
+	&775031
+
+<! halt !><!!>
+j 8
+st 6927
+
+at ptr file QPLOT(TJF1).900
+j 9
+st 6927
+
+
+at ptr inline
+
+%
+<! halt !><!!>
+j 9
+st 6927
+
+c start plotting
+j 32
+
+de plt
+sh t
+
+	

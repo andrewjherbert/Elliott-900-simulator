@@ -1,0 +1,21 @@
+﻿C WORKSHOP Calculator Program
+
+c demonstrate iteration.
+
+on 903 8K
+at ptr file ONLINE.BIN
+at tty inline
+
+\ajh006
+where a = 4
+calculate b = 2 * a
+print b
+iterate a = b
+run
+run
+run
+run
+&
+<!!>
+j 8181
+sh t

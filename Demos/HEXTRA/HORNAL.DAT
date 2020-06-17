@@ -1,0 +1,43 @@
+﻿
+on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+at ptr inline
+
+horn;
+"begin"
+   "comment" 22-AUG-1996. Procedure simps independently compiled;
+   "integer" j,n;
+   "real" y0, z0, my, mz, s, x;
+
+   "code" "real" "procedure" simps(f, x, a, b, delta, v);
+          "value" a, b, delta, v; "real" f, x, a, b, delta, v;
+   "algol";
+
+   "read" y0, z0, my, mz, s, n;
+   "print" ''LS4`Z'S7`WX'S7`LX'S7`WY'S7`LY`;
+
+   "for" j := 1 "step" 1 "until" n "do"
+   "print" aligned(2, 1), s * j, same line, aligned(4, 3),
+   y0 * exp(my * s * j),
+   simps(sqrt(1 + (y0 * my * exp(my * x))^2), 
+                    x, 0, j * s, 0.001, 100),
+   z0 * exp(mz * s * j),
+   simps(sqrt(1 + (z0 * mz * exp(mz * x))^2),
+                    x, 0, j * s, 0.001, 100)
+"end"
+<!!>
+j 12
+st 1727
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+at ptr inline
+0.75 0.1875 0.335 0.565 0.5 12
+<!!>
+select out tty
+j 10
+st 1727
+sh t

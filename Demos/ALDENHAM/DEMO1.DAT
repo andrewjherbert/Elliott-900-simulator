@@ -1,0 +1,57 @@
+﻿C Demonstrate U.1 READIT
+
+on 903
+
+nonstop on
+at ptr file READIT.BIN
+at tty inline
+1<!!>
+j 8181
+at ptr file ../AJHALGOL/ALG1(AJH).BIN
+r
+
+at ptr file READIT.BIN
+at tty inline
+2<!!>
+j 8181
+at ptr file ../AJHALGOL/ALG1(AJH).BIN
+r
+
+at ptr file READIT.BIN
+at tty inline
+3<!!>
+j 8181
+at ptr file ../AJHALGOL/ALG1(AJH).BIN
+r
+
+at ptr file READIT.BIN
+at tty inline
+4<!!>
+j 8181
+at ptr file ../AJHALGOL/ALG1(AJH).BIN
+
+at ptr file READIT.BIN
+at tty inline
+5<!!>
+j 8181
+at ptr file ../AJHALGOL/ALG1(AJH).BIN
+r
+
+at ptr file READIT.BIN
+at tty inline
+6<!!>
+j 8181
+at ptr file ../AJHALGOL/ALG1(AJH).BIN
+r
+
+at ptr file READIT.BIN
+at tty inline
+7<!!>
+j 8181
+at ptr file ../AJHALGOL/ALG1(AJH).BIN
+r
+
+sh t
+
+
+

@@ -1,0 +1,16 @@
+﻿c
+c 920 Algol demos
+c
+on 920b 8k
+
+do demo1
+pause
+
+do demo2
+pause
+
+do demo3
+pause
+
+do tests
+pause

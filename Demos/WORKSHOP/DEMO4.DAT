@@ -1,0 +1,31 @@
+﻿C WORKSHOP Calculator Program
+
+c Demonstrate "offline" working.
+c Punches "program" to tape
+
+on 903 8K
+select in ptr
+select out ptp
+at ptp file TEMP.900
+at ptr file OFFLINE.BIN
+nonstop on
+j 8181
+at ptr inline
+
+\ajh006
+where a = 4
+calculate b = 2 * a
+print b
+iterate a = b
+run
+run
+run
+run
+&
+<! halt !>
+<!!>
+r
+de ptp
+print TEMP.900
+delete TEMP.900
+sh t

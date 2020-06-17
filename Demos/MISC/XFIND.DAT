@@ -1,0 +1,23 @@
+﻿c XFID - Demonstration SIR program
+
+on 903
+
+at ptr file ../903SIR/SIR(ISS6)(5500).BIN
+j 8181
+st 8171
+
+
+c assemble program
+at ptr file XFIND.900
+j 8
+st 6927
+
+at ptp file xfind.txt legible
+c run program
+j 32
+st 255
+de ptp
+print xfind.txt
+delete xfind.txt
+
+sh t

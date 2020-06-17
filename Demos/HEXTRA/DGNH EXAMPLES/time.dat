@@ -1,0 +1,41 @@
+
+    IPBIN
+    ADLIB
+    OPASC
+    JUMP 12
+    IPASC
+time;
+"begin"
+   "integer" j, k;
+   "real" x, y, z;
+   "code" "procedure" date time; "algol";
+   "real" "array" a[1:10], b[1:10, 1:10];
+   "procedure" fred(x); "value" x; "real" x;
+   "begin"
+      z := 2*x;
+   "end";
+   date time;
+   "for" j := 1 "step" 1 "until" 10 "do"
+   "begin"
+      a[j] := j*j;
+      "for" k := 1 "step" 1 "until" 10 "do" b[j, k] := j * k
+   "end";
+
+   "print" ''L@start'L@@;
+   "for" j := 1 "step" 1 "until" 1000 "do"
+   "begin"
+      x := 2.6;
+      y := 5.3;
+      x := 5.8 + a[5];
+      y := 6.2 + b[6,3];
+      x := cos(2.1);
+      y := ln(4.2);
+      x := arctan(0.5);
+      y := exp(2.1);
+      k := 25 + 47;
+      fred(4.6);      
+   "end";
+   "print" ''L@stop'L@@;
+   date time;
+"end"
+

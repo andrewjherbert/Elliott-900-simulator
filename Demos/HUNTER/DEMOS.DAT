@@ -1,0 +1,168 @@
+﻿C Test battery for Don Hunter LGALGOL
+
+C Select generic 900
+On
+
+C Load module files to create load and go image
+LoadModule 0 M0.DAT
+LoadModule 1 M1.DAT
+DumpImage 16384 LGALGOL.IMG
+
+C DEMO1: Table of Squares
+
+do demo1
+pause
+
+C DEMO2: Man or Boy (64K) - use of recursion 
+C        - note use of local procedure
+C         to overcome fact variables in body of 
+C         a procedure are static
+
+do demo2
+
+C reset machine
+lo LGALGOL.IMG
+reset
+pause
+
+C DEMO3: Primes
+
+do demo3
+pause
+
+C DEMO4: Integration - call by name
+
+do demo4
+pause
+
+C DEMO5: Use of lower case and number input
+
+do demo5
+pause
+
+C DEMO6: String handling including special characters
+C n.b. DEMO6 must be a unicode file, not ascii
+
+do demo6
+pause
+
+C DEMO7: Using RLB libraries
+
+do demo7
+pause
+
+C DEMO8: Rising and setting time of Sun and Moon, uses RLB 
+C        libraries, shows option to make code compact by 
+C        disallowing call-by-name
+
+do demo8
+pause
+
+C DEMO9: Quicksort - use of recursion - note use of local procedure
+C        to overcome fact variables in body of a procedure are static
+
+do demo9
+pause
+
+C DEMO10: Factorization
+
+do demo10
+pause
+
+C DEMO11: 2 pass versions of Hunter ALGOL
+
+do demo11
+pause
+
+C DEMO12: Report Mode
+
+do demo12
+pause
+
+C DEMO13: Lineprinter and card reader
+
+do demo13
+pause
+
+C DEMO14: KDF9 specimen program;
+
+do demo14
+pause
+
+C TAN: Example of separate compilation 
+C      - produce an RLB for a procedure "tan"
+
+do tan
+pause
+
+C EXAM1: Example of use of library scan 
+C        - using "tan" procedure produced by TAN demo
+
+do exam1
+pause
+
+C SIMPS: Example of separate compilation 
+C        - produce an RLB for a procedure "simps"
+
+do simps
+pause
+
+C EXAM2: Example of library scan using simps procedure
+
+do exam2
+pause
+
+C DET, SOL, COPY and SIGMA: Examples of separate compilation
+
+do det
+do sol
+do copy
+do sigma
+pause
+
+C EXAM3: Example of library scan using Det, Sol, Copy and Sigma
+
+do exam3
+pause
+
+C CORNU: Example of plotting - cornu spiral
+
+do cornu
+pause
+
+C LOOP: Example of plotting - aircraft looping the loop
+
+do loop
+pause
+
+
+C SUNDIAL: Example of plotting - sundial correction table
+
+do sundial
+pause
+
+C MOON: Example of plotting - trajectory of Apollo mission
+
+do moon
+pause
+
+C MOONQUIK Example of plotting - trajectory of Apollo mission
+
+
+do moon quik
+pause
+
+C NAVIG Example of plotting - calculate ship's position
+
+do navig
+pause
+
+C WALK Example of plotting - random walk
+
+do walk
+pause
+
+C TEST: check for various bug fixes and extensions
+
+do tests
+pause

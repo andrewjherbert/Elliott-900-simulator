@@ -1,0 +1,71 @@
+﻿C DEMONSTRATE MAGENETIC TAPE TEST PROGRAM XTM73
+
+on 903
+
+delete tape1
+delete tape2
+delete tape3
+delete tape4
+
+at mt 0 tape1 wp
+at mt 1 tape2 wp
+at mt 2 tape3 wp
+at mt 3 tape4 wp
+
+
+at ptr file XMT73(ISS1).BIN
+j 8181
+st 8171
+
+j 23
+st 242
+
+C cyclic tape change
+
+de mt 0
+de mt 1
+de mt 2
+de mt 3
+
+at mt 0 tape2 wp
+at mt 1 tape3 wp
+at mt 2 tape4 wp
+at mt 3 tape1 wp
+
+j 30
+st 242
+
+C cyclic tape change
+
+de mt 0
+de mt 1
+de mt 2
+de mt 3
+
+at mt 0 tape3 wp
+at mt 1 tape4 wp
+at mt 2 tape1 wp
+at mt 3 tape2 wp
+
+j 30
+st 242
+
+C cyclic tape change
+
+de mt 0
+de mt 1
+de mt 2
+de mt 3
+
+at mt 0 tape4 wp
+at mt 1 tape1 wp
+at mt 2 tape2 wp
+at mt 3 tape3 wp
+
+sh t
+
+j 30
+st 242
+sh t
+
+

@@ -1,0 +1,211 @@
+   OPASC
+   IPBIN
+   ^8273   (no call by name)
+   8 86
+   ADLIB
+   JUMP 12
+   IPASC
+fbase;
+"begin"
+   "comment" 27-APR-1998
+             David M. Bressoud.
+             Factorization and Primality Testing.
+             Springer-Verlag 1989.
+
+             Separately assembled stuff declared first;
+
+   "code" "procedure" date time; "algol";
+   "code" "procedure" lead zero;  "algol";
+   "code" "procedure" lead blank; "algol";
+   "code" "procedure" unsigned;   "algol";
+   "code" "procedure" revert;     "algol";
+   "code" "integer" "procedure" max int; "algol";
+   "code" "procedure" add(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" sub(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" mpy(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" div(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" copy(a,b);
+          "integer" "array" a,b; 
+   "algol";
+   "code" "procedure" if(a,b,L); 
+          "integer" "array" a,b; "label" L;
+   "algol";
+   "code" "procedure" mod2(x,aa,b); 
+          "integer" "array" x,aa,b;
+   "algol";
+   "code" "procedure" multiply(a,b,c,n); "value" n;
+          "integer" "array" a,b,c; "integer" n;
+   "algol";
+   "code" "procedure" divide(x,y,a,b);
+          "integer" "array" x,y,a,b;
+   "algol";
+   "code" "procedure" mod(x,a,b);
+          "integer" "array" x,a,b;
+   "algol";
+
+   "integer" n,ks,m;
+   "comment" Program start;
+   date time;
+   "print" ''L@27-APR-1998'L@@;
+   "read" n,ks,m; 
+   "print" n, same line, ks, m;
+   "begin"
+      "integer" "array" nb,work,w1,w2,zero[1:n],
+                        ps[1:m],
+                        z1,z2[1:1],
+                        ac,bc[1:2];
+      "integer" l1,l2,j,k;
+
+      "comment" The procedures, get and put, could be provided
+                with an extra parameter, n, and stowed alongside
+                the declarations of the assembly-coded procedures.
+
+                However, get uses add, and add needs its arrays
+                to be located withing 8192 words of each other.
+                Hence get actually needs to access a non-local
+                array, work, and therefore needs to be located
+                here. The same get and put have been used in all
+                the programs for consistency;
+ 
+      "procedure" get(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k;
+         "for" j := 1 "step" 1 "until" n "do" a[j] := work[j] := 0;
+
+         "for" j := j "while" "not" buffer(1,s) "do"
+         "begin"
+            mpy(a,100000);
+            "read" work[n];
+            add(a,a,work)
+         "end"
+      "end" of get;
+
+      "procedure" put(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k,L,m,p,r,half;
+         "boolean" zero;
+         "integer" "array" work[1:2*n+1];
+
+         "boolean" "procedure" fin;
+         "begin"
+            "integer" k;
+            fin := "true";
+            "for" k := 1 "step" 1 "until" n "do"
+               "if" work[k] "ne" 0 "then" fin := "false"
+         "end" of fin;
+
+         "procedure" group;
+         "begin"
+            "integer" s;
+            s := 10^r; mpy(work, s);
+            "if" zero "then" "print" ' @;
+            "print" digits(5), same line, work[n];
+            work[n] := 0
+         "end" of group;
+ 
+         half := (max int "div" 2) + 1;
+         "for" j := 1 "step" 1 "until" 2*n+1 "do" work[j] :=
+            "if" j "le" n "then" a[j] "else" 0;
+         work[n+1] := half;
+
+         "for" j := -5, j+5 "while" "not" fin "do" div(work, 100000);
+         mpy(work, 100000);
+         "for" j := j, j+1 "while" "not" fin "do" div(work, 10);
+
+         L := ((j-1) "div" 50) + 1;
+         m := j - (L-1) * 50;
+         p := ((m-1) "div" 5) + 1;
+ 
+         "print" ''L@@;
+         r := m - (p-1) * 5;
+         zero := "false";
+         group;
+         lead zero;
+         unsigned;
+         zero := "true";
+         r := 5;
+         "for" k := 1 "step" 1 "until" p-1 "do" group;
+         "for" j := 2 "step" 1 "until" L "do"
+         "begin"
+            "print" ''L@@;
+            "for" k := 1 "step" 1 "until" 10 "do" group
+         "end";
+         lead blank;
+         revert;
+         "print" s
+      "end" of put;
+
+      "comment" prime returns the next prime after x;
+      "integer" "procedure" prime(x); "value" x; "integer" x;
+      "begin"
+         "integer" k,L;
+         "boolean" found,next;
+         k := x;
+         next := "false";
+         "for" k := k+2 "while" "not" next "do"
+         "begin"
+            L := 1;
+            found := "false";
+            "for" L := L+2 "while" L*L "le" k "and" "not" found "do"
+               found := (k "div" L) * L = k;
+            next := "not" found
+         "end";
+         prime := "if" x = 2 "then" 3 "else" k-2
+      "end";
+
+      "for" j := 1 "step" 1 "until" n "do" zero[j] := 0;
+      get(nb,'P@);
+      put(nb,'P@);
+      ps[1] := 2;
+      "comment" This does not follow the method given in
+                Bressoud's book, but uses a direct method
+                which is probably slower;
+      "for" l1 := 2 "step" 1 "until" m "do"
+      "begin"
+         ps[l1] := ps[l1-1];
+again:
+         ps[l1] := prime(ps[l1]);
+         j := ps[l1];
+         k := (j-1) "div" 2;
+         copy(w1,nb);
+         mpy(w1,ks);
+         copy(w2,w1);
+         div(w2,j);
+         mpy(w2,j);
+         sub(w1,w1,w2);
+         z1[1] := z2[1] := w1[n];
+         "for" l2 := 2 "step" 1 "until" k "do"
+         "begin"
+            multiply(ac,z1,z2,1);
+            copy(bc,ac);
+            div(bc,j);
+            mpy(bc,j);
+            sub(ac,ac,bc);
+            z1[1] := ac[2]
+         "end";
+         "if" z1[1] = 0 "or" z1[1] = 1 "then"
+         "begin"
+            "if" l1 = 2 "then" "print" ''L@    2@;
+            "if" ((l1-1) "div" 10) * 10 = l1-1 "then" "print" ''L@@;
+            "print" same line, digits(4), ps[l1]
+         "end" "else" "goto" again
+      "end"
+   "end";
+   "print" ''L@@
+"end"
+
+  3  1  29
+  499  94860  12441P
+
+
+ 

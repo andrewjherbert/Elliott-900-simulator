@@ -1,0 +1,592 @@
+﻿C DEMONSTRATE MAGNETIC TAPE LIBRARIES
+
+on 903
+
+c ensure tape files do not exist
+delete tape1
+delete tape2
+
+c initialize two scratch tapes
+at ptr file ../903UTILITIES/MTINIT(ISS3).BIN
+j 8181
+st 8171
+
+c mount tape with write permit ring fitted
+at mt 0 tape1 wp
+at mt 1 tape2 wp
+
+at tty inline
+ 0: SCRATCH:
+ 1: SCRATCH:<!!>
+j 32
+st 1395
+j 9
+st 1395
+
+c load SIR assembler
+at ptr file SIR(ISS6)(5500).BIN
+j 8181
+st 8171
+select out tty
+nonprinting off
+
+at ptr inline
+*23
+[ QMT QMOPEN QMREAD QMWRITE QMCLOSE QMREND QMSTAT
+  QMR QMRIN QMROUT QMREND
+  QERROR QDOUT
+  "NEWLIN "NEWLI2 "OUTSTR ]
+
+MAIN	4	+3		( select telerprinter output )
+	5	QDOUT
+	4	BUFSZ		( set up buffers )
+	5	BUFL0
+	5	BUFL1
+	4	+0
+	5	RECMK0
+	5	RECMK1
+	11	NEWLIN		( output starting message )
+	8	NEWLI2
+
+	11	OUTSTR
+	8	OUTSTR+1
+	\WRI
+	\TIN
+	\G T
+	\APE
+	\1^
+
+( write NSEQ sequences of NREC 200 word records
+  seperated by label blocks to tape1 )
+	11	OUTSTR
+	8	OUTSTR+1
+	\OPE
+	\NIN
+	\G T
+	\APE
+	\1 F
+	\OR
+	\WRI
+	\TIN
+	\G^
+	
+	11	QMT		( open tape1 )
+	8	QMOPEN
+	0 FTAB0			( on handler 0 )
+	8	ERR1
+	/0 0			( for writing )
+
+	4	NSEQ		( initialize sequence count )
+	5	SEQCNT
+
+
+LOOP0	11	OUTSTR
+	8	OUTSTR+1
+	\WRI
+	\TIN
+	\G R
+	\ECO
+	\RDS
+	\^
+
+	4	NREC		( no of records to write )
+	5	RECCNT
+
+( set up next record )
+LOOP1	4	RECCNT		( advance total record counter )
+	5	REC		( store in buffer as check pattern )
+	4	-199		( fill rest of buffer )
+	5	WDCNT
+LOOP2	0	WDCNT
+	/4	REC+199
+	1	+1
+	/5	REC+200
+	10	WDCNT
+	4	WDCNT
+	9	LOOP2
+
+	8	;+7		( skip message )
+	11	OUTSTR
+	8	OUTSTR+1
+	\WRI
+	\TE
+	\REC
+	\^
+
+	11	QMR		( write a record to tape1 )	
+	8	QMROUT
+	0 FTAB0			( on handler 0 )
+	0 REC			( from REC )
+	8	ERR2
+
+	10	RECCNT		( test more records to write )
+	4	RECCNT
+	9	LOOP1
+
+( sequence complete, finalize tape1 )
+	11	OUTSTR
+	8	OUTSTR+1
+	\FIN
+	\ALI
+	\ZIN
+	\G^
+
+	11	QMT	
+	8	QMREND
+	0 FTAB0
+	8	ERR3
+
+( write label if not last sequence )
+
+	10	SEQCNT		( is another sequence required? )
+	4	SEQCNT
+	9	;+2
+	8	CLOSE1
+
+	11	OUTSTR
+	8	OUTSTR+1
+	\WRI
+	\TIN
+	\G L
+	\ABE
+	\L^
+
+	4	=/0 5		( set up to write label )
+	5	BUFL0
+	4	\DAT
+	5	BUF+2
+	4	\A
+	5	BUF+3
+	4	+0
+	5	BUF+4
+	11	QMT		( write label to tape 1 )
+	8	QMWRITE
+	0 FTAB0			( on handler 0 )
+	8 	ERR4
+	4	BUFSZ		( reset buffer size )
+	5	BUFL0
+	4	+0		( reset tape marker )
+	5	RECMK0
+	8	LOOP0		( do next sequence )
+
+
+( close for writing and rewind handler 0 )
+CLOSE1	11	OUTSTR
+	8	OUTSTR+1
+	\REW
+	\IND
+	\ING
+	\ TA
+	\PE1
+	\^
+
+	11	QMT		( close tape1 )
+	8	QMCLOSE
+	0 FTAB0			( on handler 0 )
+	8 	ERR4
+	/5 0			( close for writing & rewind )
+
+	4	BUFSZ		( reset buffer length -- close upsets this )
+	5	BUFL0
+
+
+( copy content of tape1 to tape2 )
+
+	11	OUTSTR
+	8	OUTSTR+1
+	\OPE
+	\NIN
+	\G T
+	\APE
+	\2 F
+	\OR
+	\WRI
+	\TIN
+	\G^
+
+	11	QMT		( open tape2 )
+	8	QMOPEN
+	0 FTAB1			( on handler 1 )
+	8	ERR5
+	/0 0			( for writing )
+		
+	11	OUTSTR
+	8	OUTSTR+1
+	\REA
+	\DIN
+	\G R
+	\ECO
+	\RDS
+	\^
+
+LOOP3	4	+0		( indicate no records in buffer yet )
+	5	RECMK0
+
+LOOP4	11	QMR		( read next record )
+	8	QMRIN
+	0 FTAB0			( from handler 0 )
+	0 REC
+	8	CHECK
+
+	8	;+6		( skip message )
+	11	OUTSTR
+	8	OUTSTR+1
+	\REA
+	\D R
+	\EC^
+
+	4	REC		( check pattern in record against count )
+	2	RECCNT
+	7	;+2
+	8	ERR6
+	10	RECCNT
+
+	11	QMR
+	8	QMROUT
+	0 FTAB1
+	0 REC
+	8	ERR7
+
+	8	;+7		( skip message )
+	11	OUTSTR
+	8	OUTSTR+1
+	\WRI
+	\TE
+	\REC
+	\^
+
+	8	LOOP4
+
+CHECK	7	LABEL		( label block encountered )
+	9	EOT		( no more data blocks )
+	8	ERR8		( other error )
+
+LABEL	11	OUTSTR
+	8	OUTSTR+1
+	\LAB
+	\EL
+	\BLO
+	\CK
+	\SKI
+	\PPE
+	\D^
+	4	NREC		( reset record count )
+	5	RECCNT
+	4	+0		( reset record marker )
+	5	RECMK1
+	8	LOOP3
+
+( end of copy, rewind both tapes )
+
+EOT	11	OUTSTR
+	8	OUTSTR+1
+	\NO
+	\MOR
+	\E R
+	\ECO
+	\RDs
+	\ - 
+	\FIN
+	\ALI
+	\ZIN
+	\G T
+	\APE
+	\2^
+
+	11	QMT	
+	8	QMREND
+	0 FTAB1
+	8	ERR9
+
+	11	OUTSTR
+	8	OUTSTR+1
+	\REW
+	\IND
+	\ING
+	\ BO
+	\TH
+	\TAP
+	\ES^
+
+	11	QMT		( close tape1 for reading )
+	8	QMCLOSE
+	0 FTAB0			( on handler 0 )
+	8	ERR10
+	3 0			( rewind in manual )
+	11	QMT		( close tape2 for reading and writing )
+	8	QMCLOSE
+	0 FTAB1			( on handler 1 )
+	8	ERR11
+	/3 0			( rewind in manual )
+
+( wait for tapes to be rewound )
+LOOP5	11	QMSTAT
+	8	QMSTAT+1
+	0 FTAB0
+	6	+1
+	7 	LOOP6
+	8	LOOP5
+LOOP6	11	QMSTAT
+	8	QMSTAT+1
+	0 FTAB1
+	6	+1
+	7	;+2
+	8	LOOP6
+	
+( all done )
+	11	OUTSTR		( output finishing message )
+	8	OUTSTRI+1
+	\FIN
+	\ISH
+	\ED^
+	11	NEWLIN
+	8	NEWLIN+1
+	8	;+0		( stop )
+
+( stop on tape errors)
+ERR11	5	ERRINF
+	4	+11
+	8	ERROR
+ERR10   5	ERRINF
+	4	+10
+	8	ERROR
+ERR9	5	ERRINF
+	4	+9
+	8	ERROR
+ERR8	5	ERRINF
+	4	+8
+	8	ERROR
+ERR7	5	ERRINF
+	4	+7
+	8	ERROR
+ERR6	5	ERRINF
+	4	+6
+	8	ERROR
+ERR5	5	ERRINF
+	4	+5
+	8	ERROR
+ERR4	5	ERRINF
+	4	+4
+	8	ERROR
+ERR3	5	ERRINF
+	4	+1
+	8	ERROR
+ERR2	5	ERRINF
+	4	+2
+	8	ERROR
+ERR1	5	ERRINF
+	4	+1
+				
+ERROR	5	ERRLNK			( status code )
+	4	ERRINF			( error number )
+	11	QERROR
+	8	QERROR+1
+	0 ERRDAT			( link address )
+	8	;+0			( stop on errors )
+ERRDAT	0 ERRLNK
+	+1
+	\MT
+ERRLNK	+0
+ERRINF	>1
+
+RECCNT	>1			( negative count of records processed )
+NREC	-250			( negative number of records per sequence )
+WDCNT  	>1			( negative count of words processed   )
+SEQCNT	>1			( negative count of data sequences to write )
+NSEQ	-20			( negative number of sequences )
+COUNT	>1			( total count of records processed )
+
+( file table for handler 0 )
+
+BUFSZ	+602			( magnetic tape buffer size in words )
+FTAB0	
+HDLR0	+0			( handler number             )
+BUFA0	0 BUF			( buffer address             )
+BUFL0	+602			( buffer length              )
+	>2
+RECMK0	>1			( record marker              )
+	>4
+NAME0	\TAP			( file name                  )
+	\E1
+	\
+	\
+SER0	+0			( serial number              )
+GEN0	+0			( generation number          )
+REEL0	+0			( reel number                )
+CREAT0	+0			( creation date              )
+EXPIR0	+0			( expiry date                )
+	>4
+RECIN0	+200			( fixed leng 200 wd records  )
+	>1
+PROT0	>1			( protection marker          )
+OWNR0	+0			( owners optional data       )
+	
+( file table for handler 1 )
+FTAB1	
+HDLR1	+1			( handler number             )
+BUFA1	0 BUF			( buffer address             )
+BUFL1	+602			( buffer length              )
+	>2
+RECMK1	>1			( record marker              )
+	>4
+NAME1	\TAP			( file name                  )
+	\E2
+	\
+	\
+SER1	+0			( serial number              )
+GEN1	+0			( generation number          )
+REEL1	+0			( reel number                )
+CREAT1	+0			( creation date              )
+EXPIR1	+0			( expiry date                )
+	>4
+RECIN1	+200			( fixed leng 200 wd records  )
+	>1
+PROT1	>1			( protection marker          )
+OWNR1	+0			( owners optional data       )
+
+BUF >602			( tape   buffer )	
+REC >200			( record buffer )
+
+[NEWLIN NEWLI2 QCHOP]
+
+(subroutine to output a sequence of newlines)
+(enter at NEWLIN+1 for one newline          )
+(enter at NEWLI2 for multiple newlines      )
+(with count in accumulator                  )
+
+NEWLI2	4	-2
+	8	NEWLIN+3	( set count to -2 )
+NEWLIN	+0
+	4 	+1		( entry for one NEWLIN )
+	2 	+0		( entry for multiple NEWLINs )
+	5 	COUNT
+LOOP	4 	+1
+	11 	QCHOP
+	8 	QCHOP+1
+	10 	COUNT
+	4 	COUNT
+	9 	LOOP
+EXIT	0 	NEWLIN
+	/8 	1
+COUNT	>1
+
+[OUTSTRI QCHOP]
+
+(subroutine to output a string)
+
+OUTSTR 	+0
+LOOP	0 	OUTSTR
+	/4 	1		( next word in string )
+	14 	8180		( first char )
+	6 	+63
+	1 	-1
+	7 	EXIT
+	1 	+1
+	11 	QCHOP
+	8 	QCHOP+1
+	0 	OUTSTR
+	/4 	1
+	14 	8186
+	6 	+63		( second char )
+	1 	-1
+	7 	EXIT
+	1 	+1
+	11 	QCHOP
+	8 	QCHOP+1
+	0 	OUTSTR
+	/4 	1
+	6 	+63		( third char )
+	1 	-1
+	7 	EXIT
+	1 	+1
+	11 	QCHOP
+	 8 	QCHOP+1
+	10 	OUTSTR
+	8 	LOOP
+EXIT	4	+1		( terminate with a newline )
+	11	QCHOP
+	8	QCHOP+1
+	0 	OUTSTR
+	/8 	2
+
+*2		
+<! halt !><!!>
+j 8
+st 6927
+
+c add libraries
+at ptr file SSYS1(ISS1).900
+j 9
+st 6927
+
+at ptr file MTBLOC(ISS4).900
+j 9
+st 6927
+
+at ptr file MTREC(ISS3).900
+j 9
+st 6927
+
+at ptr inline
+%
+<! halt !><!!>
+j 9
+st 6927
+
+c run program
+nonstop on
+j 32
+st 284
+
+sh t
+
+c MLIST the tapes
+reset
+de mt 0
+de mt 1
+
+at mt 0 tape1
+at mt 1 tape2
+
+at ptr inline
+*18
+<! halt !><!!>
+j 8
+st 6927
+
+at ptr file ../903UTILITIES/MTLIST(ISS3).900
+j 9
+st 6927
+
+at ptr file ../903SIR/MTBLOC(ISS4).900
+j 9
+st 6927
+
+at ptr file ../903SIR/SGLPAK.900
+j 9
+st 6927
+
+at ptr inline
+%
+
+[B1]
+B1 0 ;+1
+%
+<! halt !><!!>
+j 9
+st 6927
+
+c run mtlist
+at tty inline
+/ 0: TAPE1: L:) 
+/ 1: TAPE2: L:)
+<!!>
+j 32
+st 1575
+j 32
+st 1575
+
+de mt 0
+de mt 1
+delete tape1
+delete tape2

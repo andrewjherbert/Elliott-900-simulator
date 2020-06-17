@@ -1,0 +1,23 @@
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\Elliott 900 Simulator.exe.config
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\Elliott 900 Simulator.exe
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\Elliott 900 Simulator.pdb
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\FSharp.Core.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\cs\FSharp.Core.resources.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\de\FSharp.Core.resources.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\es\FSharp.Core.resources.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\fr\FSharp.Core.resources.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\it\FSharp.Core.resources.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\ja\FSharp.Core.resources.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\ko\FSharp.Core.resources.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\pl\FSharp.Core.resources.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\pt-BR\FSharp.Core.resources.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\ru\FSharp.Core.resources.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\tr\FSharp.Core.resources.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\zh-Hans\FSharp.Core.resources.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\bin\Debug\net471\zh-Hant\FSharp.Core.resources.dll
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\obj\Debug\net471\Elliott 900 Simulator.fsprojAssemblyReference.cache
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\obj\Debug\net471\Elliott 900 Simulator.AssemblyInfoInputs.cache
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\obj\Debug\net471\Elliott 900 Simulator.AssemblyInfo.fs
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\obj\Debug\net471\Elliott 900 Simulator.fsproj.CopyComplete
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\obj\Debug\net471\Elliott 900 Simulator.exe
+C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\obj\Debug\net471\Elliott 900 Simulator.pdb

@@ -1,0 +1,55 @@
+﻿C Demonstrate VERIFY
+
+on 920b
+
+c assemble a simple program  using 2-pass SIR
+c note no clear store option set
+
+at ptr file ../ACDSIR/SIR2P71.BIN
+j 8181
+st 8175
+at ptr inline
+
+*19
+[TEST]
+TEST	4	+0
+	5	COUNT
+	0	COUNT
+	/4	MESS
+	9	;+0
+	15	6148
+	10	COUNT
+	8	;-5
+
+MESS	+141 +10 +10 +86 +197 +210 +201 +198 +89 +141 +10 -1
+COUNT	>+1
+%
+<! halt !> <!!>
+select out tty
+j 12
+st 562
+rewind
+select out auto
+at ptp file DEMO12.BIN
+j 10
+st 587
+de ptp
+
+c load and run program
+at ptr file DEMO12.BIN
+j 8181
+st 8175
+j 8
+st 12
+
+c verify tape against store
+at ptr file VERIFY(900).BIN
+j 8181
+st 8175
+at ptr file DEMO12.BIN
+j 8001
+st 8117
+
+delete DEMO12.BIN
+
+sh t

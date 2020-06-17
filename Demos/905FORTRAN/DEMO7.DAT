@@ -1,0 +1,123 @@
+﻿c
+C McCracken A Guide to FORTRAN IV Programming Case Study 6
+C
+C Load Fortran system
+on 905 16K
+at ptr file 905FORT(ISS6).BIN
+j 8181
+
+C Compile program
+
+nonstop on
+
+at ptp file DEMO7.BIN
+at ptr inline
+
+C  CASE STUDY 6
+C  COMPUTATION OF A SERVOMECHANISM FREQUENCY RESPONSE
+C     USING FORTRAN COMPLEX OPERATIONS
+C
+C
+      REAL K, FIRST, LAST, INC, OMEGA, ABSVAL, PHASE
+      COMPLEX T, N1, N2, D1, D2, D3, D4
+C
+C     READ PARAMETERS
+      READ (1, 100) K, FIRST, LAST, INC
+C     FORMAT (4F10.0)
+100   FORMAT (FREE)
+C
+C  CHECK INPUT FOR VALIDITY
+      IF (     (FIRST .GE. LAST)
+     1    .OR. (INC   .LE. 1.0) ) STOP
+C
+C  WRITE VALUE OF AMPLIFICATION FACTOR AND COLUMN HEADINGS
+      WRITE (3, 200) K
+  200 FORMAT (20X, 38HSERVOMECHANISM FREQUENCY RESPONSE DATA/
+     1        27H    AMPLIFICATION FACTOR = , 1PE12.5///8X,
+     2        5HOMEGA, 8X, 6HT REAL, 9X, 6HT IMAG, 7X, 9HABS VALUE,
+     3        6X, 5HPHASE//)
+C
+C  SET FREQUENCY TO STARTING VALUE
+      OMEGA = FIRST
+C
+C  SET UP COMPLEX FACTORS, USING THE CMPLX FUNCTION TO CONVERT FROM
+C    THE FORM OF TWO FORTRAN REAL NUMBERS, REPRESENTING THE REAL AND
+C    IMAGINARY PARTS OF THE COMPLEX NUMBER, TO THE FORM OF ONE FORTRAN
+C    COMPLEX NUMBER.
+  10  N1 = CMPLX(1.0, 0.4 * OMEGA)
+      N2 = CMPLX(1.0, 0.2 * OMEGA)
+      D1 = CMPLX(0.0, OMEGA)
+      D2 = CMPLX(1.0, 2.5 * OMEGA)
+      D3 = CMPLX(1.0, 1.43 * OMEGA)
+      D4 = CMPLX(1.0, 0.02 * OMEGA)
+C
+C  COMPUTE TRANSFER FUNCTION
+      T = K * N1 * N2 / (D1 * D2 * D3 * D4**2)
+C
+C  GET COMPLEX ABSOLUTE VALUE
+      ABSVAL = CABS(T)
+C
+C  USE TWO-ARGUMENT ARCTANGENT FUNCTION TO GET PHASE ANGLE
+C  ANGLE IS RETURNED IN RADIANS -- CONVERT TO DEGREES
+      PHASE = 57.29578 * ATAN2(AIMAG(t), REAL(T))
+      WRITE (3, 300) OMEGA, T, ABSVAL, PHASE
+C
+C  NOTE THAT T IS COMPLEX, REQUIRING TWO ASSOCIATED FIELD DESCRIPTIONS
+ 300  FORMAT (1P5E14.4)
+C
+C  INCREMENT OMEGA
+      OMEGA = INC * OMEGA
+C
+C  TEST FOR COMPLETION, AND GO AROUND AGAIN IF NOT FINISHED
+      IF (OMEGA .LE. LAST ) GO TO 10
+      STOP
+      END
+<! Halt !>
+<!!>
+
+at tty inline
+O0R
+<!!>
+
+j 16
+
+c run out of tty input
+de ptp
+
+reverse DEMO7.BIN
+
+c load loader
+at ptr file ../MASIR/LOADER(ISS3).BIN
+j 8181
+st 8171
+
+c load program
+at ptr file DEMO7.BIN
+at tty inline
+O20L<!!>
+j 16
+
+c read unloads, load library tape 1
+at ptr file 905FORTLIB1(ISS4).BIN
+at tty inline
+O3L<!!>
+j 16
+
+c reader unloads, load library tape 2
+at ptr file 905FORTLIB2(ISS5).BIN
+r
+
+c reader unloads
+at tty inline
+MM<!!>
+at ptr inline
+900 0.02 1000 1.25
+<!!>
+j 16
+delete DEMO7.BIN
+sh t
+
+
+
+
+

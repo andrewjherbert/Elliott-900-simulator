@@ -1,0 +1,73 @@
+﻿C Demonstrate 903 EDIT utility
+
+on 903 8K
+
+c load sir
+at ptr file ../903SIR/SIR(ISS6)(5500).BIN
+j 8181
+st 8171
+
+c assemble edit
+nonprinting off
+runout on
+at ptr file EDIT(ISS2).900
+j 8
+st 6927
+
+c example from manual -- note IB produces a blank line
+nonprinting on
+c set up output tape
+at ptp file DEMO1.BIN
+
+c read in correction tape
+at ptr inline
+CO BASED ON EXAMPLE IN ELLIOTT MANUAL
+FL PL
+IS U
+FC C
+DE
+IS OUT
+FL NODEC
+DE
+IS 	10	CT
+FC 8
+IB
+	11 	SPACE
+	8	SPACE+1
+^
+DC T
+RE
+<! halt !>
+<!!>
+j 32
+st 64
+
+c read in input
+at ptr inline
+   	4 	OUTNO
+   	2 	+0
+PLS 	11 	DECAUT
+NODEC 	4 	MODE
+	6	+8
+	7	NOOCT
+	8	EXIT
+MODE	+0
+<! halt !>
+<!!>
+j 33
+st 476
+
+c read back and check
+de ptp 
+
+at ptr file DEMO1.BIN
+j 37
+st 75
+
+totelecode DEMO1.BIN
+print DEMO1.900
+delete DEMO1.900
+delete DEMO1.BIN
+ 
+sh t
+

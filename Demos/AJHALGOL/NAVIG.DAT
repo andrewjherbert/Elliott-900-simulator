@@ -1,0 +1,82 @@
+﻿on
+telecode 903
+at ptr file ALG16KLG(AJH).BIN
+j 8181
+st 8175
+
+at ptr inline
+navig;
+"begin"
+   "comment" 13-JAN-2001. Best position estimate ellipses;
+   "integer" j,m,n,L,c1,framex,framey,orig,sx,sy;
+   "real"    c,ct,dx,dy,kc,kk,ks,m11,m12,m21,m22,p,pi,
+             q,r,s,st,u,v,w,x,xm,ym,z;
+   "integer" "array" a[1:20];
+   "read" n, framex, framey, orig, sx, sy, c1;
+   "begin"
+      "real" "array" k,t,g,d[1:n];
+      "print" '13-JAN-2001`;
+      "for" j:=1 "step" 1 "until" n "do" "read" k[j],t[j],g[j],d[j];
+      m:=1; in string(a,m); pi:=4*arctan(1); s:=c:=x:=ks:=kc:=kk:=0;
+      "for" j:=1 "step" 1 "until" n "do" t[j]:=t[j]*pi/180;
+      set origin(320,310); way(0,c1); move pen(-framex,0);
+      draw line(-framex,2*framey); draw line(framex,2*framey);
+      draw line(framex,0); draw line(-framex,0); move pen(0,framey);
+      move pen(10*c1-framex, 2*framey-14*c1); m:=1; punch(5);
+      outstring(a,m);
+
+      "for" j:=1 "step" 1 "until" n "do"
+      "begin"
+         ct:=cos(t[j]); st:=sin(t[j]); z:=1/g[j]; p:=k[j]*ct;
+         q:=k[j]*st; dx:=d[j]*st; dy:=-d[j]*ct;
+         move pen((p+dx)*sx,(q+dy)*sy+framey);
+         draw line((p-dx)*sx,(q-dy)*sy+framey);
+         move pen((p-dx)*sx,(q-dy)*sy+framey);
+         "print" same line, digits(1), j;
+         s:=s+z*st^2; c:=c+z*ct^2; x:=x+z*st*ct;
+         ks:=ks+z*st*k[j]; kc:=kc+z*ct*k[j]; kk:=kk+z*k[j]^2
+      "end" of lines;
+
+      z:=c*s-x^2; xm:=(s*kc-x*ks)/z; ym:=(c*ks-x*kc)/z;
+      move pen(xm*sx,ym*sy+framey); cen character(1);
+
+      "for" r:=0.120427,0.2853359,0.5850135,0.9 "do"
+      "begin"
+         L:=pi*sqrt(ln(1/(1-r))/(c+s-sqrt((c+s)^2-4*z)))*100;
+         ct:=cos(2*pi/L); st:=sin(2*pi/L);
+         m11:=ct+x*st/sqrt(z); m12:=s*st/sqrt(z);
+         m21:=-c*st/sqrt(z); m22:=ct-x*st/sqrt(z);
+         u:=sqrt(2*ln(1/(1-r))/c); v:=0.0;
+         move pen((u+xm)*sx,(v+ym)*sy+framey);
+         "for" j:=1 "step" 1 "until" L "do"
+         "begin"
+            w:=m11*u+m12*v; v:=m21*u+m22*v; u:=w;
+            draw line((u+xm)*sx,(v+ym)*sy+framey)
+         "end" of an ellipse
+      "end" of a set of ellipses;
+      move pen(framex, framey)
+   "end" of inner block
+"end" of program
+<!!>
+k 12
+j
+st 1715
+at ptr file LIBRARY.RLB
+k 9
+j
+st 8000
+at ptr inline
+4 160 140 140 70 60 2
+0.4 -59 0.9 2.5
+0.45 149.5 0.9 2.5
+1.12 41.5 0.9 2.5
+0.9 -165 2.1 2.1
+'12  29  59  90 PER CENT`
+<!!>
+at plt
+sel out tty
+k 10
+j
+st 1715
+de plt
+sh t

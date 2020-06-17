@@ -1,0 +1,137 @@
+﻿C Build and Demonstrate 905 ML/I Macro generator
+
+on 905 16K
+
+C Build ML/I
+c assemble with MASIR
+at ptr file ../MASIR/MASIR(ISS3).BIN
+j 8181
+st 8164
+at tty inline
+O4M<!!>
+at ptr file EXEC.900
+at ptp file MLI.RLB
+nonstop on
+j 16
+at ptr file MLI.900
+at tty inline
+C<!!>
+r
+de ptp
+reverse MLI.RLB
+
+c Generate binary with loader
+at ptr file ../MASIR/LOADER(ISS3).BIN
+j 8181
+st 8171
+at tty inline
+O134LM<!!>
+at ptr file MLI.RLB
+at ptp file MLI.BIN
+j 16
+de ptp
+delete MLI.RLB
+sh t
+
+C Demonstrate ML/I
+delete demo1.txt
+at ptr file MLI.BIN
+j 8181
+st 8164
+at ptp file demo1.txt
+at ptr inline
+MCINS %.
+MCSKIP MT,<>
+
+MCDEF JONES AS <SMITH>
+PEOPLE SHOULD CONSULT MR. JONES
+....JONES....JONES
+
+MCDEF & AS <;>
+X = Y & Y = Z;
+MCDEF READ AS <INPUT TO THE COMPUTER>
+THEN READ YOUR DATA, MR. JONES
+THE DREADED READER SHOULD READ
+
+MCDEF INTEGER AS <FIXED(15)
+BINARY>
+BEGIN INTEGER A,B;
+
+MCDEF THE WITHS PRIME WITHS MINISTER
+AS <MR. GLADSTONE>
+THE PRIME MINISTER CHAIRS THE CABINET
+MCDEF THE WITHS CHAIRMAN
+AS <THE PRIME MINISTER OR HIS DEPUTY>
+THE CHAIRMAN SPEAKS FIRST
+
+MCSKIP MT, * WITHS ( ) WITHS *
+MCDEF CUR AS *(DOG)*
+CUR
+
+MCDEF REWIND AS <PRINT   'FINISHED WITH TAPE'
+<REWIND>>
+REWIND
+
+MCDEF APPEND TO WITHS LIST .
+AS <%A2.[0] = %A2.[0]+1;
+%A2.[%A2.[0]] = %A1.;>
+APPEND PATIENT TO LIST WAIT.
+APPEND X/Y+9 TO LIST ARRAY.
+
+MCDEF UNSTACK ;
+AS <%A1. = STACK[PTR];
+PTR = PTR - 1;>
+L:unstack OP;
+MCDEF CALL NL
+AS <   BSR   %A1.
+>
+CALL PIG
+UNSTACK Y; LAB: CALL PIGGY
+
+MCDEF SET = OPT + OR - ALL NL
+AS <   LSS  %A2.
+MCGO L1 IF %D2. = +
+   SUB  %A3.
+MCGO L2
+%L1.   ADD  %A3.
+%L2.   ST   %A1.
+>
+SET X1 = Y1+Z1
+SET BROWN = JONES - ROBINSON
+MCDEF LET = N1 OPT + N1 OR - N1 OR NL ALL
+AS <   LSS  %A2.
+MCSET T1 = 3
+%L4.MCGO L2 IF %DT1-1. = +
+MCGO L5 UNLESS %DT1-1. = -
+   SUB  %AT1.
+MCGO L3
+%L2.   ADD  %AT1.
+%L3.MCSET T1 = T1 + 1
+MCGO L4
+%L5.    ST  %A1.
+>
+LET A = B - C + D
+
+MCDEF ( OPT + OR - OR * OR / ALL )
+AS <%D1. %A1. %A2.>
+(A + B)
+((A-(B*C))/(X/Y))
+MCINS /WITH/ .
+MCSKIP DT, ' '
+MCSKIP , COMMENT ;
+'LET SET JONES'
+COMMENT LET IS A MACRO; 'COMMENT'
+
+LET A <=> = UNSTACK L + 1; +7
+
+MCSKIP , NL WITH * NL N0
+AAA**OK
+* THIS WILL VANISH
+* SO WILL THIS
+END
+)
+<! halt !><!!>
+j 16
+de ptp
+print demo1.txt
+sh t

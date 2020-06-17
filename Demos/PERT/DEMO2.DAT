@@ -1,0 +1,108 @@
+﻿C Demonstrate 903 PERT
+
+on 903
+runout on
+C load PERT binary
+at ptr file PERT(AJH).BIN
+j 8181
+st 8171
+
+c steering tape
+at ptr inline
+Run number: 60
+
+Working days in week: 5
+
+Date of run:    1 1 10
+Project start:  1 2 20 
+
+Weeks or days: 0
+
+Commands
+DATAIN    0
+BUILD     3
+DUMP      2
+-1
+
+<!!>
+
+c read commands
+j 32
+st 3084
+
+c project tape
+at ptr inline
+<! R !> <! R !><! R !><! R !><! R !>$PERT Demonstration.
+D10
+T0
+1: 2   0=
+T1
+2  3   2   4   6= 
+2  5   3   5   9=
+3  5   4   5   7=
+3  4   4   6  10=
+5  6   4   5   7=
+4  7   3   4   8=
+6  8   3   5   8= 
+T0
+7  8   0=
+8  9   0=
+(
+<!!>
+
+c produce dump
+at ptp file DEMO2.BIN
+j 9
+de ptp
+st 902
+
+c subsequent run using dump from previous run
+
+C load PERT binary
+at ptr file PERT(AJH).BIN
+j 8181
+st 8171
+
+c patch to stop scan for blank tape
+e 76 =8 80
+
+select out tty
+
+
+c steering tape
+at ptr inline
+Run number: 61
+
+Working days in week: 5
+
+Date of run:    2 1 10
+Project start:  1 2 20 
+
+Weeks or days: 0
+
+Commands
+DUMPIN    1
+BUILD     3
+EVENTS    4
+CHECKACT  5
+ACTSIJ    6
+-1
+<!!>
+
+c read commands
+j 32
+st 3084
+
+c execute commands
+at ptr file DEMO2.BIN
+j 9
+st 3084
+
+c resume after dumpin
+j 9
+st 902
+delete DEMO2.BIN
+sh t
+
+
+

@@ -1,0 +1,349 @@
+﻿C
+C Demonstrate MTFORTRAN
+C
+
+on 903 16K
+
+c ensure tape file does not exist
+delete tape1
+
+
+c initialize a tape
+at ptr file ../903UTILITIES/MTINIT(ISS3).BIN
+j 8181
+st 8171
+
+c mount tape with write permit ring fitted
+at mt 0 tape1 wp
+c initialize as a scratch tape
+at tty inline
+ 0: TAPE1:<!!>
+j 32
+st 1395
+
+C Load Fortran LP System
+
+at ptr file 903FORT16KLP(ISS4).BIN
+j 8181
+st 8171
+
+nonprinting off
+
+at ptr inline
+     GLOBAL, DEMO12, MTCHECK, MTCLOSE
+$    OPEN, BUFOUT, BUFIN, MTERR
+$    ABS]
+
+C  BASED ON D.D. MACRACKEN A GUIDE TO FORTRAN IV PROGRAMMING 
+C  CASE STUDY 12, A PROGRAM TO SOLVE LARGE SETS OF SIMULTANEOUS
+C  EQUATIONS IN UP TO 400 UNKNOWNS.
+
+C  THE PROGRAM READS CONTROL PARAMETERS AND DATA FROM PAPER TAPE
+C  COPYING THE DATA TO MAGNETIC TAPE.  IT THEN SOLVES THE EQUATIONS
+C  USING THE GAUSS-SEIDEL METHOD CALLING DOWN DATA FROM THE TAPE,
+C  EQUATION-BY-EQUATION AS NEEDED.  IN THIS WAY ONLY ONE EQUATION'S
+C  COEFFICIENTS NEED BE IN MEMORY AT ANY ONE TIME.
+
+C  EACH EQUATION'S COEFFICIENTS IS WRITTEN AS AN INDIVIDUAL BLOCK.
+C  SINCE ELLIOTT TAPES ARE BLOCKED NUMBERED, THE COEFFICIENTS OF
+C  EQUATION N CAN BE READ BY READING BLOCK N OF THE TAPE FILE.
+C  THE GAUSS-SEIDEL METHOD WORKS THROUGH BLOCKS SEQUENTIALLY AND
+C  WHEN THE NEXT ITERATION STARTS, FETCHING THE FIRST EQUATION 
+C  (I.E., BLOCK 1) WILL AUTOMATICALLY REWIND THE TAPE.
+
+C  DATA IS TRANSFERRED TO AND FROM TAPE USING RBUF AS A BUFFER.
+C  RBUF (1) IS USED BY THE TAPE SYSTEM FOR HOUSERKEEPING DATA.  
+C  RBUF (2) TO RBUF (402) HOLD COEFFICIENTS.
+
+      DIMENSION RBUF(402), X(400)
+      COMMON RBUF, NBUFMX
+
+      WRITE (3, 900)
+ 900  FORMAT ( //, 12HGAUSS-SEIDEL //)   
+
+C     ..OPEN TAPE1 FOR READING AND WRITING ON HANDLER 0
+  10  CALL OPEN
+      MTCODE = MTCHECK (0, NBLK, NSTAT)
+      IF ( MTCODE ) 20, 20, 30
+
+C     ..FATAL ERROR, REPORT AND GIVE UP
+  20  CALL MTERR (1, NBLK, NSTAT)
+
+C     ..READ PARAMETERS FROM PAPER TAPE:
+C     ..        N      - NUMBER OF UNKNOWNS, MUST BE <= 400
+C     ..        MAXIT  - MAXIMUM NUMBER OF ITERATIONS
+C     ..        EPSLON - DESIRED ACCURACY
+
+   30 READ (1) N, MAXIT, EPSLON
+      IF ( N ) 50, 50, 40
+   40 IF ( N-400 ) 60, 60, 50
+   50 WRITE (3, 910)
+  910 FORMAT (27HN MUST BE BETWEEN 1 AND 400)
+      STOP
+
+C     ..READ IN DATA IN THE FORM OF TRIPLES I, J, A (I, J).
+C     ..I=999 OR HIGHER ACTS AS AN END OF DATA SENTINEL AND 
+C     ..THE REMAINDER OF THE TRIPLE IS IGNORED.  THE TRIPLES
+C     ..MUST BE IN ASCENDING ROW ORDER; WITHIN A ROW COLUMNS
+C     ..CAN BE IN ANY ORDER.
+
+C     ..SET UP USEFUL CONSTANTS: NBUFMX IS SIZE OF TAPE BUFFER.
+  60  NPLUS2 = N+2
+      NBUFMX = NPLUS2+NPLUS2
+      LAST = 0
+
+C     .. ZERO RBUF
+      DO 65 K = 2, NPLUS2
+  65      RBUF(K) = 0.0
+
+  70  READ (1) I, J, TEMP
+ 
+      IF ( I-LAST )  80,  90, 120
+
+C     ..NOT IN ASCENDING ORDER
+  80  WRITE (3, 920) I, J, TEMP
+ 920  FORMAT (17HOUT OF ORDER DATA, 2I4, F12.5) 
+      STOP
+
+C     ..ANOTHER COLUMN IN CURRENT ROW, VALIDATE INDICES
+C     ..AND STORE ARRAY ELEMENT.
+  90  IF ( I-N )  110, 110, 100
+ 100  WRITE (5, 930)
+ 930  FORMAT (15HDATA PROBLEM AT, I7, I7)
+ 110  IF ( J )     100, 100, 112
+ 112  IF ( J-N-1 ) 114, 114, 100
+ 114  RBUF(J+1) = TEMP
+      GOTO 70
+
+C     ..STARTING A NEW ROW
+ 120  IF (LAST) 150, 150, 130
+
+C     ..WRITE OUT PREVIOUS ROW
+ 130  CALL BUFOUT 
+      MTCODE = MTCHECK (0, NBLK, NSTAT )
+      IF ( MTCODE ) 140, 140, 150
+
+C     ..FATAL ERROR, GIVE UP
+ 140  CALL MTERR (2, NBLK, NSTAT)
+
+C     ..RESET RBUF TO ZEROS
+ 150  DO 155 K = 2, NPLUS2
+ 155      RBUF(K) = 0.0
+
+C     ..TEST FOR SENTINEL
+      IF (I-999) 160, 180, 180
+
+C     ..PREPARE NEXT ROW
+ 160  LAST = LAST+1
+      DO 170 K = 2, NPLUS2
+ 170      RBUF(K) = 0.0
+      IF (  I-LAST ) 100,  90, 100
+ 
+C     ..CLEAR THE X ARRAY
+ 180      DO 190 I = 1, N
+ 190          X(I) = 0.0
+
+C     ..BEGIN ITERATION, DO LOOP COUNTS THE NUMBER OF ITERATIONS
+      DO 280 ITER = 1, MAXIT
+
+C         ..NEXT STATEMENT IS EXECUTED ONCE PER SWEEP OF THE SYSTEM
+          RESID = 0.0
+
+C         ..INDEX I SELECTS A ROW
+          DO 260 I = 1, N
+              IPLUS1 = I+1
+
+C             .. NEXT 2 STATEMENTS ARE EXECUTED ONCE PER ROW
+              SUM = 0.0
+
+C             ..GET I-TH ROW OF COEFFICIENTS
+              CALL BUFIN (IPLUS1)
+              MTCODE = MTCHECK (0, NBLK, NSTAT)
+              IF ( MTCODE ) 200, 200, 210
+
+C             ..FATAL ERROR, GIVE UP
+ 200          CALL MTERR (3, NBLK, NSTAT)
+
+C             ..GET SUM OF TERMS OF I-TH ROW NOT INCLUDING DIAGONAL TERM
+ 210          DO 230 J = 1, N
+                  IF ( I-J ) 220, 230, 220
+ 220              SUM = SUM + RBUF(J+1)*X(J)
+ 230          CONTINUE
+
+C             ..COMPUTE NEW APPROXIMATION TO VARIABLE X(I)
+              TEMP = (RBUF(NPLUS2) - SUM) / RBUF(IPLUS1)
+
+C             ..THEN AT END OF SWEEP OF ALL EQUATIONS, THE FOLLOWING
+C             ..STATEMENT WILL HAVE PUT THE LARGEST RESIDUAL IN 
+              DIFF = ABS (TEMP - X(I))
+              IF ( DIFF - RESID ) 250, 250, 240
+ 240          RESID = DIFF
+
+C             ..STORE APPROXIMATION TO I-TH VARIABLE
+ 250          X(I) = TEMP
+ 260      CONTINUE
+
+C         ..ONE SWEEP HAS BEEN COMPLETE, PRINT VARIABLES
+          WRITE (3, 950) X(1)
+ 950      FORMAT (F9.5)
+          DO 270 K = 2, N
+ 270          WRITE (3, 960) X(K)
+ 960      FORMAT (Z, F9.5)
+
+C         ..IF LARGEST RESIDUAL LESS THAN EPSLON, PROCESS HAS CONVERGED
+          IF ( EPSLON-RESID ) 280, 280, 290
+
+C         ..CONTINUE ITERATING
+ 280      CONTINUE
+
+C     ..IF HERE, MORE THAN MAXIT ITERATIONS NEEDED FOR CONVERGENCE
+C     .. REPORT ERROR AND GIVE UP
+      WRITE (3, 970) MAXIT
+ 970  FORMAT (27HPROCESS DID NOT CONVERGE IN, I4, 10HITERATIONS )
+
+C     ..ALL DONE, CLOSE TAPE
+ 290  CALL MTCLOSE (0, 2)
+      END
+       
+
+C  SUBROUTINE TO OPEN TAPE
+      GLOBAL, OPEN, MTOPEN]
+      SUBROUTINE OPEN
+      DIMENSION IBUF (804)
+      COMMON IBUF
+      CALL MTOPEN (0, IBUF, 0)
+ 800  FORMAT (5HTAPE1)
+      RETURN
+      END
+
+C  SUBROUTINE TO OUTPUT RBUF
+      GLOBAL, BUFOUT, MTWRITE]
+      SUBROUTINE BUFOUT
+      DIMENSION IBUF (804)
+      COMMON IBUF, NBUFMX
+      CALL MTWRITE (0, IBUF, NBUFMX)
+      RETURN
+      END
+
+C  SUBROUTINE TO INPUT EQUATION N TO RBUF
+      GLOBAL, BUFIN, MTREAD]
+      SUBROUTINE BUFIN (N)
+      DIMENSION IBUF (804)
+      COMMON IBUF, NBUFMX
+      CALL MTREAD (0, IBUF, N)
+      RETURN
+      END
+
+C  SUBROUTINE TO REPORT A TAPE ERROR
+      GLOBAL, MTERR]
+      SUBROUTINE MTERR (N, NB, NSTAT)
+      WRITE (3, 900) N, NB, NSTAT
+ 900  FORMAT (11HMT ERROR AT, I2, X, 4HCODE, I3, X, 6HSTATUS, I6)
+      STOP
+      RETURN
+      END                                                                 
+<! Halt !><!!>
+
+C translate - compile
+
+at ptp file DEMO12.RLB
+
+j 13
+st 15118
+
+at ptr file MTFORTRAN(ISS3).900
+j 9
+
+C indicate complete
+
+j 10
+de ptp
+st 14430
+
+C load RLB
+at ptr file DEMO12.RLB
+j 14
+st 16006
+
+c run
+
+sh t
+
+select out tty
+
+at ptr inline
+
+   7  50       .000002
+
+   1   1     12.4180
+   1   2     -1.0610
+   1   3      2.6690
+   1   4      4.3610
+   1   5     -0.1190
+   1   6     -1.2090
+   1   7     -0.5000
+   1   8      8.2620
+   2   1     -1.5010
+   2   2     19.8320
+   2   3      0.6940
+   2   4     -4.8160
+   2   5      2.2740
+   2   6      2.0010
+   2   7     -1.9090
+   2   8    -33.8180
+   3   1      2.3080
+   3   2      1.7280
+   3   3    -15.1650
+   3   4     -2.0230
+   3   5      1.1040
+   3   6      2.1070
+   3   7     -1.0000
+   3   8    -52.6730
+   4   1      3.3590
+   4   2     -0.9130
+   4   3     -6.4410
+   4   4     27.8640
+   4   5      3.7370
+   4   6     -4.3750
+   4   7     -2.3750
+   4   8    -97.2840
+   5   1     -1.5620
+   5   2      1.1680
+   5   3     -2.0040
+   5   4      1.8180
+   5   5      9.4900
+   5   6      0.4010
+   5   7     -1.0730
+   5   8     20.3510
+   6   1     -1.1740
+   6   2      7.3180
+   6   3     -2.2780
+   6   4     -0.1430
+   6   5     -9.8350
+   6   6    -31.6700
+   6   7      4.1140
+   6   8    149.9190
+   7   1      0.1090
+   7   2     -1.3130
+   7   3     -0.9000
+   7   4     -1.9720
+   7   5     -3.5140
+   7   6     -1.1070
+   7   7     12.0940
+   7   8     81.6530
+ 999   0      0.0
+
+<! Halt !>
+<!!>
+j 11
+st 10111
+
+de mt 0
+delete TAPE1
+delete DEMO12.RLB
+sh t
+
+
+
+
+

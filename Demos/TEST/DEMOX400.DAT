@@ -1,0 +1,35 @@
+﻿c X400 - Function  & Store Test
+
+on 903 8K
+
+nonstop on
+
+at ptr file X400(ISS1).BIN
+at ptp file demox400.txt legible
+j 8181
+st 8174
+
+c start test
+at ptr inline bin
+000 000 000 000 000 000 
+000 000 000 000 000 000
+000 000 000 000 000 000
+000 000 000 000 000 000
+000 000 000 000 000 000
+000 000 000 000 000 000
+020
+<!!>
+j 16
+
+c will fall off tape
+de ptp
+print demox400.txt
+
+c soak test
+step 10000000
+at ptr file X400(ISS1).BIN
+j 8181
+st 8174
+j 18
+
+sh t

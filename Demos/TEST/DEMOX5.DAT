@@ -1,0 +1,47 @@
+﻿c X5 - Interrupt Test
+
+on 903 8K
+
+nonstop on
+
+at ptr file X5(ISS3).BIN
+j 8181
+st 8174
+sh t
+
+c start test
+at ptp file demox5.txt legible
+
+step 2000
+j 8
+
+de ptp
+print demox5.txt
+at ptp file demox5.txt legible
+
+interrupt 3
+step 1000
+restart
+
+
+de ptp
+print demox5.txt
+at ptp file demox5.txt legible
+
+step 1000
+interrupt 2
+restart
+
+sh t
+de ptp
+print demox5.txt
+at ptp file demox5.txt legible
+
+step 300000
+interrupt 1 
+restart
+
+de ptp
+print demox5.txt
+at ptp file demox5.txt legible
+sh t

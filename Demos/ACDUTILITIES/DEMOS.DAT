@@ -1,0 +1,68 @@
+﻿c demo 1 - BINCOP (short tape)
+do demo1
+pause
+
+c demo 2 - BINCOP (long tape)
+do demo2
+pause
+
+c demo 3 - BOWDLER 82
+do demo3
+pause
+
+c demo 4 - BOWDLER 70
+do demo4
+pause
+
+c demo5 - DO-ALL-4 (legible tape)
+do demo5
+pause
+
+c demo6 - DO-ALL-4 (code conversion and joining)
+do demo6
+pause
+
+c demo7 - DO-ALL-4 (copy long tape)
+do demo7
+pause
+
+c demo8 - TELECOP
+do demo8
+pause
+
+c demo9 - GENSORT
+do demo9
+pause
+
+c demo10 - TATDOC
+do demo10
+pause
+
+c demo11 - DUMP
+do demo11
+pause
+
+c demo12 - VERIFY
+do demo12
+pause
+
+c demo13 - AUTOSTART
+do demo13
+pause
+
+c demo14 - AMEND
+do demo14
+pause
+
+c demo15 - STOREPRINT
+do demo15
+pause
+
+c demo16 - direct QIN1 and QOUT1
+do demo16
+pause
+
+c demo17 - MONITOR
+do demo17
+pause
+

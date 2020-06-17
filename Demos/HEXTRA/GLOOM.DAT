@@ -1,0 +1,39 @@
+﻿
+on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+at ptr inline
+
+gloom;
+"begin"
+   "comment" 17-APR-1997.
+             Formal procedures and all that;
+
+   "procedure" t(x, y, z); "value" y;
+                           "integer" x, y, z;
+   "begin"
+      "print" digits(4), x, same line, y, z;
+      x := 60; y := 70; z := 80
+   "end";
+
+   "procedure" p(q); "procedure" q;
+   "begin"
+      "integer" j, k, l;
+      j := 3;
+      k := 5;
+      l := 7;
+      q(j, (k), l);
+      "print" digits(4), j, same line, k, l
+   "end";
+   p(t)    
+"end"
+<!!>
+j 8
+st 7943
+select out tty
+j 10
+st 1727
+sh t

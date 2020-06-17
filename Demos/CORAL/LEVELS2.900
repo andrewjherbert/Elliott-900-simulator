@@ -1,0 +1,23 @@
+
+'CORAL'
+'PROGRAM' LEVELS
+'SEGMENT' LEVEL2
+'BEGIN'
+
+   'PROCEDURE' PUNCH ('VALUE''INTEGER' CHAR); 'BEGIN'
+      'INTEGER' P; P := CHAR;
+      'FOR' P := P 'WHILE' P > 0 'DO' 'BEGIN'
+         P := P 'MASK' 'INTEGER'(P-1);
+         CHAR := CHAR 'DIFFER' 128;
+      'END';
+      'CODE''BEGIN' 4,CHAR; 15,6148; 'END';
+   'END' PUNCH;
+    
+L: PUNCH(50); PUNCH(13); PUNCH(10);
+
+   'CODE' 'BEGIN' 15, 7168; 'END';
+   'GOTO' L;
+
+'END'
+'FINISH'
+<! halt !>

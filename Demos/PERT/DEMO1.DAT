@@ -1,0 +1,80 @@
+﻿C Demonstrate 903 PERT
+
+on 903
+runout on
+C load PERT binary
+at ptr file PERT(AJH).BIN
+j 8181
+st 8171
+
+c steering tape
+select out tty
+at ptr inline
+Run number: 50
+
+Working days in week: 5
+
+Date of run:    1 1 10
+Project start:  1 2 20 
+
+Weeks or days: 0
+
+Commands
+DATAIN    0
+BUILD     3
+EVENTS    4
+CHECKACT  5
+ACTSIJ    6
+ACTXDESD 13
+ACTXDLSD 14
+ACTSTF   16
+ACTXDFF  19
+PROJDUR  15 89
+ACTSIJ    6
+-1
+
+<!!>
+
+c read commands
+j 32
+st 3084
+
+c project tape
+at ptr inline
+<! R !> <! R !><! R !><! R !><! R !>$
+Throw away first two titles$
+$PERT Demonstration.
+D10
+T0
+1: 2   5=
+C
+1: 2  10=
+R
+1: 2
+A
+T0
+1: 2   0
+T1
+2  3   2   4   6= 
+2  5   3   5   9*comment=
+3  5   4   5   7*comment=more comment
+3  4   4   6  10
+5  6   4   5   7
+4  7   3   4   8
+6  8   3   5   8=comment 
+T0
+7  8   0*dummy=
+8  9   0
+(
+<!!>
+
+c execute commands
+j 9
+st 902
+sh t
+
+
+
+
+
+

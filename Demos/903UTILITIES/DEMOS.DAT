@@ -1,0 +1,52 @@
+﻿C 903 UTILITIES DEMOS
+
+c DEMO1 - EDIT
+do demo1
+pause
+
+c DEMO2 - T.2 (binary)
+do demo2
+pause
+
+c DEMO3 - T.2 (relocatable)
+do demo3
+pause
+
+c DEMO4 - QBINOUT
+do demo4
+pause
+
+c DEMO5 - QT2OUT
+do demo5
+pause
+
+
+c DEMO6 - QCOPY
+do demo6
+pause
+
+
+c DEMO7- COPYTAPE
+do demo7
+pause
+
+
+c DEMO8 - C3A TRACE UTILITY
+do demo8
+pause
+
+c DEMO9 - MTINIT
+do demo9
+pause
+
+C DEMO10 - MTLIST
+do demo10
+pause
+
+
+
+
+
+
+
+

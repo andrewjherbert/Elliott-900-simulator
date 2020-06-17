@@ -1,0 +1,113 @@
+﻿c MASIR "load and go" example using 8K LOADER
+
+c Also shows use of MAPLOD 
+
+on 903 16K
+
+c load MASIR
+at ptr file MASIR(181175).BIN
+j  8181
+st 8164
+
+nonstop on
+select out auto
+
+at ptr inline
+
+((DEMO5 19/06/2012))		
+
+	ST	X		(parameter from command line)
+	LD	MSGADD		(initialize loop)
+	ST	INDEX
+LOOP	LDB 	INDEX		(fetch next code)
+	/LD 	0		
+	JZ	;+0		(0 terminates)
+	IPO	6148		(output to teleprinter)
+	INC 	INDEX		(advance pointer)
+	J	LOOP
+
+MSGADD 	0 MSG
+
+MSG	+141			(message masir demo ok in ascii)
+	>2:+10
+	+77
+	+65
+	+83
+	+201
+	+210
+	+160
+	+68
+	+197
+	+77
+	+207
+	+160
+X	>1
+	+160
+	+207
+	+75
+	+141
+	>2:+10
+	+0			(0 terminates message)
+
+INDEX	>+1
+	
+%
+<! H !>
+<!!>
+
+c MASIR  commands
+c O4 punch loader stop code, normal assembly
+c M  read program tape
+at tty inline
+O4M
+<!!>
+
+at ptp file DEMO5.BIN
+j 16
+
+c falls off tty inline
+de ptp
+
+c MASIR outputs RLB "back to front"
+reverse DEMO5.BIN
+
+c load loader
+
+at ptr file LOADER(8K).BIN
+j 8181
+st 8171
+
+at ptr file DEMO5.BIN
+
+c LOADER commands
+C 0120 loader options
+c 020 - do not use built in  routines
+c 100 - list labels
+c L load tape
+at tty inline
+O120L<!!>
+j 16
+
+c reaches HALT code
+
+c LOADER commands
+c M    - flag program complete 
+c 065M - execute with &065 in accumulator on entry
+at tty inline
+M065M<!!>
+
+j 16
+st 8085
+
+c load and run MAPLOD to get a list of labels known to LOADER
+at ptr file MAPLOD(ISS2)(4096).BIN
+
+c MAPLOD command
+c L list located labels
+at tty inline
+L<!!>
+j 8181
+
+c runs off tty inline
+delete DEMO5.BIN
+sh t

@@ -1,0 +1,69 @@
+﻿c 905 fortran demos
+
+c table of squares
+do demo1
+pause
+
+c economic order quantity
+do demo2
+pause
+
+c current in an ac circuit
+do demo3
+pause
+
+c column design
+do demo4
+pause
+
+c newton-raphson
+do demo5
+pause
+
+c double precision arithmetic
+do demo6
+pause
+
+c complex numbers
+do demo7
+pause
+
+c binary adder
+do demo8
+pause
+
+c subscripts, means, standard deviations
+do demo9
+pause
+
+c damped oscillation
+do demo10
+pause
+
+c gauss-seidel method
+do demo11
+pause
+
+c graphing - damped oscillation
+do demo12
+pause
+
+c graphing - heat map
+do demo13
+pause
+
+c quadratic equations
+do demo14
+pause
+
+c polish notation
+do demo15
+pause
+
+c machine code
+do demo16
+pause
+
+c EXTERNAL statement
+do demo17 
+pause

@@ -1,0 +1,101 @@
+﻿C run all test demos
+
+c 920 paper tape test
+do demox1
+pause
+
+c store chequerboard test
+do demox2
+pause
+
+c function test
+do demox3
+pause
+
+c 920A function test
+do demox3a
+pause
+
+c store on/off test
+do demox4
+pause
+
+c interrupt test
+do demox5
+pause
+
+c timing test
+do demox6
+pause
+
+c trace facility test
+do demox8
+pause
+
+c paper tape test
+do demox10
+pause
+
+c 920M 5 musec store chequerboard test
+do demox12
+pause
+
+c 920M 2musec store chequerboard test
+do demox17
+pause
+
+c teleprinter test
+do demox50
+pause
+
+c paper tape test
+do demox51
+pause
+
+c plotter test
+c do demox52
+c pause
+
+c extended store chequerboard test
+do demox202
+pause
+
+c 920M 5 musec extended store chequerboard test
+do demox212
+pause
+
+c 920M 2musec extended store chequerboard test
+do demox217
+pause
+
+c combined function and store test
+do demox400
+pause
+
+c extend store on/off test
+do demox402
+pause
+
+c initial instructions test
+do demoxinit
+pause
+
+c paper tape station test
+do demoxpts1
+pause
+
+c magnetic tape programmable test
+do demoxmt70
+pause
+
+c magnetic tape function test
+do demoxmt71
+pause
+
+c magnetic tape engineering test
+do demoxmt72
+pause
+
+c magnetic tape interchange test
+do demoxmt73
+pause

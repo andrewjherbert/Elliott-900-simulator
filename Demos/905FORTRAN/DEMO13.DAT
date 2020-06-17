@@ -1,0 +1,197 @@
+﻿c
+c McCracken A Guide to FORTRAN IV Programming Case Study 11B
+c
+c Load Fortran system
+on 905 64K
+at ptr file 905FORT(ISS6).BIN
+j 8181
+
+c compile program
+
+nonstop on
+
+at ptp file DEMO13.BIN
+at ptr inline
+C  CASE STUDY 11B
+C GRAPHING A PIPE TEMPERATURE MAP
+C
+C
+C PUT TEMPERATURE MAP IN COMMON AS LARGER THAN 8192 WORDS
+      COMMON /ARRAYS/ U(61, 61)
+      INTEGER SYMBOL (17), GRAPH(71), BLANK
+C
+C READ GRAPHING SYMBOLS AND A BLANK
+      READ (1, 1000) (SYMBOL(K), K= 1, 17), BLANK
+ 1000 FORMAT (18A1)
+C
+C FROM HERE THROUGH STATEMENT 100 IS THE TEMPERATURE COMPUTATION
+C
+C READ NEXT SET OF PARAMETERS, MAXIT .LE. 0 TERMINATES
+    5  READ (1, 1100) OMEGA, EPS, TEMP, MAXIT
+ 1100  FORMAT (FREE)
+       IF ( MAXIT .LE. 0 ) GO TO 150
+       WRITE (3, 1150) OMEGA, EPS, TEMP, MAXIT
+ 1150 FORMAT (///, 8HOMEGA = , F15.6/
+     1             8HEPS   = , F15.6/
+     2             8HTEMP  = , F15.6/
+     3             8HMAXIT = , I15)
+C
+C SET UP BOUNDARIS AND INITIAL APPROXIMATIONS
+      DO 20 I = 1, 61
+         DO 10 J = 1, 61
+            U(I, J) = 0.0
+   10    CONTINUE
+   20 CONTINUE
+      DO 30 J = 32, 61
+         FJ = J
+         BOUND = 100.0 * (FJ - 31.0) / 30.0
+         U(1, J)  = BOUND
+         U(61, J) = BOUND
+   30 CONTINUE
+      DO 40 I = 2, 60
+         U(I, 61) = 100.0
+   40 CONTINUE
+      DO 50 I = 19, 43
+         U(I, 43) = TEMP
+         U(I, 19) = TEMP
+   50 CONTINUE
+      DO 60 J = 19, 43
+         U(43, J) = TEMP
+         U(19, J) = TEMP
+   60 CONTINUE
+C
+C SET UP COMMON FACTORS
+      A = OMEGA / 4.0
+      B = 1.0 - OMEGA
+C
+C START DO TO COUNT ITERATIONS AND CHECK AGAINST MAXIMUM
+      DO 100 ITN = 1, MAXIT
+C
+C START BIGGEST RESIDUAL AT ZERO
+   70   BIGRES = 0.0
+C
+C COMPUTE NEW APPROXIMATION AT EACH POINT IN PIPE
+        DO 90 J = 2, 60
+           DO 80 I = 2, 60
+              IF (       (I .GE. 19)
+     1             .AND. (I .LE. 43)
+     2             .AND. (J .GE. 19)
+     3             .AND. (J .LE. 43) ) GO TO 80
+              UNEW = A*(U(I+1,J) + U(I-1, J) + U(I,J+1) + U(I,J-1))
+     1               + B*U(I, J)
+              RESID = ABS(UNEW - U(I,J))
+              IF ( RESID .GT. BIGRES ) BIGRES = RESID
+              U(I, J) = UNEW
+   80      CONTINUE
+   90   CONTINUE
+C
+C CHECK FOR CONVERGENCE
+        IF ( BIGRES .LT. EPS) GO TO 110
+  100 CONTINUE
+C
+C IF THIS IS EVER SATISFIED, MORE THAN 'MAXIT' ITERATIONS WOULD BE
+C    NEEDED FOR CONVERGENCE -- WRITE COMMENT AND PRINT GRAPH ANYWAY
+      WRITE (3, 1200) MAXIT, BIGRES
+ 1200 FORMAT (19HDIDN'T CONVERGE IN , I3, 14H   ITERATIONS./
+     1        22HBIGGEST RESIDUAL WAS  , F12.4, 
+     2        24H; PRINTING GRAPH ANYWAY.)
+C
+C COMPUTATION COMPLETE
+C
+  110 WRITE (3, 1300)
+ 1300 FORMAT (///)
+C
+C SET ROW INDEX, J, TO 61 FOR TOP ROW
+      J = 61
+C
+C RUN THROUGH COMPLETE ROW
+  120 DO 140 I = 1, 61
+C 
+C CHECK IF POINT IS IN CENTRE OF PIPE
+         IF (       (I .GE. 20)
+     1        .AND. (I .LE. 42)
+     2        .AND. (J .GE. 20)
+     3        .AND. (J .LE. 42) ) GO TO 130
+C
+C NOT IN CENTRE -- SELECT LETTER OR BLANK TO REPRESENT TEMPERATURE
+         K = U(I,J) / 11.765 + 1.0
+C
+C PLACE SELECTED SYMBOL IN APPROPRIATE POSITION IN LINE
+         GRAPH(I) = SYMBOL(K)
+         GO TO 140
+C
+C INSERT BLANK FOR CENTRE OF PIPE
+  130    GRAPH(I) = BLANK
+  140 CONTINUE
+C
+C WRITE ENTIRE LINE -- N.B. 905 FORTRAN REQUIRES INDEXING
+      WRITE (3, 1400) (GRAPH(K), K = 1, 61)
+ 1400 FORMAT (61A1)
+C
+C MOVE TO NEXT ROW OF MAP
+      J = J - 1
+C
+C CHECK FOR COMPLETION
+      IF ( J .NE. 0 ) GO TO 120
+C
+C GRAPH COMPLETE -- GO BACK FOR MORE DATA IF ANY
+      GO TO 5
+C
+C STOP ON MAXIT = 0 SENTINEL
+  150 STOP
+      END
+<! Halt !>
+<!!>
+
+at tty inline
+O12R
+<!!>
+j 16
+
+c run out of tty input
+de ptp
+
+reverse DEMO13.BIN
+
+c load loader
+at ptr file ../MASIR/LOADER(ISS3)(64K).BIN
+j 8181
+st 8171
+
+c load program
+at ptr file DEMO13.BIN
+at tty inline
+O20L<!!>
+j 16
+
+c reader unloads, load library tape 1
+at ptr file 905FORTLIB1(ISS4).BIN
+at tty inline
+O3L<!!>
+j 16
+
+c reader unloads, load library tape 2
+at ptr file 905FORTLIB2(ISS5).BIN
+r
+
+c reader unloads
+at tty inline
+MM<!!>
+at ptr inline
+A B C D E F G H K    
+0.90 0.5 200.0 200
+0.90 0.5 150.0 200
+0.90 0.5 100.0 200
+0.90 0.5  50.0 200
+0.50 0.5 200.0 200
+0.10 0.5 200.0 200
+0.0 0.0 0.0 0 0
+<!!>
+j 16
+delete DEMO13.BIN
+sh t
+
+
+
+
+

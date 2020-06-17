@@ -1,0 +1,66 @@
+﻿c demonstrate ACD TELECOP utility
+
+
+on 903 8K
+
+runout on
+
+c load 900 TELECOP
+at ptr file TELECOP(900).BIN
+j 8181
+st 8175
+
+c copy a 900 telecode tape
+at ptr file ../903UTILITIES/MONITOR(ISS1).900
+nonstop on
+j 8
+st 46
+
+c verify tape just read and punch new, unclean
+at ptp file DEMO8.900
+rewind
+j 10
+st 129
+de ptp
+
+c verify tape just punched
+at ptr file DEMO8.900
+nonstop on
+j 10
+
+c should complain punch is offline
+
+print DEMO8.900
+de tty
+delete DEMO8.900
+sh t
+
+c load 920 TELECOP
+at ptr file TELECOP(920).BIN
+j 8181
+st 8175
+
+c copy a 920 telecode tape
+at ptr file ../ACDSIR/II_A.920
+nonstop on
+j 8
+st 44
+
+c verify tape just read and punch new, clean
+at ptp file DEMO8.920
+rewind
+j 11
+st 122
+de ptp
+
+c verify tape just punched
+at ptr file DEMO8.920
+nonstop on
+j 10
+
+c should complain punch is offline
+
+print DEMO8.920
+delete DEMO8.920
+sh t
+

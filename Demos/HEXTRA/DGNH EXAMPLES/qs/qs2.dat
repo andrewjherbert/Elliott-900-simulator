@@ -1,0 +1,392 @@
+   OPASC
+   IPBIN
+   ^8273
+   8 86   (no call by name)
+   ADLIB
+   JUMP 12
+   IPASC
+qs2;
+"begin"
+   "comment" 25-APR-1998
+             David M. Bressoud.
+             Factorization and Primality Testing.
+             Springer-Verlag 1989.
+
+             Separately assembled stuff declared first;
+
+   "code" "procedure" lead zero;  "algol";
+   "code" "procedure" lead blank; "algol";
+   "code" "procedure" unsigned;   "algol";
+   "code" "procedure" revert;     "algol";
+   "code" "integer" "procedure" max int; "algol";
+   "code" "integer" "procedure" and(a,b);
+          "value" a,b; "integer" a,b;
+   "algol";
+   "code" "procedure" add(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" sub(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" mpy(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" div(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" copy(a,b);
+          "integer" "array" a,b; 
+   "algol";
+   "code" "procedure" if(a,b,L); 
+          "integer" "array" a,b; "label" L;
+   "algol";
+   "code" "procedure" mod2(x,aa,b); 
+          "integer" "array" x,aa,b;
+   "algol";
+   "code" "procedure" multiply(a,b,c,n); "value" n;
+          "integer" "array" a,b,c; "integer" n;
+   "algol";
+   "code" "procedure" divide(x,y,a,b);
+          "integer" "array" x,y,a,b;
+   "algol";
+   "code" "procedure" mod(x,a,b);
+          "integer" "array" x,a,b;
+   "algol";
+   "code" "procedure" qdm;
+   "algol";
+
+   "comment" Outer block declarations;
+
+   "integer" ks,m,n,s,s2;
+   "real" bt,btw,t,wd,z;
+
+   "comment" John Pollard's logarithm choice.
+             z is 2/ln(2);
+   "integer" "procedure" iln(x); "value" x; "integer" x;
+      iln := z*ln(x);
+
+   "comment" jln is like iln, but for a long number. It
+             seemed hard to implement;
+   "integer" "procedure" jln(x); "integer" "array" x;
+   "begin"
+      "integer" i,j;
+      "real" tg;
+      tg := 0.0;
+      i := 0;
+      btw := 1.0;
+      "for" j := 1 "step" 1 "until" n "do"
+         "if" x[j] "ne" 0 "or" i "ne" 0 "then"
+      "begin"
+         i := i + 1;
+         btw := btw * bt;
+         tg := tg * wd + btw * x[j];
+         tg := tg * bt
+      "end";
+      jln := z * (ln(tg) - (i+1) * ln(bt))
+   "end" of jln;
+
+   "comment" Program start. Must pretend to call qdm in order
+             to load some of the separately assembled stuff;
+   "if" "false" "then"  qdm;
+
+   "print" ''L@25-APR-1998'L@@;
+   "read" s,t,n,ks,m;
+   z := 2.0/ln(2.0);
+   s2 := s "div" 2;
+   wd := 1.0 + max int;
+   "comment" Using exp and ln instead of sqrt, for bt, saves
+             space because exp and ln are built-in anyway;
+   bt := 1.0/exp(0.5*ln(wd));
+ 
+   "begin"
+      "integer" i,j,L,npj,pj,t1,t2,t3,t4;
+      "boolean" first;
+      "integer" "array" a,b,c,nb,one,r,rs,work,w1,w2,zero[1:n],
+                        d[1:2*n],
+                        ps,ts[1:m],
+                        e,es[0:m],
+                        f[0:s]; "comment" f[0] is a dustbin;
+
+      "comment" The procedures, get and put, could be provided
+                with an extra parameter, n, and stowed alongside
+                the declarations of the assembly-coded procedures.
+
+                However, get uses add, and add needs its arrays
+                to be located withing 8192 words of each other.
+                Hence get actually needs to access a non-local
+                array, work, and therefore needs to be located
+                here. The same get and put have been used in all
+                the programs for consistency;
+ 
+      "procedure" get(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k;
+         "for" j := 1 "step" 1 "until" n "do" a[j] := work[j] := 0;
+
+         "for" j := j "while" "not" buffer(1,s) "do"
+         "begin"
+            mpy(a,100000);
+            "read" work[n];
+            add(a,a,work)
+         "end"
+      "end" of get;
+
+      "procedure" put(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k,L,m,p,r,half;
+         "boolean" zero;
+         "integer" "array" work[1:2*n+1];
+
+         "boolean" "procedure" fin;
+         "begin"
+            "integer" k;
+            fin := "true";
+            "for" k := 1 "step" 1 "until" n "do"
+               "if" work[k] "ne" 0 "then" fin := "false"
+         "end" of fin;
+
+         "procedure" group;
+         "begin"
+            "integer" s;
+            s := 10^r; mpy(work, s);
+            "if" zero "then" "print" ' @;
+            "print" digits(5), same line, work[n];
+            work[n] := 0
+         "end" of group;
+ 
+         half := (max int "div" 2) + 1;
+         "for" j := 1 "step" 1 "until" 2*n+1 "do" work[j] :=
+            "if" j "le" n "then" a[j] "else" 0;
+         work[n+1] := half;
+
+         "for" j := -5, j+5 "while" "not" fin "do" div(work, 100000);
+         mpy(work, 100000);
+         "for" j := j, j+1 "while" "not" fin "do" div(work, 10);
+
+         L := ((j-1) "div" 50) + 1;
+         m := j - (L-1) * 50;
+         p := ((m-1) "div" 5) + 1;
+ 
+         "print" ''L@@;
+         r := m - (p-1) * 5;
+         zero := "false";
+         group;
+         lead zero;
+         unsigned;
+         zero := "true";
+         r := 5;
+         "for" k := 1 "step" 1 "until" p-1 "do" group;
+         "for" j := 2 "step" 1 "until" L "do"
+         "begin"
+            "print" ''L@@;
+            "for" k := 1 "step" 1 "until" 10 "do" group
+         "end";
+         lead blank;
+         revert;
+         "print" s
+      "end" of put;
+
+      "comment" q copies the head of d to w1;
+      "procedure" q;
+      "begin"
+         "integer" j;
+         "for" j := 1 "step" 1 "until" n "do" w1[j] := d[n+j]
+      "end" of q;
+
+      "comment" md1 is the ordinary mod function;
+      "integer" "procedure" md1(x,y); "value" x,y; "integer" x,y;
+         md1 := x - (x "div" y) * y;
+
+      "comment" md2 is the mod function for a long number, but
+                only for when the result is a single-length number;
+      "integer" "procedure" md2(x,y); "value" y;
+         "integer" "array" x; "integer" y;
+      "begin"
+         copy(w1,x); div(w1,y); mpy(w1,y);
+         sub(w2,x,w1); md2 := w2[n]
+      "end";
+
+      "comment" From Knuth, extended Euclid algorithm for
+                single-length numbers.
+                I think that label names have to be unique
+                throughout the whole program, but am not sure.;
+      "integer" "procedure" inv(x,y); "value" x,y; "integer" x,y;
+      "begin"
+         "integer" u1,u2,u3,v1,v2,v3,t1,t2,t3,q;
+         u1 := v2 := 1; u2 := v1 := 0; u3 := y; v3 := x;
+qcyc:
+         "if" v3 = 1 "then" "goto" qfin;
+         q := u3 "div" v3;
+         t1 := u1 - v1 * q;
+         t2 := u2 - v2 * q;
+         t3 := u3 - v3 * q;
+         u1 := v1;
+         u2 := v2;
+         u3 := v3;
+         v1 := t1;
+         v2 := t2;
+         v3 := t3;
+         "goto" qcyc;
+qfin:
+         "if" v2 < 0 "then" v2 := v2 + y;
+         inv := v2
+      "end";
+
+      "comment" Just a way of finding md2 of t1*t2 without
+                causing overflow of t1*t2;
+      "integer" "procedure" md3;
+      "begin"
+         copy(w2,zero);
+         w2[n] := t1;
+         mpy(w2,t2);
+         md3 := md2(w2,pj)
+      "end" of md3;
+
+      "comment" Program continues by setting up stuff
+                and reading the initial data;
+      "for" j := 1 "step" 1 "until" n "do" one[j] := zero[j] := 0;
+      one[n] := 1;
+      get(nb,'P@);
+      mpy(nb,ks);
+      "for" j := 1 "step" 1 "until" m "do" "read" ps[j];
+      "for" j := 1 "step" 1 "until" m "do" "read" ts[j];
+      "comment" For each input polynomial;
+polyin:
+      get(a,'A@);
+      if(a,zero,endzzz);
+      get(b,'B@);
+      get(c,'C@);
+      first := "true";
+      "for" i := 1 "step" 1 "until" s "do" f[i] := 0;
+      "comment" The number to be factorised must be equal
+                to 1 modulo 8;
+      j := iln(8);
+      "for" i := 2 "step" 2 "until" s "do" f[i] := j;
+      "comment" Evaluate the limit, L, for the sieving
+                according to Bressoud's formula;
+      L := (jln(nb) "div" 2) + iln(s2) - t*iln(ps[m]);
+
+      "for" j := 2 "step" 1 "until" m "do"
+      "begin"
+         "comment" We are trying to find a value of i so that
+                   (a*(i-(s/2))+b)^2 - nb = 0 modulo p[j].
+                   It's a bit of a slog; 
+         pj := ps[j];
+         npj := iln(pj);
+         t4 := md2(b,pj);
+         t3 := md1(s2,pj);
+         t2 := inv(md2(a,pj),pj);
+         t1 := ts[j] - t4;
+         "if" t1 < 0 "then" t1 := t1 + pj;
+         t1 := md1(md3 + t3,pj);
+         "for" i := t1 "step" pj "until" s "do" f[i] := f[i] + npj;
+         "if" md1(ks,pj) "ne" 0 "then"
+         "begin"
+             "comment" The other solution;
+            t1 := pj - ts[j] - t4;
+            "if" t1 < 0 "then" t1 := t1 + pj;
+            t1 := md1(md3 + t3,pj);
+            "for" i := t1 "step" pj "until" s "do" f[i] := f[i] + npj
+         "end"
+      "end";
+
+      "comment" The sieve.;
+      "for" i := 1 "step" 1 "until" s "do"
+      "if" f[i] "ge" L "then"
+      "begin"
+         copy(r,zero);
+         "if" i<s2 "then"
+         "begin"
+            r[n] := s2 - i; 
+            e[0] := 1
+         "end" "else"
+         "begin"
+            r[n] := i - s2; 
+            e[0] := 0
+         "end";
+         multiply(d,a,r,n); q;
+         "if" e[0] = 1 "then" sub(r,b,w1) "else" add(r,b,w1);
+         "if" r[1] < 0 "then" sub(r,zero,r);
+         multiply(d,r,r,n); q;
+         sub(w2,w1,nb);
+         copy(w1,w2);
+         "if" w1[1] < 0 "then"
+         "begin"
+            e[0] := 1;
+            sub(w1,zero,w1)
+         "end" "else" e[0] := 0;
+         "for" j := 1 "step" 1 "until" m "do" e[j] := 0;
+         "for" j := 1 "step" 1 "until" m "do"
+         "begin"
+again:
+            copy(w2,w1);
+            div(w2,ps[j]);
+            mpy(w2,ps[j]);
+            if(w1,w2,found); "comment" if w1=w2 then goto found;
+            "goto" next;
+found:
+            div(w1,ps[j]);
+            e[j] := e[j] + 1;
+            "comment" Remember that a is a residual factor, so
+                      process stops when w1=a, not when w1=1;
+            if(w1,a,good);
+            "goto" again;
+next:
+         "end";
+         "goto" skip;
+good:
+         "if" first "then"
+         "begin"
+            "comment" Save first solution;
+            "for" j := 0 "step" 1 "until" m "do" es[j] := e[j];
+            copy(rs,r);
+            first := "false"
+         "end" "else"
+         "begin"
+            e[0] := "if" e[0] = es[0] "then" 0 "else" 1;
+            "for" j := 1 "step" 1 "until" m "do" e[j]:=e[j]+es[j];
+            "comment" Combine;
+            multiply(d,r,c,n);
+            mod2(r,d,nb);
+            multiply(d,r,rs,n);
+            mod2(r,d,nb);
+            put(r,'Q@);
+            "for" j := 0 "step" 1 "until" m "do"
+            "begin"
+               "if" md1(j,10) = 0 "then" "print" ''L@@;
+               "print" digits(3), same line, e[j]
+            "end"
+         "end";
+skip:
+      "end";
+      "goto" polyin;
+endzzz:
+      "print" ''L@@
+   "end"
+"end"
+
+ 1000  1.5
+
+    3     1    29
+  499 94860 12441P
+    2    3    5    7   17   19   31   43   47   59
+   61   67  107  163  181  193  197  229  241  263
+  271  277  311  331  349  359  367  389  397
+ 
+    1    1    1    2    3    1    5   19   18   14
+   16    6   32   38   19   86   14    7   18  101
+   22   39   39   65   52  171  125   69   50
+
+  6299A
+  1649B
+   217 31374 34841C
+  6311A
+  2063B
+   349 43325 62332C
+  6343A
+  4150B
+   419 08035 83186C
+     0A
+

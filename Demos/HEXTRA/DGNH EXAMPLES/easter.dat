@@ -1,0 +1,45 @@
+
+    IPBIN
+    ADLIB
+    OPASC
+    JUMP 12
+    IPASC
+easter;
+"begin"
+   "comment" 09-OCT-1998;
+   "integer" d,m,y;
+   "code" "procedure" unsigned; "algol";
+   "code" "procedure" revert; "algol";
+
+   "procedure" easter(d,m,y); "value" y; "integer" d,m,y;
+   "begin"
+      "procedure" divide(x,z,q,r); "value" x,z; "integer" x,z,q,r;
+      "begin"
+         q := x "div" z;
+         r := x - z * q
+      "end" divide;
+
+      "integer" a,b,c,h;
+
+      divide(y,19,m,a);
+      divide(y,100,b,c);
+      divide(b,4,d,y);
+      divide(19*a+b-d+15-((8*b+13) "div" 25), 30, m, h);
+      divide(c,4,b,d);
+      divide(2*(y+b)-h-d+32,7,m,c);
+      h := h+c-7*((a+11*h+19*c) "div" 433);
+      m := (h+90) "div" 25;
+      divide(33*m+h+19,32,b,d)
+   "end" of easter;
+
+   unsigned; "print" ''L@09-OCT-1998'L@@;
+   "for" y := 2003 "step" 1 "until" 2010 "do"
+   "begin"
+      easter(d,m,y);
+      "print" y, same line, digits(2), '   easter is on @,
+              d, digits(1), '.@, m
+   "end";
+   revert
+"end"
+
+

@@ -1,0 +1,63 @@
+   IPBIN
+   OPASC
+   ADLIB
+   JUMP 12
+   IPASC
+
+sundial;
+"begin"
+   "comment" 20-SEP-2000. Sundial timekeeping;
+   "integer" j,m,c1,c2,c3,sx,sy;
+   "integer" "array" a[1:12];
+   "real" pi;
+
+   "print" ''L@20-SEP-2000@; pi := 4*arctan(1);
+   set origin(100, 160);
+   c1 :=3; c2 := 3; c3 := 3; sx :=40; sy := 8;
+   "comment" c1 determines the offset of the y-axis numbers,
+             c2 the size of the month letters and y-axis numbers,
+             c3 the size of the text above and below.
+             If invoked by "c:\ada\sim900al > fred.lis"
+             then the end of the program does not clutter
+             up the screen which can then be printed;
+   "for" j := 1 "step" 1 "until" 12 "do"
+   "begin"
+      m := j; in string(a,m);
+   "end";
+   same line; digits(2); punch(5);
+   move pen(0, -15*sy); draw line(0, 15*sy); move pen(0,0);
+   draw line(12*sx,0); move pen(12*sx,-15*sy);
+   draw line(12*sx, 15*sy);
+
+   way(0, c2);
+   "for" j := -15 "step" 1 "until" 15 "do"
+   "begin"
+      move pen(0,j*sy); cen character(1);
+      move pen(-20*c1,j*sy-3*c1);
+      "if" (j "div" 5) * 5 = j "then" "print" j
+   "end";
+
+   "for" j := 1 "step" 1 "until" 12 "do"
+   "begin"
+      move pen((j-1)*sx,0); cen character(1);
+      move pen((j-1)*sx,-14*c1); m := j; out string(a,m)
+   "end";
+
+   move pen(12*sx,-15*sy);
+   "for" j := -15 "step" 1 "until" 15 "do"
+   "begin"
+      move pen(12*sx,j*sy); cen character(1)
+   "end";
+
+   way(0,c3); move pen(3*sx,10*sy); "print" 'MINUTES - FAST@;
+   move pen(3*sx,-10*sy); "print" 'MINUTES - SLOW@;
+   move pen(0,-sy*3.373);
+
+   "for" j := 1 "step" 1 "until" 360 "do"
+   draw line(sx*(j/360)*12,
+            -sy*(7.6*sin(2*pi*(j/360))+10*sin(2*pi*(j/180)+0.344)))
+
+"end";
+
+  'J@ 'F@ 'M@ 'A@ 'M@ 'J@ 'J@ 'A@ 'S@ 'O@ 'N@ 'D@
+

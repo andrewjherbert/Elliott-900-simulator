@@ -1,0 +1,27 @@
+﻿c X51 - varying speed paper tape reader and punch test
+
+on 903 8K
+
+nonprinting off
+
+c load test program
+at ptr file X51(ISS1).BIN 
+j 8181
+st 7820
+
+c produce short specimen tape
+at ptp file DEMOX51B.BIN 
+j 21
+st 57
+de ptp
+
+c check prepared long specimen
+at ptr file DEMOX51A.BIN 
+at ptp file DEMOX51B.BIN
+nonstop on
+j 22
+
+
+de ptp
+print DEMOX51B.BIN
+sh t

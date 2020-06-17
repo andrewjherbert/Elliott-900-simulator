@@ -1,0 +1,123 @@
+﻿on
+telecode 903
+c at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+c j 8181
+c st 5124
+at ptr inline
+TESTINV;
+"begin"
+   "comment" 08-DEC-1997. With parts written in 1963 
+             by TJ Dekker, Matematisch Centrum,
+             (det was AP204, sol was AP205), and this
+             "normal equations" program was originally
+             written in 1986;
+
+   "code" "real" "procedure" det(a,n,p); "value" n; 
+   "integer" n; "array" a; "integer" "array" p; "algol";
+
+   "code" "procedure" inv(lu,n,p); "value" n; "integer" n;
+   "array" lu; "integer" "array" p; "algol";
+
+   "code" "real" "procedure" sigma(j,n,z); "value" n;
+   "integer" j,n; "real" z; "algol";
+
+   "code" "procedure" copy(j,m,n,z,v); "value" m,n;
+   "integer" j,m,n; "real" z,v; "algol";
+
+   "comment" must leave 16 storage locations for det
+             as the FIRST declaration;
+   "real" d1,d2,d3,d4,d5,d6,d7,d8;
+
+   "integer" n;
+
+   "real" "procedure" read; "read" read;
+
+   "comment" PROGRAM START. Must pretend to call sqrt,
+             as otherwise it would not get loaded;
+   "if" "false" "then" d1:=sqrt(d2);
+
+   "print" '08-DEC-1997'L``;
+   "read" n; 
+   "begin"
+      "real" "array" a,b[1:n,1:n];
+      "integer" "array" p[1:n];
+      "real" deter, plot; "integer" ast,i,j,k;      
+                        
+      "comment" get input data;
+      "for" k:=1 "step" 1 "until" n "do"
+      "begin"
+         copy(j,1,n,a[k,j],read);
+         copy(j,1,n,b[k,j],a[k,j])
+      "end"; 
+
+      "comment" print input data A;
+      "print" ''L`input data A`;
+      "for" j:=1 "step" 1 "until" n "do"
+      "begin"
+         "print" ''L``;
+         "for" k := 1 "step" 1 "until" n "do"
+            "print" aligned(6,3), same line, '   `, a[j,k]
+      "end";
+
+      "comment" print input data B;
+      "print" ''L`input data B`;
+      "for" j:=1 "step" 1 "until" n "do"
+      "begin"
+         "print" ''L``;
+         "for" k := 1 "step" 1 "until" n "do"
+            "print" aligned(6,3), same line, '   `, b[j,k]
+      "end";
+
+      "comment" solve them;
+      deter:=det(a,n,p);
+
+      "print" ''L`DETERMINANT = `, same line, deter;
+
+      "comment" print input data A after det;
+      "print" ''L`input data A after det`;
+      "for" j:=1 "step" 1 "until" n "do"
+      "begin"
+         "print" ''L``;
+         "for" k := 1 "step" 1 "until" n "do"
+            "print" aligned(6,3), same line, '   `, a[j,k]
+      "end";
+
+      inv(a,n,p);
+
+      "comment" print input data A after inv;
+      "print" ''L`input data A after inv`;
+      "for" j:=1 "step" 1 "until" n "do"
+      "begin"
+         "print" ''L``;
+         "for" k := 1 "step" 1 "until" n "do"
+            "print" aligned(6,3), same line, '   `, a[j,k]
+      "end";
+
+      "print" ''L`results'L``, deter, ''L``;
+      "comment" print unit matrix;
+      "for" j:=1 "step" 1 "until" n "do"
+      "begin"
+         "print" ''L``;
+         "for" k := 1 "step" 1 "until" n "do"
+            "print" aligned(6,3), same line, '   `, 
+            sigma(i, n, a[j,i] * b[i,k])
+      "end"
+   "end"
+"end"
+<!!>
+j 12
+st 1727
+at ptr file ..\HUNTER\LIBRARY.RLB
+j 9
+st 7943
+select out tty
+at ptr inline
+   (input data)
+  3
+ 4.6  2.3  8.5
+ 5.1  6.5  9.2
+ 8.6  9.4  4.1
+<!!>
+j 10
+st 1727
+sh t

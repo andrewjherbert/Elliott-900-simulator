@@ -1,0 +1,102 @@
+﻿C DEMONSTRATE XMT70
+
+on 903
+
+delete tape1
+
+at mt 0 tape1 wp
+
+at ptr file XMT70(ISS1).BIN
+j 8181
+st 8171
+
+at tty inline
+
+	PR M ^^WRITE 5 BLOCKS WITH INTERRUPTS^$ .
+	LP 5 		(LOOP 5 TIMES) .
+	OC 5/6/9/10  	(COMMAND WORD WITH BITS 5,6,9,10 SET) .
+	IW 		(WAIT FOR INTERRUPT) .
+	WB /A /128 	(WRITE BLOCK OF 256 ALTERNATE 1S AND 0S) .
+	WB /A /128 .
+	CB 		(CLOSE BLOCK) .
+        IW .
+	IS 		(STATUS WORD) .
+	PR S 		(PRINT STATUS WORD) .
+	JB 		(JUMP BACK TO START OF LOOP) .
+	OC /8/9 .
+
+L/1/ 	IS .
+	CP /S /1 	(TEST IF BIT 1 OF STATUS IS ZERO) .
+	JF /1 		(JUMP IF FALSE TO LABEL 1) .
+	J /2		(JUMP UNCONDITIONAL TO LABEL 2) .
+
+L/2/	PR M ^^REWOUND^$ (PRINT MESSAGE) .
+
+	PR M ^^READ AND CHECK 5 BLOCKS WITHOUT INTERRUPTS^$ .
+	LP 5 .
+	OC 6/8/10 .
+	RB /256 	(READ BLOCK OF 256 WORDS) .
+	CB .
+	IS .
+	PR S.
+	CP /A /256	(COMPARE BLOCK WITH A PATTERN) .
+	JF /5.
+	JB .
+
+	PR M ^^WRITE BACKSPACE AND READ BACK^$ .
+	OC /6/9/10 .
+	WB /F /128 	(WRITE BLOCK FULL HOUSE PATTERN) .
+	WB /Z /128 	(WRITE BLOCK ZERO PATTERN) .
+	WB /B /256 	(WRITE BLOCK RANDOM PATTERN) .
+	WW 1/2/3 	(WRITE WORD) .
+	CB .
+	OC /9 .
+	OC /6/8/10 .
+	RB /255 .
+	RW 		(READ WORD) .
+	CB .
+	IS .
+	PR S .
+	CP /S /6 .
+	JF /7 .
+	J /8 .
+L/7/	PR M ^^LONG RECORD DETECTED^$ .
+	CP /D /1 	(COMPARE LAST READ WORD) .
+	JF /3 .
+	CP /D /2 .
+	JF /3 .
+	CP /D /3
+	JF /3
+	CP /F /256 .
+	JF /3 .
+	J /4 .
+
+L/8/	PR M ^^LONG RECORD NOT DETECTED^$ .
+
+L/3/	PR M ^^DATA ERROR^$ .
+   	PR D 		(PRINT DATA) .
+
+L/4/	OC /8/9 .
+	WT 30000 	(WAIT 3 SECONDS).
+L/5/ 	IS .
+	CP /S /1 .
+	JF /5 .
+	J /6 .
+
+L/6/	PR M ^^REWOUND^$ .
+
+	PR M ^CHECK STATUS OF ALL HANDLERS^$ .
+	LP 4 .
+	CT/OC 1		(PUT LOOP COUNTER MODULO 4 IN HANDLER BITS) .
+	IS .
+	PR S .
+	JB  .
+GO
+<!!>
+
+nonstop on
+j 23
+
+de mt 0
+
+sh t

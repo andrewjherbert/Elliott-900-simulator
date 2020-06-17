@@ -1,0 +1,33 @@
+﻿c X212 Store Test 1 - Chequerboard for Internal and External Stores, 920M, 5musec store
+
+on 920M 16K 5
+nonstop on
+
+c load program - triggers itself automatically
+at ptr file X212(ISS2).BIN
+at ptp file demox212.txt legible
+j 8181
+de ptp
+print demox212.txt
+de tty
+
+c manually trigger at 8 with control tape
+at ptp file demox212.txt legible
+at ptr inline bin
+048 000 000 000 000 000 000 177 000 000 000 000 000 020
+<!!>
+j 8
+de ptp
+print demox212.txt
+de tty
+
+c soak test module 1
+at ptp file demox212.txt legible
+at ptr inline bin
+000 000 000 000 000 000 000 000 000 000 000 
+<!!>
+enter A 1
+j 10
+de ptp
+print demox212.txt
+sh t

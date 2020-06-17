@@ -1,0 +1,62 @@
+﻿C DEMONSTRATE 903 FORTRAN
+C
+
+C Load and Go System - Table of Squares
+C
+DO DEMO1
+PAUSE
+C
+C 2-Pass System, Batch Mode - Taylor Series for exp(x)
+C
+DO DEMO2
+PAUSE
+C
+C 2-Pass System, Relocatable Mode - Newton Raphson
+C
+DO DEMO3
+PAUSE
+C
+C Large Program System - Taylor Series for Sine
+C
+DO DEMO4
+PAUSE
+C
+C Load and Go System - Stickler Problem
+C
+DO DEMO5
+PAUSE
+C
+C Large Program System - Gauss-Seidel solver
+C
+DO DEMO6
+PAUSE
+C
+C Load and Go System - Sinusoidal Graph
+C
+DO DEMO7
+PAUSE 
+C
+C Large Program System - Heat Equation
+C
+DO DEMO8
+PAUSE
+C
+C Load and Go System - Quadratic Equations
+C
+DO DEMO9
+PAUSE
+C
+C Load and Go System - CODE sections
+C
+DO DEMO10
+PAUSE
+C
+C Load and Go System - Pi to 300 places
+C
+DO DEMO11
+PAUSE
+C
+C MTFORTRAN - Gauss-Seidel for large number of unknowns
+C
+DO DEMO12
+PAUSE

@@ -1,0 +1,84 @@
+﻿C DEMONSTRATE T.2 ASSEMBLER
+
+on 903 8K
+
+c load T2
+at ptr file T2(ISS1)(5500).BIN
+j 8181
+st 7746
+
+c patch to make dynamic stop at end a loop stop
+e 8016 =8 8016
+
+c T.2 input
+select out tty
+at ptr inline
+=T.2 EXAMPLE<! R !>
+&
++32
++64
+*
+4 8;
+5 9;
+0 9;
+B4 0;2
+7 4;
+15 6148
+10 9;
+8 2;
++0
++0
+*
++141
++10
++10
++212
++46
++178
++160
++201
++83
++160
++80
++210
++201
++77
++201
++212
++201
++86
++197
++46
++141
++10
++0
+*
+<! halt !>
+<!!>
+
+j 7749
+st 8016
+
+c run the program
+j 32
+st 36
+
+c create a temporary directory
+c and patch output message
+at ptr inline
++19;2
++33
+\
+<!!>
+j 8
+st 7971
+
+c run program
+j 32
+st 56
+
+sh t
+
+
+
+		

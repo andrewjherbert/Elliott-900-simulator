@@ -1,0 +1,697 @@
+   OPASC
+   IPBIN
+   ^8273
+   8 86   (no call by name)
+   ^27
+   +65522 (lots of store)
+   ADLIB
+   JUMP 12
+   IPASC
+gauss;
+"begin"
+   "comment" 28-APR-1998
+             David M. Bressoud.
+             Factorization and Primality Testing.
+             Springer-Verlag 1989.
+
+             Separately assembled stuff declared first;
+
+   "code" "procedure" date time; "algol";
+   "code" "procedure" lead zero;  "algol";
+   "code" "procedure" lead blank; "algol";
+   "code" "procedure" unsigned;   "algol";
+   "code" "procedure" revert;     "algol";
+   "code" "integer" "procedure" max int; "algol";
+   "code" "integer" "procedure" and(a,b);
+          "value" a,b; "integer" a,b;
+   "algol";
+   "code" "procedure" add(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" sub(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" mpy(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" div(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" copy(a,b);
+          "integer" "array" a,b; 
+   "algol";
+   "code" "procedure" if(a,b,L); 
+          "integer" "array" a,b; "label" L;
+   "algol";
+   "code" "procedure" mod2(x,aa,b); 
+          "integer" "array" x,aa,b;
+   "algol";
+   "code" "procedure" multiply(a,b,c,n); "value" n;
+          "integer" "array" a,b,c; "integer" n;
+   "algol";
+   "code" "procedure" divide(x,y,a,b);
+          "integer" "array" x,y,a,b;
+   "algol";
+   "code" "procedure" mod(x,a,b);
+          "integer" "array" x,a,b;
+   "algol";
+   "code" "procedure" qdm;
+   "algol";
+
+   "comment" This expression avoids overflow;
+   "integer" "procedure" or(x,y); "value" x,y; "integer" x,y;
+      or := x - and(x,y) + y;
+
+   "comment" This expression avoids overflow;
+   "integer" "procedure" xor(x,y); "value" x,y; "integer" x,y;
+      xor := x - and(x,y) + y - and(x,y);
+
+   "comment" This should have been provided as an assembly
+             coded boolean procedure;
+   "boolean" "procedure" ifb(a,b); "integer" "array" a,b;
+   "begin"
+      ifb := "true";
+      if(a,b,ifbjoin);
+      ifb := "false";
+ifbjoin:
+   "end";
+
+   "integer" bits,dups,i1,i2,i3,j,k,ks,
+             m,maxsol,n,nos,r1,r2,usable;
+
+   "comment" Program start. Must pretend to call qdm in order
+             to load some of the separately assembled stuff;
+   "if" "false" "then"  qdm;
+   "print" ''L@28-APR-1998'L@@;
+   "read" n,ks,m,maxsol;
+   bits := entier((ln(max int)/ln(2)) + 0.5);
+   r1 := 1 + ((maxsol - 1) "div" bits);
+   r2 := 1 + ((m+1) "div" bits);
+
+   "begin"
+      "integer" "array" ans,c,nb,one,p,
+                        work,ww1,x,y,zero[1:n],
+                        d,ww2[1:2*n],
+                        ps,es[0:m],
+                        em[1:maxsol,0:m],
+                        soln[1:maxsol,1:n],
+                        lrow[1:r2], left[1:maxsol,1:r2],
+                        rrow[1:r1],right[1:maxsol,1:r1],
+                        zeror[1:r1];
+      "boolean" "array" used[1:maxsol];
+
+      "comment" The procedures, get and put, could be provided
+                with an extra parameter, n, and stowed alongside
+                the declarations of the assembly-coded procedures.
+
+                However, get uses add, and add needs its arrays
+                to be located withing 8192 words of each other.
+                Hence get actually needs to access a non-local
+                array, work, and therefore needs to be located
+                here. The same get and put have been used in all
+                the programs for consistency;
+ 
+      "procedure" get(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k;
+         "for" j := 1 "step" 1 "until" n "do" a[j] := work[j] := 0;
+
+         "for" j := j "while" "not" buffer(1,s) "do"
+         "begin"
+            mpy(a,100000);
+            "read" work[n];
+            add(a,a,work)
+         "end"
+      "end" of get;
+
+      "procedure" put(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k,L,m,p,r,half;
+         "boolean" zero;
+         "integer" "array" work[1:2*n+1];
+
+         "boolean" "procedure" fin;
+         "begin"
+            "integer" k;
+            fin := "true";
+            "for" k := 1 "step" 1 "until" n "do"
+               "if" work[k] "ne" 0 "then" fin := "false"
+         "end" of fin;
+
+         "procedure" group;
+         "begin"
+            "integer" s;
+            s := 10^r; mpy(work, s);
+            "if" zero "then" "print" ' @;
+            "print" digits(5), same line, work[n];
+            work[n] := 0
+         "end" of group;
+ 
+         half := (max int "div" 2) + 1;
+         "for" j := 1 "step" 1 "until" 2*n+1 "do" work[j] :=
+            "if" j "le" n "then" a[j] "else" 0;
+         work[n+1] := half;
+
+         "for" j := -5, j+5 "while" "not" fin "do" div(work, 100000);
+         mpy(work, 100000);
+         "for" j := j, j+1 "while" "not" fin "do" div(work, 10);
+
+         L := ((j-1) "div" 50) + 1;
+         m := j - (L-1) * 50;
+         p := ((m-1) "div" 5) + 1;
+ 
+         "print" ''L@@;
+         r := m - (p-1) * 5;
+         zero := "false";
+         group;
+         lead zero;
+         unsigned;
+         zero := "true";
+         r := 5;
+         "for" k := 1 "step" 1 "until" p-1 "do" group;
+         "for" j := 2 "step" 1 "until" L "do"
+         "begin"
+            "print" ''L@@;
+            "for" k := 1 "step" 1 "until" 10 "do" group
+         "end";
+         lead blank;
+         revert;
+         "print" s
+      "end" of put;
+
+      "comment" x := gcd(u,v);
+      "procedure" gcd(x,u,v); "value" u,v;
+         "integer" "array" x,u,v;
+      "begin"
+gcdl1:
+         if(v,zero,gcdl2);
+         mod(x,u,v);
+         copy(u,v);
+         copy(v,x);
+         "goto" gcdl1;
+gcdl2:
+         copy(x,u)
+      "end" of gcd;
+
+      "comment" Looks for non-zero words;
+      "boolean" "procedure" oddbit(i); "value" i; "integer" i;
+      "begin"
+         "integer" j;
+         oddbit := "false";
+         "for" j := 1 "step" 1 "until" r2 "do"
+         "begin"
+            "if" and(left[i,j],lrow[j]) "ne" 0 
+            "then" oddbit := "true"
+         "end"
+      "end";
+
+      "comment" Looks for a solution; 
+      "boolean" "procedure" found;
+      "begin"
+         "integer" j;
+         found := "true";
+         "for" j := 1 "step" 1 "until" r2 "do"
+         "begin"
+            "if" left[i3,j] "ne" 0 "then" found := "false"
+         "end"
+      "end";
+
+      "comment" x := m ^ e modulo nn;
+      "procedure" power(x,m,e,nn); "value" m,e;
+                  "integer" "array" x,nn; 
+                  "integer" m,e;
+      "begin"
+         "integer" j,kx,z;
+         "integer" "array" c[1:n];
+
+         kx := (max int "div" 2) + 1;
+
+         "if" e < 0 "then" "print" ''L@e = @, same line, e, stop;
+
+         "if" e = 0 "then"
+         "begin"
+            copy(x,one);
+            "goto" finish
+         "end";
+
+p1:
+         z := and(kx,e);
+         "if" z = 0 "then"
+         "begin"
+            kx := kx "div" 2; "goto" p1;
+         "end";
+
+         copy(c,one);
+p4:
+         multiply(d,c,c,n);
+         mod2(c,d,nn);
+         "if" and(z,e) "ne" 0 "then" "goto" p6;
+p5:
+         "if" z = 1 "then" "goto" p7;
+         z := z "div" 2;
+         "goto" p4;
+p6:
+         "for" j := 1 "step" 1 "until" 2*n "do"
+            d[j] := "if" j "le" n "then" 0 "else" c[j-n];
+         mpy(d,m);
+         mod2(c,d,nn);
+         "goto" p5;
+p7:
+         mod(x,c,nn);
+finish:
+      "end";
+
+      "comment" Tries to solve a found solution;
+      "procedure" tryit;
+      "begin"
+         "integer" h,j,k,r;
+         "boolean" first;
+         first := "true";
+         k := 0;
+         "for" j := 1 "step" 1 "until" r1 "do" 
+            rrow[j] := right[i3,j];
+cycle:
+         k := k + 1;
+         "comment" When rrow is zero we have a possible solution;
+         if(rrow,zeror,eval);
+         "if" and(rrow[r1],1) = 1 "then" "goto" doit;
+         div(rrow,2);
+         "goto" cycle;
+doit:
+         div(rrow,2);
+         "for" j := 1 "step" 1 "until" n "do" ww1[j] := soln[k,j];
+         "comment" Save the first solution;
+         "if" first "then"
+         "begin"
+            first := "false";
+            copy(x,ww1);
+            "for" j := 0 "step" 1 "until" m "do" es[j] := em[k,j];
+         "end" "else"
+         "begin"
+            multiply(ww2,x,ww1,n);
+            mod2(x,ww2,nb);
+            "for" j := 0 "step" 1 "until" m "do"
+               es[j] := es[j] + em[k,j];
+         "end";
+         "goto" cycle;
+eval:
+         copy(y,one);
+         "comment" Have we any odd powers;
+         "for" r := 1 "step" 1 "until" m "do"
+         "begin"
+            "if" and(es[r],1) = 1 "then"
+            "begin"
+               "print" 'odd'L@@;
+               "for" h := 0 "step" 1 "until" m "do"
+               "begin"
+                  "if" ((h-1) "div" 10)*10 = h - 1 
+                  "then" "print" ''L@@;
+                  "print" same line, digits(5), es[h]
+               "end";
+               stop
+            "end";
+            "comment" Even powers only;
+            "if" es[r] "ne" 0 "then"
+            "begin"
+               power(ww1,ps[r],es[r] "div" 2,nb);
+               multiply(ww2,ww1,y,n);
+               mod2(y,ww2,nb)
+            "end"
+         "end";
+         "if" and(es[0],3) "ne" 0 "then" 
+         "begin"
+            sub(ww1,nb,y);
+            copy(y,ww1)
+         "end";
+         "comment" Reject cases where x = y;
+         "if" ifb(x,y) "then"
+         "begin"
+            "print" 'x = y    'L@@; "goto" fail
+         "end";
+         "comment" Reject cases where x + y = n;
+         add(ww1,x,y);
+         "if" ifb(ww1,nb) "then"
+         "begin"
+            "print" 'x + y = n'L@@; "goto" fail
+         "end";
+         "comment" Force ww1 to be positive;
+         sub(ww1,x,y);
+         "if" ww1[1] < 0 "then"
+         "begin"
+            add(c,ww1,nb);
+            copy(ww1,c)
+         "end";
+         gcd(ans,ww1,nb);
+         "comment" Reject cases where factor equals 1;
+         "if" ifb(ans,one) "then"
+         "begin"
+            "print" 'fact = 1 'L@@; "goto" fail
+         "end";
+         "comment" Aha, the answer;
+         "print" ''L2@x, y = @;
+         put(x,'X@); put(y,'y@); 
+         "print" ''L2@exponents'L@@;
+
+         "for" h := 0 "step" 1 "until" m "do"
+         "begin"
+            "if" ((h-1) "div" 10)*10 = h - 1 
+            "then" "print" ''L@@;
+            "print" same line, digits(5), es[h]
+         "end";
+         "print" ''L2@factor = @;
+         put(ans,'f@);
+         "print" ''L2@number = @;
+         put(nb,'n@);
+         date time;
+         stop;
+fail:
+      "end" of tryit;
+
+      "comment" Program continues;
+      "for" j := 1 "step" 1 "until" n "do" one[j]:=zero[j]:=0;
+      one[n]:=1;
+      "for" j := 1 "step" 1 "until" r1 "do" zeror[j] := 0;
+      get(nb,'P@);
+      "for" j := 1 "step" 1 "until" m "do" "read" ps[j];
+      nos := 0;
+      copy(rrow,zeror);
+      rrow[r1]:=1;
+      "comment" Get solutions until a zero value of p is met;
+again:
+      get(p,'Q@);
+      if(p,zero,contin);
+      nos := nos + 1;
+      "if" nos > maxsol "then"
+      "begin"
+         "print" 'too many equations'L@@; stop
+      "end";
+
+      "for" j := 1 "step" 1 "until" r1 "do" right[nos,j] := rrow[j];
+      mpy(rrow,2);
+      "for" j := 1 "step" 1 "until" n  "do" soln[nos,j] := p[j];
+      "for" j:=0 "step" 1 "until" m "do" 
+      "begin"
+         "read" es[j];
+         em[nos,j] := es[j]
+      "end";
+      "for" j := 1 "step" 1 "until" r2 "do"
+      "begin"
+         lrow[j] := 0;
+         left[nos,j] := 0
+      "end";
+
+      lrow[r2] := 1;
+      "for" j := 0 "step" 1 "until" m "do"
+      "begin"
+         "if" and(es[j],1) = 1 "then"
+         "begin"
+            "for" k := 1 "step" 1 "until" r2 "do" left[nos,k] :=
+               or(left[nos,k], lrow[k]);
+         "end";
+         "if" j < m "then" mpy(lrow,2)
+      "end";
+
+      "goto" again;
+      "comment" Gaussian elimination starts;
+contin:
+      "for" j := 1 "step" 1 "until" nos "do" used[j] := "false";
+      dups := 0;
+      "for" i1 := 1 "step" 1 "until" nos - 1 "do"
+      "begin"
+         "for" j := 1 "step" 1 "until" n "do" x[j] := soln[i1,j];
+         "for" i2 := i1+1 "step" 1 "until" nos "do"
+         "begin"
+            "for" j := 1 "step" 1 "until" n "do" y[j] := soln[i2,j];
+            "if" ifb(x,y) "then"
+            "begin"
+               dups := dups + 1;
+               used[i2] := "true"
+            "end"
+         "end"
+      "end";
+      "if" dups > 0 "then" "print" 'duplicates'L@@;
+
+      "for" i1 := m "step" -1 "until" 0 "do"
+      "begin"
+         "for" i2 := 1 "step" 1 "until" nos-1 "do"
+         "begin"
+            "if" (oddbit(i2) "and" "not" used[i2]) "then"
+            "begin"
+               used[i2] := "true";
+               "for" i3 := i2+1 "step" 1 "until" nos "do"
+               "begin"
+                  "if" (oddbit(i3) "and" "not" used[i3]) "then"
+                  "begin"
+                     "for" j := 1 "step" 1 "until" r2 "do"
+                        left[i3,j] := xor(left[i3,j], left[i2,j]);
+                      "for" j := 1 "step" 1 "until" r1 "do"
+                        right[i3,j] := xor(right[i3,j], right[i2,j]);
+                      "if" found "then" tryit
+                  "end"
+               "end"
+            "end"
+         "end";
+        "if" i1 > 0 "then" div(lrow,2)
+      "end";
+   date time;
+   "end";
+   "print" 'failed miserably'@@
+"end"
+   3   1  29  60
+  499 94860 12441P
+    2    3    5    7   17   19   31   43   47   59
+   61   67  107  163  181  193  197  229  241  263
+  271  277  311  331  349  359  367  389  397
+  4487 10460Q
+   0   9   4   0   1   0   2   0   0   0
+   1   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   2   0   0   0   0
+  3329 21914Q
+   0  11   0   1   1   0   2   0   0   0
+   0   0   1   0   0   0   0   0   1   0
+   0   0   0   0   1   1   0   0   0   0
+  3085 45378Q
+   0  10   3   1   2   0   1   0   1   1
+   0   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+  2872 15909Q
+   1   6   0   2   2   0   2   0   0   0
+   0   0   0   0   0   0   0   0   1   0
+   0   0   0   1   0   1   0   0   0   0
+  2750 27641Q
+   1   6   1   0   2   1   2   0   0   1
+   1   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+  1714 27363Q
+   1   6   2   1   1   1   2   1   0   0
+   0   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   1   1   0   0   0
+   160 26946Q
+   1  10   1   0   1   1   1   0   1   0
+   0   1   0   0   1   0   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+   499 94685 21650Q
+   1   6   2   2   1   0   1   1   0   0
+   0   0   0   0   0   0   0   0   2   1
+   0   0   0   0   0   1   0   0   0   0
+   499 93984 39109Q
+   1   9   0   1   2   1   1   0   0   0
+   0   0   0   0   0   0   0   0   1   1
+   0   0   0   0   0   1   0   0   0   1
+   499 92399 91625Q
+   1  11   1   2   2   0   2   0   2   0
+   0   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+   499 88347 31714Q
+   1   6   2   2   2   0   2   0   0   0
+   0   0   1   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   1   0
+   499 87707 43307Q
+   1  10   1   0   2   0   1   1   0   0
+   0   0   0   0   0   0   0   0   2   0
+   0   0   0   0   1   1   0   0   0   0
+   499 87585 55039Q
+   1   9   0   2   2   0   1   0   0   1
+   0   1   0   0   0   0   0   1   1   0
+   0   0   0   0   0   1   0   0   0   0
+  9407 52092Q
+   1   9   1   1   3   0   3   0   0   0
+   0   0   0   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   1   0   0
+  9834 11030Q
+   1  16   0   0   2   1   1   0   0   0
+   1   0   0   1   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+ 10321 64102Q
+   1  11   4   2   1   0   1   0   1   0
+   0   0   0   0   0   0   0   0   1   0
+   0   1   0   0   0   1   0   0   0   0
+ 15562 59626Q
+   1   9   2   1   1   0   1   0   1   0
+   0   0   0   1   0   0   0   0   1   1
+   0   0   0   0   0   1   0   0   0   0
+ 17086 12976Q
+   1  11   1   1   2   1   1   0   0   0
+   1   0   1   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+ 18365 89790Q
+   1  10   1   0   3   0   1   0   0   0
+   0   1   0   0   0   0   0   0   1   0
+   0   0   0   0   0   1   0   0   1   0
+ 18548 72192Q
+   1  12   3   1   1   0   2   0   0   0
+   0   0   0   0   0   1   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+ 18822 95795Q
+   0   6   2   0   1   0   1   0   0   0
+   1   0   0   1   0   1   0   0   1   0
+   0   0   0   0   0   1   0   0   0   0
+  2028 96037Q
+   0   5   1   1   1   2   0   0   1   0
+   0   1   0   0   1   0   0   0   0   1
+   0   0   0   0   0   0   0   0   0   1
+  1721 73601Q
+   0   5   2   1   2   1   1   0   0   1
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   1   0   1
+  1388 90962Q
+   0  11   0   1   2   1   0   0   0   0
+   0   1   0   0   1   0   0   0   0   0
+   0   0   0   1   0   0   0   0   0   1
+  1337 70556Q
+   0   8   1   1   1   2   0   0   0   0
+   1   0   0   0   1   0   0   0   0   0
+   0   0   1   0   0   0   0   0   0   1
+   499 94456 89193Q
+   1  12   1   2   3   2   0   1   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+   499 93176 79043Q
+   1   9   0   2   3   1   2   0   0   0
+   1   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+   499 92818 36201Q
+   1  16   1   0   2   1   0   0   0   0
+   1   0   0   0   1   1   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+   499 90155 75089Q
+   1   9   1   0   2   1   0   0   0   0
+   1   0   0   0   1   1   1   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+  9235 93283Q
+   1   5   5   1   1   1   0   1   0   0
+   1   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   1   0   0   0   1
+ 10080 79982Q
+   1  11   1   0   2   1   0   0   1   0
+   0   0   1   0   1   0   1   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+ 11719 32974Q
+   1  11   1   1   3   2   1   0   1   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+ 13383 46169Q
+   1   5   4   1   1   1   0   0   1   0
+   0   0   0   1   1   0   0   0   0   0
+   0   1   0   0   0   0   0   0   0   1
+ 14228 32868Q
+   1   8   1   1   4   1   0   0   0   0
+   0   1   0   0   2   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+ 16711 72559Q
+   1   5   2   1   3   1   0   0   0   0
+   0   1   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   1   0   0   1
+ 16788 53168Q
+   1  12   1   1   1   1   0   0   0   0
+   1   0   0   0   1   0   0   0   0   0
+   0   0   0   1   0   0   0   0   0   1
+ 16942 14386Q
+   1   8   2   0   1   2   0   0   0   0
+   0   0   1   1   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+ 17070 15401Q
+   0   5   2   0   2   1   1   1   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   1   0   1
+ 17863 81694Q
+   0  10   4   1   1   1   0   1   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   2
+ 19937 58137Q
+   0   5   8   0   2   1   0   0   0   1
+   0   0   0   0   1   0   0   0   0   0
+   0   0   1   0   0   0   0   0   0   1
+ 20167 99964Q
+   0   8   2   2   1   2   2   0   0   0
+   1   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+ 20475 22400Q
+   0  10   1   0   4   1   2   0   0   0
+   0   1   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   1
+  6388 09305Q
+   0   4   2   4   5   1   2   0   0   0
+   0   0   0   0   1   0   0   0   0   0
+   1   0   0   0   0   0   0   0   0   0
+  5504 78713Q
+   0   3   5   1   5   0   1   0   0   1
+   1   0   0   0   1   0   0   1   0   0
+   0   0   0   0   0   0   0   0   0   0
+  4495 29465Q
+   0   3   5   2   6   0   1   0   1   0
+   0   0   0   0   1   0   1   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+  3611 98873Q
+   0   8   2   1   6   1   2   1   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+  3391 16225Q
+   0   0   1   2   6   0   2   0   0   0
+   0   0   0   0   1   2   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+  1466 81721Q
+   1   3   2   3   5   2   1   1   1   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+   499 88377 18834Q
+   1   7   2   1   5   1   1   0   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   1   0   1   0   0   0
+  9259 04039Q
+   1   4   3   2   5   1   1   0   0   0
+   0   0   0   0   2   0   0   0   0   0
+   0   0   0   0   0   0   0   0   1   0
+  9385 22695Q
+   1   3   1   5   5   0   1   0   1   0
+   1   1   0   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+ 13991 03639Q
+   1   4   2   2   5   1   2   1   0   0
+   0   0   0   0   1   0   0   0   1   0
+   0   0   0   0   0   0   0   0   0   0
+ 16167 75455Q
+   1   0   2   2   6   0   2   0   1   0
+   0   1   1   0   1   0   0   0   0   0
+   0   0   0   0   0   0   0   0   0   0
+ 16924 87391Q
+   1   0   3   1   7   0   1   1   0   0
+   1   0   0   0   1   0   0   0   0   0
+   0   0   0   0   1   0   0   0   0   0
+ 17303 43359Q
+   1   0   2   2   5   1   1   0   0   1
+   0   0   1   0   1   0   0   0   0   0
+   0   0   1   0   0   0   0   0   0   0
+ 19353 96519Q
+   0   4   4   2   6   1   1   0   0   0
+   0   0   0   0   1   0   0   1   0   0
+   0   0   0   0   0   0   0   0   0   0
+ 23423 48175Q
+   0   0   2   2   5   0   1   0   0   0
+   0   0   0   0   1   0   0   0   0   0
+   0   0   0   0   1   0   0   0   2   0
+   0Q
+
+

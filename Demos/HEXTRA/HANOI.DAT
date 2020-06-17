@@ -1,0 +1,62 @@
+﻿
+on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+
+enter 3726 =2 8180
+enter 3727 =7 3689
+enter 3728 =8 8181
+enter 8180 +33
+enter 8181 =2 8180
+enter 8182 =15 6144
+enter 8183 =8 3724
+
+at ptr inline
+
+hanoi;
+"begin"
+   "comment" 22-JUL-2000.
+             Towers of Hanoi;
+   "integer" j,n;
+   "code" "procedure" unsigned; "algol";
+   "procedure" line;
+   "begin"
+      "if" (j "div" 20) * 20 = j "then" "print" ''L``;
+      j := j+1
+   "end" of line;
+
+   "procedure" move(no, from, to, via);
+               "value" no, from, to, via;
+               "integer" no, from, to, via;
+   "if" no=1 "then" "print" line, from, to, ' `
+             "else"
+   "begin"
+      move(no-1, from, via, to);
+      "print" line, from, to ,' `;
+      move(no-1, via, to, from)
+   "end" of move;
+
+   "read" n; j :=0; unsigned;
+   "print" ''L`22-JUL-2000'L`No. = `, same line, digits(2), n;
+   same line; digits(1);
+   move(n, 1, 3, 2)
+"end"
+
+<!!>
+j 12
+st 1727
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+select out tty
+at ptr inline
+!The Towers of Hanoi problem
+!
+8
+<!!>
+j 10
+st 1727
+sh t

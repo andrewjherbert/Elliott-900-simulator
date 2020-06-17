@@ -1,0 +1,86 @@
+﻿C Demonstrate AMEND
+
+on 920B
+
+
+c assemble AMEND as a program using BOWDLER
+
+at ptr file BOWDLER.BIN
+j 8181
+st 8175
+
+at ptr inline
+
+INS
+
+*3
+^+7680
+^%,
+CHE
+INS
+%
+^%,
+COP
+<! halt !><!!>
+j 8
+st 490
+at ptp file DEMO14.900
+at ptr file AMEND.900
+j 9
+st 1274
+de ptp
+
+c assemble AMEND
+at ptr file ../ACDSIR/SIR2P71.BIN
+j 8181
+st 8175
+
+at ptr file DEMO14.900
+select out tty
+j 12
+st 562
+rewind
+select out ptp
+at ptp file AMEND(900)(&17000).BIN
+j 10
+st 587
+de ptp
+
+c load AMEND
+at ptr file AMEND(900)(&17000).BIN
+j 8181
+st 8175
+
+c run AMEND
+at ptr inline
+(( simple test program )
+^32
+	8	;+3
+	+0
+	>1
+	4	;-2
+	5	33
+	0	33
+	/4	;+5
+	9	;+0
+	15	6148
+	10	33
+	8	;-5
+	+141 &12 &12 +65 +77 +197 +78 +68 +141 &12 -1
+<! halt !><!!>
+j 7680
+st 7686
+
+c run program
+select out tty
+j 32
+st 39
+
+
+delete DEMO14.900
+
+sh t
+
+
+
+

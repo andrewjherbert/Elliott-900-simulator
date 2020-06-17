@@ -1,0 +1,848 @@
+﻿C Demonstration programs from "Electronic Data Processing"
+C by G. Emery, Pitman, 1968.
+
+on 903
+
+at ptr inline
+The following programs are from Appendix 5.  In the book
+the examples are given as fragments amd I have extended
+them with code to read in / initialize suitable data and
+print out the results.  As in the book, the sample code
+typically begins at location 200. A few minor errors in 
+original have been corrected.
+
+1. Balancing a Ledger
+
+Read in a credit total and balance total, output
+corrsponding credit and debit balances.
+
+2. Highest Common Factor
+
+Read in two integers and output their highest common
+factor.
+
+3. State Pension Scheme
+
+Calculate pension entitlement based on the following rules:
+a) A man must be  95 or older to receive a pension
+b) A woman must be 90 or older to receive a pension if she
+   is single; if married she does not get a pension until her
+   husband is 95 or she is 90 which ever is the later.  If she
+   is divorced she has no pension entitlement at all.
+
+Read in age, sex (0 female, 1 male), married state (0 divorced,
+1 single, 2 married), husband's age.  Prints 300 if entitled to
+a pension, 300 otherwise.
+
+4. Tax Example.
+
+Calculate tax on pay according to the rules:
+a) No tax is payable on the first 2,000 of income
+b) The next 10,000 are taxed at 3%
+c) The next 20,000 are taxed at 5%
+d) The next 30,000 are taxed at 7%
+e) Any remaiing income is taxed at 9%.
+
+Reads in income and outputs tax due.
+
+5. Trivial Input-Output
+
+Read a number and output it.
+
+6. Sum List of Numbers
+
+Output sum of 5 numbers in location 500 onwards.
+
+7. Sorting Numbers
+
+Sort 10 numbers in location 500 onwards and output them.
+
+8. Debiting an Account and testing Overdraft
+
+Read in an amount to debit from an account record in 
+location 500 onwards.  The record contains the current
+account balance in location 504 and the overdraft limit
+in location 516.
+
+Output 200 if debit makes account overdran beyond the limit,
+other wise output 300.
+
+9. Largest Element in First Column of a 10*20 Array
+
+Set up a 10*20 array in store, in row order.  Scan for largest 
+element of first column and print.
+
+10. Replace First Column of Array by Row Sums
+
+Set up a 10*20 array in store, in row order.  Replace each 
+entry in the first column with the sum of corresponding row.
+
+Output row sums.
+
+11. Generalized Listing Subroutine
+
+Call a subroutine to sum a series of number sin store and
+output total.
+
+On entry to subroutine, index register 3 points to a parameter
+area:
+	word 0: address of first item to be summed
+	word 1: number of items to sum
+	word 2: cleared to receive sum.
+
+12 Trial Balance
+
+Calculate and output credit and debit balance from an account
+file.
+
+On entry to subroutine, index register 3 points to a parameter
+area:
+	word 0: start of account
+	word 1: accumulated credit balance
+	word 2: accumulated debit balance
+
+account:
+	word 0: number of entries
+	word 1: entry
+	...
+	word n:	balance.
+
+13. Switch Jump
+
+Jump to a subroutine determined by contents of location 504.
+
+14. Macro
+
+Calls a subroutine to determine largest entry in a list
+of numbers.
+
+On entry to subroutine, 3 points to parameter area:
+   	 word 0: start of list to be scanned
+   	 word 1: number of items
+	 word 2: location for result
+<!!>
+
+at ptr file CANDG.BIN
+j 8181
+
+at ptr inline
+
+(TITLE)
+BALANCING A LEDGER
+
+(STORE 90)
+       RNT	95
+       STA 	10
+       RNT 	95
+       STA 	11
+       JUN 	100
+       JST
+
+(STORE 100)
+       LDA	10
+       SUB 	11
+       JGR 	109
+       LDAN	0
+       STA 	12
+       LDA 	11
+       SUB 	10
+       STA 	13
+       JUN 	200
+
+       STA 	12
+       LDAN 	0
+       STA 	13
+       JUN 	200
+ 
+(STORE 200)
+      LDA	12
+       PNT 	5,0
+       LDA 	13
+       PNT	5,0
+       PNL
+       JST
+(EXECUTE 90)
++100
++200   
+
+(TITLE)
+HIGHEST COMMON FACTOR
+(STORE 90)
+       RNT	95
+       STA 	10
+       RNT	15
+       STA	11
+       JUN 	100
+       JST  
+
+(STORE 100)
+       LDA	10
+       SUB 	11
+       JEQ 	113
+       JGR 	101
+       ADD 	11
+       STA 	10
+       LDA 	11
+       SUB 	10
+       JEQ 	113
+       JGR 	107
+       ADD 	10
+       STA 	11
+       JUN 	100
+
+       LDA 	11
+       STA 	12
+       JUN 	200
+
+(STORE 200)
+       LDA	 12
+       PNT 	 5,0
+       PNL
+       JST
+(EXECUTE 90)
+
++300
++60  
+
+(TITLE)
+STATE PENSION SCHEME
+
+(STORE 90)
+       RNT	99
+       STA 	10
+       RNT 	99
+       STA 	11
+       RNT 	99
+       STA 	12
+       RNT 	99
+       STA 	13
+       JUN 	100
+       JST
+
+(STORE 100)
+       LDA	11
+       JEQ 	106
+       LDA 	10
+       SUBN 	95
+       JGR 	300
+       JUN 	200
+
+       LDA 	10
+       SUBN 	90
+       JGR 	110
+       JUN	200
+
+       LDA 	12
+       JEQ 	200
+       SUBN 	1
+       JEQ 	300
+       LDA 	13
+       SUBN 	95
+       JGR 	300
+       JUN 	200
+
+(STORE 200)
+       LDAN	200
+       PNT 	5,0
+       JST
+
+(STORE 300)
+       LDAN	300
+       PNT 	5,0
+       PNL
+       JST
+
+(EXECUTE 90)
+
++90
++0
++2
++95
+
+(TITLE)
+TAX EXAMPLE
+
+(STORE 90)
+       RNT	93
+       STA 	10
+       JUN 	100
+       JST
+
+(STORE 100)
+       LDA	10
+       DIVN 	10
+       STA 	10
+       SUBN	200
+       JGR	108
+       LDAN	0
+       STA	11
+       JUN 	200
+
+       MLTN	3
+       STA	11
+       LDA	10
+       SUBN	300
+       JGR	114
+       JUN 	200
+
+       MLTN	2
+       ADD	11
+       STA	11
+       LDA	10
+       SUBN	500
+       JGR	121
+       JUN	200
+       MLTN	2
+       ADD	11
+       STA	11
+       LDA	10
+       SUBN	800
+       JGR	128
+       JUN 	200
+       MLTN	2
+       ADD	11
+       STA	11
+       JUN	200
+
+(STORE 200)
+       LDA	11
+       PNT	5,0
+       PNL
+       JST
+
+(EXCUTE 90)
+
++10000
+
+(TITLE)
+TRIVIAL INPUT-OUTPUT EXAMPLE 
+(STORE 100)
+       RNT	200
+       STA	10
+       RNT	200
+       ADD	10
+       PNT	7,1
+       PNL
+       JST
+
+(STORE 200)
+       JST
+
+(EXECUTE 100)
+1234.567
+7.654321
+
+(TITLE)
+SUM LIST OF NUMBERS
+
+(STORE 100)
+       LDAN	1
+       STA	2
+       LDA	500
+       ADD	500,2
+       STA	10
+       LDA	2
+       ADDN	1
+       STA	2
+       SUBN	5
+       JEQ	112,2
+       LDA	10
+       JUN	103
+       JUN	200
+
+(STORE 200)
+       LDA	10
+       PNT	6,0
+       PNL
+       JST
+
+(STORE 500)
+       +1
+       +2
+       +3
+       +4
+       +5
+
+(EXECUTE 100)
+
+(TITLE)
+SORTING NUMBERS
+
+(STORE 100)
+       LDAN	0
+       STA	10
+       STA	2
+       ADDN	1
+       STA	3
+
+       LDA	500,2
+       SUB	500,3
+       JGR	116
+       LDA	500,2
+       STA	11
+       LDA	500,3
+       STA	500,2
+       LDA	11
+       STA	500,3
+       LDAN	1
+       STA	10
+
+       LDA	3
+       STA	2
+       ADDN	1
+       STA	3
+       SUBN 	10
+       JEQ	123
+       JUN	105
+
+       LDA	10
+       JEQ	126
+       JUN	100
+
+       JUN	200
+
+(STORE 200)
+       LDAN	0
+       STA	2
+       LDA	500,2
+       PNT	5,0
+       PNL
+       LDA	2
+       ADDN	1
+       STA	2
+       SUBN	10
+       JEQ	211
+       JUN	202
+
+       JST
+
+(STORE 500)
+
++1
++10
++5
++7
++6
++4
++3
++2
++8
++9
+
+(EXECUTE 100)
+
+(TITLE)
+AN ACCOUNT AND TESTING OVERDRAFT
+
+(STORE 90)
+       RNT	93
+       STA	10
+       JUN	100
+
+       JST
+
+(STORE 100)
+       LDAN	500
+       STA	2
+       LDA	4,2
+       SUB	10
+       STA	4,2
+       SUB	16,2
+       JGR	300
+       JUN	200
+
+(STORE 200)
+       LDAN	200
+       PNT	5,0
+       PNL
+       JST
+
+(STORE 300)
+       LDAN	300
+       JUN	201
+
+(STORE 500)
+       +0
+       +0
+       +0
+       +0
+       +100
+       +0
+       +0
+       +0
+       +0
+       +0
+       +0
+       +0
+       +0
+       +0
+       +0
+       +200
+
+(EXECUTE 90)
+
++150
+
+(TITLE)
+LARGEST ELEMENT IN FIRST COLUMN OF 10*20 ARRAY
+
+(STORE 90)
+
+       LDAN	0
+       STA	2
+       STA	500,2
+       LDA	2
+       ADDN	1
+       STA	2
+       SUBN	200
+       JGR	100
+       LDA	2
+       JUN	92
+
+(STORE 100)
+       LDAN	0
+       STA	10
+       STA	2
+       LDA	10
+       SUB	500,2
+       JGR	108
+       LDA	500,2
+       STA 	10
+       LDA	2
+       ADDN	20
+       STA	2
+       SUBN	200
+       JEQ	114
+       JUN	103
+       JUN	200
+
+(STORE 200)
+       LDA	10
+       PNT	5,0
+       PNL
+       JST
+
+(EXECUTE 90)
+
+(TITLE)
+REPLACE FIRST COLUMN OF ARRAY BY ROW SUMS
+
+(STORE 90)
+       LDAN	0
+       STA	2
+       STA	500,2
+       LDA	2
+       ADDN	1
+       STA	2
+       SUBN	200
+       JGR	100
+       LDA	2
+       JUN	92
+
+(STORE 100)
+       LDAN	0
+       STA	2
+       ADDN	1
+       STA	3
+       LDAN	19
+       STA	5
+
+       LDA	500,2
+       ADD	500,3
+       STA	500,2
+       LDA	3
+       ADDN	1
+       STA	3
+       LDA	5
+       SUBN	1
+       STA	5
+       JEQ	117
+       JUN	106
+
+       LDA	3
+       SUBN	200
+       JEQ	122
+       LDA	3
+       JUN	101
+
+       JUN	200
+
+(STORE 200)
+       LDAN	0
+       STA	2
+       LDA	500,2
+       PNT	5,0
+       PNL
+       LDA	2
+       ADDN	20
+       STA	2
+       SUBN	200
+       JGR	211	
+       JUN	202
+
+       JST
+
+(EXECUTE 90)
+
+(TITLE)
+GENERALIZED LISTING SUBROUITNE
+
+(STORE 200)
+       LDA	2
+       STA	217
+       LDA	0,3
+       STA	2
+
+       LDA 	2,3
+       ADD	0,2
+       STA	2,3
+       LDA	2
+       ADDN	1
+       STA	2
+       SUB	0,3
+       SUB	1,3
+       JEQ 	214
+       JUN	204
+
+       LDA	217
+       STA	2
+       JUN	0,4
+       +0
+
+(STORE 90)
+       LDAN	0
+       STA	2
+       JUN	100
+
+(STORE 100)
+       LDAN	150
+       STA	3
+       LDAN	500
+       STA	0,3
+       LDAN	10
+       STA	1,3
+       LDAN	0
+       STA	2,3
+       JSR	200
+
+       LDA	152
+       PNT	5,0
+       PNL
+       JST
+
+(STORE 500)
+       +1
+       +2
+       +3
+       +4
+       +5
+       +6
+       +7
+       +8
+       +9
+       +10
+
+(EXECUTE 90)
+
+(TITLE)
+TRIAL BALANCE
+
+(STORE 200)
+       LDA	2
+       STA 	218
+       LDA	0,3
+       STA	2
+       LDA	0,2
+       ADD	0,3
+       STA	2
+       LDA	0,2
+       JGR	213
+       LDA	2,3
+       SUB	0,2
+       STA	2,3
+       JUN	215
+
+       ADD	1,3
+       STA	1,3
+
+       LDA	218
+       STA	2
+       JUN	0,4
+
+       +0
+
+(STORE 300)
+       +303
+       +100
+       +200
+       +5
+       +1
+       +2
+       +3
+       +4
+       +10
+
+(STORE 100)
+       LDAN	300
+       STA	2
+       STA	3
+       JSR	200
+       LDA	301
+       PNT	5
+       LDA	302
+       PNT 	5
+       PNL
+       JST
+
+(EXECUTE 100)   
+
+(TITLE)
+SWITCH JUMP
+
+(STORE 100)
+       LDA	504
+       STA	2
+       JSR 	103,2
+       JUN	200
+       JUN 	202
+       JUN	204
+       JUN	206
+
+(STORE 200)
+       LDAN	200
+       JUN	300  
+       LDAN	202
+       JUN	300
+       LDAN	204
+       JUN 	300
+       LDAN	206
+       JUN	300
+
+(STORE 300)
+       PNT	5,0
+       PNL
+       JST
+
+(STORE 504)
+       +2
+
+(EXECUTE 100)
+
+(TITLE)
+MACRO
+
+(STORE 200)
+       LDA	0,3
+       STA	2
+
+       LDA	0,2
+       STA	2,3
+
+       LDA	2
+       ADDN	1
+       STA	2
+       LDA	1,3
+       SUBN	1
+       STA	1,3
+       JEQ	0,4
+       LDA	2,3
+       SUB	0,2
+       JGR	204
+       JUN	202
+
+(STORE 500)
+       +503
+       +5
+       +0
+       +100
+       +200
+       +300
+       +400
+       +500
+
+(STORE 100)
+       LDAN	500
+       STA	3
+       JSR	200
+       LDA	502
+       PNT	5
+       PNL
+       JST
+
+(EXECUTE 100)
+
+<! halt !><!!>
+
+select out tty
+
+J 8
+ST 590
+J 9
+ST 952
+
+j 8
+st 590
+j 9
+st 952
+
+j 8
+st 590
+j 9
+st 952
+
+j 8
+st 590
+j 9
+st 952
+
+j 8
+st 590
+j 9
+st 952
+
+j 8
+st 590
+j 9
+st 952
+
+j 8
+st 590
+j 9
+st 952
+
+j 8
+st 590
+j 9
+st 952
+
+j 8
+st 590
+j 9
+st 952
+
+j 8
+st 590
+j 9
+st 952
+
+j 8
+st 590
+j 9
+st 952
+
+j 8
+st 590
+j 9
+st 952
+
+j 8
+st 590
+j 9
+st 952
+
+j 8
+st 590
+j 9
+st 952
+
+sh t

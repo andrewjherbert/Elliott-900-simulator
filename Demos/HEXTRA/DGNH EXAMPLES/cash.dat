@@ -1,0 +1,103 @@
+
+    IPBIN
+    OPASC
+    JUMP 8
+    IPASC
+cash flow calculation;
+"begin"
+   "comment" 31-MAR-1997;
+   "integer" e, n, y; 
+   "real" f, i, p, r, t, v, w, x;
+   "real" "array" c, d[0:30];
+
+   "procedure" a(b, c, d, e, f); "value" c, d, e;
+      "string" b, f; "integer" c, d; "real" e;
+      "print" ''L@PRESENT VALUE =@, same line, v, b, 
+              aligned(c, d), e, f;
+
+   "real" "procedure" g(b); "real" "array" b;
+   "begin"
+      v := 0;
+      "for" e := y "step" -1 "until" 0 "do" v := v * x + b[e];
+      g := v
+   "end" of g;
+
+   "procedure" z(s); "string" s; "print" ''L@@, s, stop;
+
+   "procedure" h;
+   "begin"
+      "print" ''L@ YEAR  CASH FLOW  PRESENT VALUE'L@@;
+      f := 0;
+      p := x;
+      "for" e := 1 "step" 1 "until" y "do"
+      "begin"
+         "if" e < y "then"
+         "begin"
+            w := c[e] * p;
+            p := p * x;
+            f := f + w
+         "end" "else"
+         "begin"
+            w := v - f;
+            f := v
+         "end";
+         "print" e, same line, c[e], '  @, w
+      "end" of for loop;
+      "print" ''LS7@--------     --------'L@TOTAL@,
+         same line, t, '  @, v
+   "end" of h;
+
+   "boolean" "procedure" q;
+      "if" n = 0 "or" abs(i - v) >100000 "then"
+         z('NO CONVERGENCE@) "else" q := abs(i - v) > 1;
+
+
+   "comment" PROGRAM STARTS HERE;
+
+   "print" ''L@DISCOUNTED CASH FLOW DEMONSTRATION PROGRAM@,
+           ''L@INPUT TOTAL INVESTMENT THEN CASH FLOWS :@;
+
+   aligned(9, 0);
+   digits(4);
+   "read" i, y;
+   "print" same line, i;
+   "if" y > 30 "then" z('MAXIMUM OF 30 VALUES PERMITTED@);
+   t := c[0] := d[y] := 0;
+   x := 1/1.1;
+   "for" n := 1 "step" 1 "until" y "do" 
+   "begin"
+      "print" ''L@YEAR @, digits(2), same line, n, ':@;
+      "read" w;
+      "print" same line, w;
+      c[n] := w;
+      d[n-1] := w * n;
+      t := t + w
+   "end" of for loop;
+
+   "if" t < i "then" 
+      z('INVESTMENT MUST BE LESS THAN SUM OF CASH FLOWS@);
+
+   "for" n := 6, n-1 "while" q "do" x := x + (1/g(d)) * (i - g(c));
+   a('    RATE =@, 2, 2, (1/x - 1) * 100, ' %@);
+   h;
+L:
+   "read" r;
+   "if" r = 0 "then"
+   "begin"
+      "print" ''L@AGAIN@;
+      "goto" L
+   "end" "else" "if" r < 0 "then" stop;
+
+   "print" ''L2@RATE:@, same line, aligned(4, 0), r;
+   x := 1/(1 + r/100);
+   a('    PROFITABILITY INDEX = @, 1, 4, g(c) / i, ' @);
+   h;
+   "goto" L
+"end"
+100000 for 5 years
+18000 20000 23000 28000 24000
+at 6 percent
+at 7 percent
+at -1 percent
+
+

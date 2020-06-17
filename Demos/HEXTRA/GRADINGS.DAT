@@ -1,0 +1,184 @@
+﻿
+on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+at ptr inline
+
+gradings;
+"begin"
+   "comment" 29-JUN-1999;
+   "code" "procedure" unsigned; "algol";
+   "code" "procedure" revert; "algol";
+
+   "boolean" detail;
+   "real" A12, A13, A23, b12, b13, b23, d, delta, diff,
+          EPS, f, p, q, r, RF, t1, t2, t3, w;
+   "integer" h, i, j, k, m, n, N1, N2, N3;
+   "real"    "array" b[1:3];
+   "integer" "array" e[1:6];
+
+   "print" ''L`20-MAY-1999'L``;
+
+   "comment" Get titles;
+   h := 1;
+   "for" i := 1 "step" 1 "until" 3 "do" instring(e, h); 
+
+   "comment" Get data;
+   "print" ''L`Input A12   A13   A23   RF`; 
+   "read"  A12, A13, A23, RF; 
+   "print" aligned(1, 3), ''L`    `, same line, A12, A13, A23, RF;
+
+   "print" ''L`Input EPS`;
+   "read"    EPS; 
+   "print"   aligned(1, 7), ''L`   `, same line, EPS;
+ 
+   "print" ''L`Input N1  N2  N3`;
+   "read"    N1, N2, N3;
+   "print"   digits(3), ''L`    `, same line, N1, N2, N3, ''L``;
+
+   "print" ''L`Print detail'LS6``;
+   "read" h; detail := h=1;
+   "if" detail "then" "print" 'yes` "else" "print" 'no`;
+   "print" ''L``;   
+
+   "begin"
+      "switch" s := L1, L2, L3, L4, L5, L6, L7, L8;
+      "real" "array" a[-1:N1+1, -1:N2+1, -1:N3+1];
+
+      "for" j := -1 "step" 1 "until" N1 + 1 "do"
+         "for" k := -1 "step" 1 "until" N2 + 1 "do" 
+            "for" m := -1 "step" 1 "until" N3 + 1 "do" a[j, k, m] := 0.0;
+ 
+      "for" j := 0 "step" 1 "until" N1 "do"
+         "for" k := 0 "step" 1 "until" N2 "do"
+            "for" m := 0 "step" 1 "until" N3 "do" a[j, k, m] :=
+               1/((N1 + 1) * (N2 + 1) * (N3 + 1));
+
+      delta := 1.0;
+      "for" h := 1, h + 1 "while" abs(delta) > EPS "do"
+      "begin"
+         delta := 0.0;
+         "for" j := N1 "step" -1 "until" 0 "do"
+            "for" k := N2 "step" -1 "until" 0 "do"
+               "for" m := N3 "step" -1 "until" 0 "do"
+         "begin"
+            n := 1;
+            "if" j = N1 "then" n := n + 1;
+            "if" k = N2 "then" n := n + 2;
+            "if" m = N3 "then" n := n + 4;
+            "goto" s[n];
+         L1:
+         L2:
+         L3:
+         L5: 
+            d := A12 + A13 + A23; "goto" fin;
+         L4:
+            d := A13 + A23; "goto" fin;
+         L6:
+            d := A12 + A23; "goto" fin;
+         L7: 
+            d := A12 + A13; "goto" fin;
+         L8: 
+            d := 0.0;
+         fin:
+            f   := 1.0 / (d + j + k + m);
+            t1  := N1 - j + 1;
+            t2  := N2 - k + 1;
+            t3  := N3 - m + 1;
+            b12 := N1 + N2 - j - k + 1;
+            b13 := N1 + N3 - j - m + 1;
+            b23 := N2 + N3 - k - m + 1;
+            p   := A12 * t1 / b12 + A13 * t1 / b13;
+            q   := A12 * t2 / b12 + A23 * t2 / b23;
+            r   := A13 * t3 / b13 + A23 * t3 / b23;
+            w   := f * (p * a[j-1, k, m] +
+                        q * a[j, k-1, m] +
+                        r * a[j, k, m-1] +
+                  (j + 1) * a[j+1, k, m] +
+                  (k + 1) * a[j, k+1, m] +
+                  (m + 1) * a[j, k, m+1]);
+            diff := w - a[j, k, m];
+
+            "if" abs(diff) > abs(delta) "then" delta := diff;
+            a[j, k, m] := a[j, k, m] + RF * diff
+         "end" of three for loops;
+
+         "print" ''L`delta = `, same line, aligned(1,7), delta;
+         w := 0.0;
+         "for" j := 0 "step" 1 "until" N1 "do"
+            "for" k := 0 "step" 1 "until" N2 "do"
+               "for" m := 0 "step" 1 "until" N3 "do" w := w + a[j, k, m];
+         
+         w := 1.0 / w;
+         "for" j := 0 "step" 1 "until" N1 "do"
+            "for" k := 0 "step" 1 "until" N2 "do"
+               "for" m := 0 "step" 1 "until" N3 "do" a[j, k, m] := a[j, k, m] * w;
+      "end";
+      
+      "if" detail "then"
+      "begin"
+         "print" ''L2`State probabilities     `;
+         unsigned;
+         "for" m := 0 "step" 1 "until" N3 "do"
+         "begin"
+            "if" m "ne" 0 "and" (m "div" 4) * 4 = m "then" "print" ''LS24``;
+            "print" 'r`, same line, digits(1), m;
+            "if" (m "div" 4) * 4 + 3 "ne" m "then" "print" ''S10``;
+         "end";
+         revert;
+          
+         "for" j := 0 "step" 1 "until" N1 "do"
+         "begin"
+            "print"''L``;
+            "for" k := 0 "step" 1 "until" N2 "do"
+            "begin"
+               "print" ''L`   p`, digits(1), same line, unsigned, j, 
+                          '   q`, k, '         `, revert;
+               "for" m := 0 "step" 1 "until" N3 "do"
+               "begin"
+                  "if" m "ne" 0 "and" (m "div" 4) * 4 = m "then" "print" ''LS19``;
+                  "print" same line, aligned(1,7) , a[j, k, m], '  `
+               "end"
+            "end"
+         "end" of printing
+      "end" of if detail;
+
+      b[1] := b[2] := b[3] := 0.0;
+      "for" j := 0 "step" 1 "until" N1 "do" b[1] := b[1] + a[j,  N2, N3];
+      "for" k := 0 "step" 1 "until" N2 "do" b[2] := b[2] + a[N1, k,  N3];
+      "for" m := 0 "step" 1 "until" N3 "do" b[3] := b[3] + a[N1, N2,  m];
+      
+      "print" ''L2`Blocking probabilities are'L``;
+      h := 1;
+      "for" i := 1 "step" 1 "until" 3 "do"
+      "begin"
+         "print" ''L``;
+         outstring(e, h); 
+         "print" same line, aligned(2,6), b[i];
+      "end"
+   "end";
+   "print" ''L3`Average blocking =  `, same line, aligned(1,6),
+           (b[1] * A23 + b[2] * A13 + b[3] * A12) / (A23 + A13 + A12)
+"end"
+
+<!!>
+j 12
+st 1727
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+at ptr inline
+
+  'E23` 'E13` 'E12`
+  0.35 1.4 2.45 1.4
+  0.0000001
+  3  3  3
+  1
+<!!>
+select out tty
+j 10
+st 1727
+sh t

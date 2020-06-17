@@ -1,0 +1,18 @@
+﻿c X12 Store Test 1 - Chequerboard for 920M with 5 musec store
+
+on 920M 8K 5
+nonstop on
+at ptr file X12(ISS3).BIN
+j 8181
+
+c wait for call to load punch
+at ptp file demox12.txt legible
+
+c use step limit to detect end loop
+step 100000
+restart
+
+c will hit step limit
+de ptp
+print demox12.txt
+sh t

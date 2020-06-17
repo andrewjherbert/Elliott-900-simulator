@@ -1,0 +1,59 @@
+﻿C DEMONSTRATE QT2OUT (C.9)
+
+on 903 8K
+
+nonprinting off
+
+C load SIR source
+at ptr file ../903SIR/SIR(ISS6)(5500).BIN
+j 8181
+st 8171
+
+c patch for QBINOUT
+at ptr inline
+^32
+*3
+<! halt !>
+<!!>
+j 8
+st 6927
+
+c QT2OUT
+at ptr file QT2OUT(ISS1).900
+j 9
+st 6927
+
+
+c QT2OUT parameters and program
+at ptr inline
+^QT2OUT+222
++8046			(start address)
++8179			(last address)
++8167
++8176
++0			(end constants list)
+
+%
+<! halt !>
+<!!>
+j 9
+st 6927
+
+c load T22-23
+at ptr file T22_23(ISS3).BIN
+at ptp file DEMO5.BIN
+j 8181
+de ptp
+st 8070
+
+c run QBINOUT
+at ptp file DEMO5.900
+j 32
+de ptp
+st 97
+
+print DEMO5.900
+delete DEMO5.900
+delete DEMO5.BIN
+
+sh t

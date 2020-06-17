@@ -1,0 +1,301 @@
+   OPASC
+   IPBIN
+   ^27
+   +65522
+   ^8273
+   8 86   (no call by name)
+   ADLIB
+   JUMP 12
+   IPASC
+qs4;
+"begin"
+   "comment" 27-APR-1998
+             David M. Bressoud.
+             Factorization and Primality Testing.
+             Springer-Verlag 1989.
+
+             Separately assembled stuff declared first;
+
+
+   "code" "procedure" lead zero;  "algol";
+   "code" "procedure" lead blank; "algol";
+   "code" "procedure" unsigned;   "algol";
+   "code" "procedure" revert;     "algol";
+   "code" "integer" "procedure" max int; "algol";
+   "code" "integer" "procedure" and(a,b);
+          "value" a,b; "integer" a,b;
+   "algol";
+   "code" "procedure" add(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" sub(a,b,c);
+          "integer" "array" a,b,c; 
+   "algol";
+   "code" "procedure" mpy(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" div(a,b); "value" b;
+          "integer" "array" a;  "integer" b; 
+   "algol";
+   "code" "procedure" copy(a,b);
+          "integer" "array" a,b; 
+   "algol";
+   "code" "procedure" if(a,b,L); 
+          "integer" "array" a,b; "label" L;
+   "algol";
+   "code" "procedure" mod2(x,aa,b); 
+          "integer" "array" x,aa,b;
+   "algol";
+   "code" "procedure" multiply(a,b,c,n); "value" n;
+          "integer" "array" a,b,c; "integer" n;
+   "algol";
+   "code" "procedure" divide(x,y,a,b);
+          "integer" "array" x,y,a,b;
+   "algol";
+   "code" "procedure" mod(x,a,b);
+          "integer" "array" x,a,b;
+   "algol";
+   "code" "procedure" qdm;
+   "algol";
+
+   "comment" Outer block declarations;
+   "integer" ks,m,n,s;
+   "real" bt,btw,t,wd,z;
+
+   "comment" John Pollard's logarithm choice.
+             z is 2/ln(2);
+   "integer" "procedure" iln(x); "value" x; "integer" x;
+      iln := z*ln(x);
+
+   "comment" jln is like iln, but for a long number. It
+             seemed hard to implement;
+   "integer" "procedure" jln(x); "integer" "array" x;
+   "begin"
+      "integer" i,j;
+      "real" tg;
+      tg := 0.0;
+      i := 0;
+      btw := 1.0;
+      "for" j := 1 "step" 1 "until" n "do"
+         "if" x[j] "ne" 0 "or" i "ne" 0 "then"
+      "begin"
+         i := i + 1;
+         btw := btw * bt;
+         tg := tg * wd + btw * x[j];
+         tg := tg * bt
+      "end";
+      jln := z * (ln(tg) - (i+1) * ln(bt))
+   "end" of jln;
+
+   "integer" "procedure" modulo(x,y); "value" x,y; "integer" x,y;
+   "begin"
+      "integer" k;
+      k := x - (x "div" y) * y;
+      modulo := "if" k = 0 "then" y "else" k
+   "end";
+
+
+   "comment" Program start. Must pretend to call qdm in order
+             to load some of the separately assembled stuff;
+   "if" "false" "then"  qdm;
+   "print" ''L@27-APR-1998'L@@;
+   "read" s,t,n,ks,m;
+   z := 2.0/ln(2.0);
+ 
+   "begin"
+      "integer" i,j,L,npj,pj,tj;
+      "integer" "array" a,b,c,nb,one,r,sn,work,w1,w2,zero[1:n],
+                        d[1:2*n],
+                        ps,ts[1:m],
+                        e[0:m],
+                        f[1:s];
+
+      "comment" The procedures, get and put, could be provided
+                with an extra parameter, n, and stowed alongside
+                the declarations of the assembly-coded procedures.
+
+                However, get uses add, and add needs its arrays
+                to be located withing 8192 words of each other.
+                Hence get actually needs to access a non-local
+                array, work, and therefore needs to be located
+                here. The same get and put have been used in all
+                the programs for consistency;
+ 
+      "procedure" get(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k;
+         "for" j := 1 "step" 1 "until" n "do" a[j] := work[j] := 0;
+
+         "for" j := j "while" "not" buffer(1,s) "do"
+         "begin"
+            mpy(a,100000);
+            "read" work[n];
+            add(a,a,work)
+         "end"
+      "end" of get;
+
+      "procedure" put(a,s);
+         "integer" "array" a; "string" s;
+      "begin"
+         "integer" j,k,L,m,p,r,half;
+         "boolean" zero;
+         "integer" "array" work[1:2*n+1];
+
+         "boolean" "procedure" fin;
+         "begin"
+            "integer" k;
+            fin := "true";
+            "for" k := 1 "step" 1 "until" n "do"
+               "if" work[k] "ne" 0 "then" fin := "false"
+         "end" of fin;
+
+         "procedure" group;
+         "begin"
+            "integer" s;
+            s := 10^r; mpy(work, s);
+            "if" zero "then" "print" ' @;
+            "print" digits(5), same line, work[n];
+            work[n] := 0
+         "end" of group;
+ 
+         half := (max int "div" 2) + 1;
+         "for" j := 1 "step" 1 "until" 2*n+1 "do" work[j] :=
+            "if" j "le" n "then" a[j] "else" 0;
+         work[n+1] := half;
+
+         "for" j := -5, j+5 "while" "not" fin "do" div(work, 100000);
+         mpy(work, 100000);
+         "for" j := j, j+1 "while" "not" fin "do" div(work, 10);
+
+         L := ((j-1) "div" 50) + 1;
+         m := j - (L-1) * 50;
+         p := ((m-1) "div" 5) + 1;
+ 
+         "print" ''L@@;
+         r := m - (p-1) * 5;
+         zero := "false";
+         group;
+         lead zero;
+         unsigned;
+         zero := "true";
+         r := 5;
+         "for" k := 1 "step" 1 "until" p-1 "do" group;
+         "for" j := 2 "step" 1 "until" L "do"
+         "begin"
+            "print" ''L@@;
+            "for" k := 1 "step" 1 "until" 10 "do" group
+         "end";
+         lead blank;
+         revert;
+         "print" s
+      "end" of put;
+
+      "comment" Program continues. Get initial data;
+      "for" j := 1 "step" 1 "until" n "do" one[j] := zero[j] := 0;
+      one[n] := 1;
+      get(nb,'P@);
+      mpy(nb,ks);
+      "for" j := 1 "step" 1 "until" m "do" "read" ps[j];
+      get(sn,'Q@);
+      "for" j := 1 "step" 1 "until" m "do" "read" ts[j];
+      "for" i := 1 "step" 1 "until" s "do" f[i] := 0;
+      j := iln(8);
+      "for" i := 2 "step" 2 "until" s "do" f[i] := j;
+
+      wd := 1.0 + max int;
+      "comment" Using exp and ln instead of sqrt, for bt, saves
+                space because exp and ln are built-in anyway;
+      bt := 1.0/exp(0.5*ln(wd));
+
+      "comment" Evaluate the limit, L, for the sieving
+                according to Bressoud's formula;
+      L := (jln(nb) "div" 2) + iln(s "div" 2) - t*iln(ps[m]);
+
+      "print" ''L@L = @, same line, L;
+
+      copy(w1,zero);
+      w1[n] := s "div" 2;
+      sub(r, sn, w1);
+
+      "for" j := 2 "step" 1 "until" m "do"
+      "begin"
+        pj := ps[j];
+        tj := ts[j];
+        npj := iln(pj);
+        copy(w2,r);
+        copy(w1,w2);
+        div(w2,pj);
+        mpy(w2,pj);
+        sub(w1,w1,w2);
+        "comment" We are trying to find a value of i so that
+                  ((i-(s/2))+b)^2 - nb = 0 modulo p[j].
+                  It's a bit of a slog; 
+        "for" i := modulo(pj+tj-w1[n],pj) 
+           "step" pj "until" s "do" f[i] := f[i] + npj;
+        "if" (ks "div" pj) * pj "ne" ks "then"
+        "begin"
+           "comment" The other solution;
+           "for" i := modulo(2*pj-tj-w1[n],pj)
+              "step" pj "until" s "do" f[i] := f[i]+npj
+        "end"
+      "end";
+
+      "comment" The sieve;
+      "for" i := 1 "step" 1 "until" s "do"
+      "begin"
+         add(r,r,one);
+         "if" f[i] "ge" L "then"
+         "begin"
+            multiply(d,r,r,n);
+            "for" j := 1 "step" 1 "until" n "do" w1[j] := d[j+n];
+            sub(w1,w1,nb);
+            "if" w1[1] < 0 "then"
+            "begin"
+               e[0] := 1; 
+               sub(w1,zero,w1)
+            "end" "else" e[0] := 0;
+            "for" j := 1 "step" 1 "until" m "do" e[j] := 0;
+            "for" j := 1 "step" 1 "until" m "do"
+            "begin"
+again:
+               copy(w2,w1);
+               div(w2,ps[j]);
+               mpy(w2,ps[j]);
+               if(w1,w2,found);
+               "goto" next;
+found:
+               div(w1,ps[j]);
+               e[j] := e[j] + 1;
+               "comment" Good when w1 = 1;
+               if(w1,one,good);
+               "goto" again;
+next:
+            "end";
+            "goto" skip;
+good:
+            put(r,'Q@);
+            "for" j := 0 "step" 1 "until" m "do"
+            "begin"
+               "if" (j "div" 10) * 10 = j "then" "print" ''L@@;
+               "print" digits(3), same line, e[j]
+            "end";
+skip:
+         "end"
+      "end";
+      "print" ''L@@
+   "end"
+"end"
+
+ 10000  1.5
+    3     1    29
+  499 94860 12441P
+    2    3    5    7   17   19   31   43   47   59
+   61   67  107  163  181  193  197  229  241  263
+  271  277  311  331  349  359  367  389  397
+   22 35953Q 
+    1    1    1    2    3    1    5   19   18   14
+   16    6   32   38   19   86   14    7   18  101
+   22   39   39   65   52  171  125   69   50
+
+

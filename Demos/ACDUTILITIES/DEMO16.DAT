@@ -1,0 +1,70 @@
+﻿c Demonstrate T5-CUM-QIN1, T6-CUM-QOUT1
+
+on 920B
+
+telecode 920
+select out tty
+
+at ptr file ../ACDSIR/SIR1P71.BIN
+j 8181
+st 8175
+
+at ptr inline 920 mode3
+
+*+19
+[DEMO15 QIN1 QOUT1]
+
+DEMO15 	4	+2
+	15	6144
+	15	6144
+	4 	-9
+ 	5 	COUNT
+LOOP	11	QIN1		( read an integer or fraction )
+	8	QIN1+1	
+	5	NUMBER
+	11   	QOUT1		( print as integer )
+	8	QOUT1+1
+	/0 0			( output on a newline )
+	4	NUMBER
+	11 	QOUT1		( output as fraction )
+	8	QOUT1+2
+	0 0			( sameline)
+	4	NUMBER
+	11	QOUT1		( output as octal )
+        8	QOUT1+3
+        0 0
+	10	COUNT
+	4	COUNT
+	9	LOOP
+	4 	+2
+	15	6144
+	8	;+0
+
+ 
+
+COUNT 	>+1
+NUMBER	>+1
+<! halt !><!!>
+j &17741
+st 6852
+at ptr file T5_QIN.920
+j &17742
+st 6852
+at ptr file T6_QOUT.920
+j &17742
+st 6852
+at ptr inline 920 mode3
+
+%
+<! halt !><!!>
+j &17742
+st 7573
+
+at ptr inline
+A	+678	B	+.05	C	-.999999
+A	+713	B	+.40	C	-.995000
+A	+82	B	+.10	C	+.000010
+<! halt !><!!>
+j 8
+st 32
+sh t

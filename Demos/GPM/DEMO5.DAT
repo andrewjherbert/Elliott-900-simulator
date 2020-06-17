@@ -1,0 +1,48 @@
+﻿C GPM Programs by Eiiti Wada
+
+C Build BGPM
+
+on 903 24K
+nonprinting off
+select out tty
+at ptr file ../ACDSIR/SIR2P71.BIN
+j 8181
+st 8175
+
+c assemble BGPM
+
+at ptr file BGPM.900
+j 12
+st 562
+
+rewind
+select out auto
+at ptp file BGPM.BIN
+j 10
+st 587
+de ptp
+
+c load gpm
+at ptr file BGPM.BIN
+j 8181
+st 8175
+
+c set max store to 24K
+e 41 +24575
+
+select out tty
+
+at ptr file BGPMQUEENS.900
+
+j 8
+st 634
+
+sh t
+
+reset
+
+j 8
+st 634
+
+sh t
+

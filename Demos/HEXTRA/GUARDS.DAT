@@ -1,0 +1,30 @@
+﻿
+on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+
+at ptr inline
+
+guards;
+"begin"
+   "boolean" "array" locked[1:100];
+   "integer" guard, j;
+   
+   "print" ''L`19-DEC-1999`;
+   "for" j := 1 "step" 1 "until" 100 "do"
+      locked[j] := "true";
+   "for" guard := 1 "step" 1 "until" 100 "do"
+      "for" j := guard "step" guard "until" 100 "do"
+         locked[j] := "not" locked[j];
+   "for" j := 1 "step" 1 "until" 100 "do"
+      "if" "not" locked[j] "then" "print" j
+"end"
+<!!>
+j 12
+st 7943
+select out tty
+j 10
+st 1727
+sh t

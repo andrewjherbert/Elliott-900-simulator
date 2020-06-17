@@ -1,0 +1,24 @@
+﻿c X10 - varying speed paper tape reader and punch test
+
+on 903 8K
+
+c load test program
+at ptr file X10(ISS1).BIN 
+j 8181
+st 8174
+
+c produce short specimen tape
+at ptp file DEMOX10.BIN 
+j 8
+st 25
+de ptp
+
+c check prepared long specimen
+at ptr file DEMOX10_DATA.BIN 
+at ptp file DEMOX10.BIN
+nonstop on
+j 32
+
+de ptp
+print DEMOX10.BIN
+sh t

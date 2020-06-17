@@ -1,0 +1,100 @@
+﻿
+on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+at ptr inline
+
+board;
+"begin"
+   "comment" 02-DEC-1999.
+             Effectiveness of the Diagonal Board,
+             Donald W. Davies,
+             Cryptologia Vol. XXIII No. 3,
+             pages 229 to 239.;
+   
+   "real" "procedure" lnfact(x); "value" x; "integer" x;
+   "begin"
+      "real" sum;
+      "integer" j;
+      sum := 0;
+      "if" x>1 "then"
+      "begin"
+         "for" j := x "step" -1 "until" 2 "do"
+            sum := sum + ln(j)
+      "end";
+      lnfact := sum
+   "end" of lnfact;
+   
+   "integer" case1, case2, case3, j, N;
+   "real"    V, W, w1, w2, w3;
+   
+   "print" ''L`02-DEC-1999'L2`   N        V           L`,
+           '           W           V/W     LOG(V/W)'L``;
+   
+   "for" N := 2 "step" 1 "until" 16 "do"
+   "begin"
+      V := 0;
+      W := 0;
+      
+      "for" case1 := 0 "step" 1 "until" (N "div" 2) "do"
+      "begin"
+         "for" case 2 := 0 "step" 1 "until" (N - 2*case1) "do"
+         "begin"
+            case3 := N - 2*case1 - case2;
+            
+            "comment" Step through the sequence ... 7, 5, 3
+               while w1 accumulates contributions to V;
+            w1 := 0;
+            "if" case1>1 "then"
+            "begin"
+               "for" j := (2*case1-1) "step" -2 "until" 3 "do" 
+                     w1 := w1 + ln(j)
+            "end";
+            
+            "comment" w2 will accumulate contributions to W,
+                      starting with the value already in w1;
+            w2 := w1;
+            
+            "comment" w3 is supposed to be a common expression.
+                      I cannot be bothered to speed up the 
+                      factorial calculations by finding which is
+                      the biggest, smallest and middle one of
+                      case1, case2, case3;
+            w3 := lnfact(N) - lnfact(2*case1) -
+                  lnfact(case2) - lnfact(case3);
+            
+            "comment" w1 accumulates contributions to V;
+            w1 := w1 + ln(26-N) * case3 + w3;
+            V := V + exp((w1 - ln(26)*N));
+            
+            "comment" w2 accumulates contributions to W here;
+            "if" case3>0 "and" case3 "le" (26-N) "then"
+            "begin"
+               "for" j := (26-N) "step" -1
+                  "until" (26-N-case3+1) "do"
+                  w2 := w2 + ln(j)
+            "end";
+            w2 := w2 + w3; 
+            W := W + exp((w2 - ln(26)*N));
+         "end"
+      "end";
+      "print" digits(3), N, same line, '   `, freepoint(8), V,
+              aligned(2,3),'   `, -ln(V)/ln(26),
+              scaled(3), '     `, W, 
+              aligned(5,2), '  `, V/W,
+              aligned(2,3), '     `, ln(V/W)/ln(26)
+   "end" 
+"end"
+<!!>
+j 12
+st 7943
+select out tty
+j 10
+st 1727
+sh t
+
+
+
+

@@ -1,0 +1,96 @@
+﻿C WORKSHOP Calculator Program
+
+c demonstrate matrix facilities.
+
+on 903 8K
+at ptr file ONLINE.BIN
+at tty inline
+\AJH001
+WHERE AI = 45 5.678 34.6 45.9 ;
+PRINT AI
+RUN
+
+WHERE BIJ =
+1 0 0 0
+0 1 0 0
+0 0 1 0
+0 1 4 1 ;
+PRINT BIJ
+RUN
+Shows that matrices are indexed by column then by row
+
+\AJH002
+WHERE CIJK =
+1 0 0
+0 1 0
+0 0 1
+
+2 3 4
+5 6 7
+8 9 0;
+PRINT CIJK
+RUN
+
+\AJH003
+WHERE CIJ =
+1 0 0
+0 1 0
+0 0 1
+
+2 3 4
+5 6 7
+8 9 0 ;
+PRINT CIJ
+RUN
+Shows that dimensions in data are dropped (merged) if not required
+by specification of matrix
+CALCULATE DIJ = CJI ;
+PRINT CIJ 
+PRINT DIJ
+PRINT DJI
+CALCULATE EI = D2I
+PRINT EI
+CALCULATE F = D21
+PRINT F
+RUN
+
+\AJH004
+WHERE AIJ =
+10 20 30
+40 50 60
+70 80 90
+100 110 120 ;
+BI = 1 3 2 2 ;
+CI = 2 2 3 4 ;
+CALCULATE DI = A[BI, CI] ;
+PRINT DI
+CALCULATE EI = CI + I;
+PRINT EI
+CALCULATE FI = I + CI - CI
+PRINT FI
+CALCULATE GIJ = AIJ [I = 2 ^^ 3, J = 3 ^^ 4] ;
+PRINT GIJ
+CALCULATE UIJ = QDEL (I - J) [I = 0 ^^ 3, J = 0 ^^ 3]
+PRINT UIJ
+RUN
+
+\AJH005
+WHERE AI = 1 1 2 ;
+PRINT QSUMI (AI + QSUMI AI) ;
+CALCULATE BIJ = AI [J = 1 ^^ QCNTI AI] ;
+PRINT BIJ ; QSUMI BIJ ; QSUMJ BIJ ;
+RUN
+
+\AJH006
+WHERE XIJ = 
+3 7 9
+12 5 3
+76 45 64
+CALCULATE IXIJ = QMIN XIJ
+PRINT XIJ ; IXIJ ; QSUMK(XIK*IXKJ)
+RUN
+Shows matrix inversion and formula for matrix multiplication
+&
+<!!>
+j 8181
+sh t

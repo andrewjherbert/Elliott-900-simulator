@@ -1,0 +1,240 @@
+   IPBIN
+   OPASC
+   ADLIB
+   JUMP 12
+   IPASC
+
+donut;
+"begin"
+   "real" bigr, eps, grav, pi, secs;
+   "integer" bndx, bndy, dph, phe;
+   "real" adist, ascale, contin, ph, x1r, x2r, y1r,
+   y2r; 
+    
+   "integer" j, laxis, lim, n, num, xorig, yorig;
+   
+   bigr := 6371000.0;
+   bndx := 24;
+   bndy := 26;
+   eps := 0.0001;
+   grav := 9.81;
+   phe  := 180;
+   pi := 3.1415926536;
+   secs := 3600.0;
+   
+   "begin"
+      "real" "array" sx[0:bndx], sy[0:bndy],
+                     oa,r1,r2,rf,rcos,rsin[0:phe];
+      "integer" "array" r3[0:phe];
+      "real"   a, b, c, c1, h, om, ri, rcph, rsph, th, u, v;
+      
+      "procedure" eval(n); "value" n; "integer" n;
+      "begin"
+         "integer" j;
+         "real" ang, sum, x, y;
+         
+         "real" "procedure" d;
+         "begin"
+            "real" w1, w2, w3;
+            w1 := (a + rcph - c * a * cos(th));
+            w2 := c * a * sin(th);
+            w3 := w1 * w1 + rsph * rsph + w2 * w2;
+            d := exp(1.5 * ln(w3))
+         "end" of d;
+       
+         "real" "procedure" funx;
+            funx := (a + rcph - c * a * cos(th))/d;
+         
+         "real" "procedure" funy;
+            funy := rsph/d;
+         
+         "real" "procedure" simpsx;
+         "begin"
+            "real" sum,dth;
+            "real" "array" rx[0:bndx];
+            "integer" j, m;
+          
+            dth := pi / bndx;
+            m := bndx "div" 2;
+            "for" j := 0 "step" 1 "until" bndx "do"
+            "begin"
+               th := j * dth;
+               rx[j] := funx
+            "end";
+            sum := rx[0] + rx[bndx];
+            "for" j := 1 "step" 1 "until" m "do"
+               sum := sum + 4.0 * rx[2*j-1];
+            "for" j := 1 "step" 1 "until" (m-1) "do"
+               sum := sum + 2.0 * rx[2*j];
+            simpsx := (sum * dth) / 3.0
+         "end" of simpsx;
+         
+         "real" "procedure" simpsy;
+         "begin"
+            "real" sum, dth;
+            "real" "array" ry[0:bndy];
+            "integer" j, m;
+            dth := pi / bndy;
+            m := bndy "div" 2;
+            "for" j := 0 "step" 1 "until" bndy "do"
+            "begin"
+               th := j * dth;
+               ry[j] := funy
+            "end";
+            sum := ry[0] + ry[bndy];
+            "for" j := 1 "step" 1 "until" m "do"
+               sum := sum + 4.0 * ry[2*j-1];
+            "for" j := 1 "step" 1 "until" (m-1) "do"
+               sum := sum + 2.0 * ry[2*j];
+            simpsy := (sum * dth) / 3.0
+         "end" of simpsy;
+         
+          sum := 0.0;
+         "for" j := 0 "step" 1 "until" n "do"
+         "begin"
+            ph := j * dph;
+            u := r1[j];
+            rcos[j] := cos(ph * pi / 180.0);
+            rcph := u * rcos[j];
+            "if" j > 0 "then"
+            sum := sum + ((u * u * rcph)
+                       *  (a + u * rcph) / a ) * 0.75;
+            rsin[j] := sin(ph * pi / 180.0);
+            rsph := u * rsin[j];
+            x := (simpsx - (a + rcph) * om * om) * h;
+            y := simpsy * h;
+            rf[j] := sqrt(x * x + y * y);
+            
+            "if" abs(x) < eps "then"
+            "begin"
+               "if" ((y>0.0) "and" (x>0.0))
+               "or" ((y<0.0) "and" (x<0.0)) "then"
+               ang := 90.0 "else" ang := -90.0
+            "end" "else"
+            ang := arctan(y/x) * 180.0 / pi;
+            
+            "if" abs(ang) < eps
+            "then" ang := 0.0 "else"
+            "begin"
+               "if" ang < 0.0 "then" ang := ang + 180.0;
+               ang := ph - ang
+            "end";
+            oa[j] := ang
+         "end";
+      c1 := 1.0 + sum / (n * b)
+      "end" of eval;
+      
+      set origin(360, 120);
+      
+      xorig := 100;
+      yorig := 50;
+      
+      "read" dph, a, b, u, c, lim, laxis, ascale;
+      
+      adist := a * ascale;
+      n := phe "div" dph;
+      v := dph * pi / 180.0;
+      num := 0;
+      ri := b / a;
+      h := 100.0 * exp(ln((9.0 * ri*ri*ri*ri) /
+                          (4.0 * pi)) / 3.0);
+      om := (2.0 * pi) / (u * secs * ri * sqrt(
+                         (3.0 * grav) /
+                         (2.0 * bigr)));
+      "print" ''L@Step length, degrees    =@, same line, dph;
+      "print" ''L@Torus radius            =@, same line,  a;
+      "print" ''L@Torus ring radius       =@, same line,  b;
+      "print" ''L@Revolution time, hours  =@, same line,  u;
+      "print" ''L@Relative gravity centre =@, same line,  c;
+      "print" ''L@Number of iterations    =@, same line, lim;
+      "for" j := 0 "step" 1 "until" n "do" r1[j] := b;
+      eval(n);
+cyc:
+      move pen(xorig, yorig);
+      draw line(xorig, yorig - (laxis "div" 2));
+      draw line(xorig, yorig + (laxis "div" 2));
+      "for" j := 0 "step" 1 "until" n-1 "do"
+      "begin"
+         x1r := ascale * r1[j]   * rcos[j];
+         x2r := ascale * r1[j+1] * rcos[j+1];
+         y1r := ascale * r1[j]   * rsin[j];
+         y2r := ascale * r1[j+1] * rsin[j+1];
+         move pen(xorig + adist + x1r, yorig + y1r);
+         draw line(xorig + adist + x2r, yorig + y2r);
+         move pen(xorig + adist + x1r, yorig -y1r);
+         draw line(xorig + adist + x2r, yorig - y2r);
+         move pen(xorig - adist - x1r, yorig + y1r);
+         draw line(xorig - adist - x2r, yorig + y2r);
+         move pen(xorig - adist - x1r, yorig - y1r);
+         draw line(xorig - adist - x2r, yorig - y2r);
+       "end";
+      "if" num = lim "then"
+      "begin"
+again:
+         "print" ''L@Continue (0=no, 1=yes)@;
+         "read" contin;
+         "if" contin = 0 "then" "goto" fin "else"
+         "if" contin = 1 "then"
+         "begin"
+            ri := b;
+            "print" ''L@New rotation time, hours          :  @;
+            "read" u;
+            om := (2.0 * pi) /
+                  (u * secs * ri *
+                  sqrt((3.0 * grav) /
+                  (2.0 * bigr)));
+         "end" "else" "goto" again;
+         num := 0
+      "end";
+      eval(n);
+
+      r2[0] := r1[0];
+      "for" j := 0 "step" 1 "until" n "do"
+      "begin"
+         u := (oa[j] + oa[j+1]) * pi / 360.0;
+         r2[j+1] := r2[j] * (1.0 + v * sin(u)/cos(u))
+      "end";
+      u := 0;
+      "for" j := 0 "step" 1 "until" n "do" u := u + r2[j];
+      u := u /(n+1);
+      u := (b / u);
+      "for" j := 0 "step" 1 "until" n "do" r2[j] := r2[j] * u;
+      "print" ''L@Size    @;
+      "for" j := 0 "step" 1 "until" n "do" r1[j] := r2[j];
+      num := num + 1;
+      "goto" cyc;
+fin:
+      "print" ''L2@Radius values * 1000 from 0..n@;
+      "for" j := 0 "step" 1 "until" n "do" r3[j] := r2[j] * 1000.0;
+      "for" j := 0 "step" 1 "until" n "do"
+      "begin"
+         "if" (j "div" 10) *10 = j-1 "then" "print" ''L@@;
+         "print" same line, r3[j]
+      "end";
+
+      "print" ''L2@@;
+      "print" ''L2@Gravity values, percent relative to Earth@;
+      "for" j := 0 "step" 1 "until" n "do"
+      "begin"
+         "if" (j "div" 10) * 10 = j-1 "then" "print" ''L@@;
+         "print" same line, rf[j]
+      "end";
+
+      "print" ''L2@@;
+      u := a * c1;
+      "print" ''L@Actual centre of gravity =@, same line, u;
+      "print" ''L@Relative position of CG. =@, same line, c1;
+
+      "print" ''L2@@;
+      "print" ''L@Gravity angles, relative to radius vector@;
+      "for" j := 0 "step" 1 "until" n "do"
+      "begin"
+         "if" (j "div" 10) * 10 = j-1 "then" "print" ''L@@;
+         "print" same line, oa[j]
+      "end";
+      "print" ''L@@;
+   "end"
+"end"
+  3  1.0  0.5  2.59  1.0  5  150  150
+  0
+  0

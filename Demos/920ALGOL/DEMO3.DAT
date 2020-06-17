@@ -1,0 +1,74 @@
+﻿c
+c DEMO3: character handling
+c
+
+c load translator
+
+on 920m
+
+nonprinting off
+
+telecode 920
+
+at ptr file ALG1(920ISS6).BIN mode1
+j 8181
+st 8174
+
+c translate program
+
+at ptr inline 920
+
+strings;
+~begin~
+   ~comment~ 9-FEB-2011: this program must be input as unicode for correct handling of 
+                          special characters;
+	
+   ~integer~ m; ~integer~ ~array~ a[1:30];
+   reader(1); punch(3);
+   m := 1; instring(a, m);
+   m := 1; outstring(a, m);
+   ~print~ ''L`Special symbols ~ ‘QSU’ ( ) , £ : & * / = + - . ; [ ] < > ↑ % ?`;
+
+   ~comment~ In INNER strings
+             L means Carriage Return Line Feed
+             S means Space
+             R means Runout
+             Q means Quote
+             U means Unquote
+             H means Halt Code
+     Any of these followed by a small integer repeats the
+     character that many times, and
+             B means output a single character with the value
+               of the small integer which follows it, eg B33
+               is Exclamation Mark;
+   ~print~ ''LS2RLS3QQQLS4UUULS5HL``;
+~end~
+<!!>
+at ptp file DEMO3.RLB
+j 8
+de ptp
+st 9
+
+c load interpreter
+
+at ptr file ALG2(920ISS6).BIN mode1
+j 8181
+st 8174
+
+c load rlb
+at ptr file DEMO3.RLB mode1
+j 8
+st 7943
+
+c test 920 input
+
+select out tty
+
+at ptr inline 920 
+ ''L`920 Telecode input. ‘QSU’ ~~ $ ↑^ 'B126SB58SB43SB170L`` 
+<!!>
+j 10
+de ptp
+st 1727
+delete DEMO3.RLB
+sh t

@@ -1,0 +1,373 @@
+﻿C
+C Gauss-Seidel Iteration (using 903 FORTRAN LP system)
+C
+
+C Load Fortran LP System
+on 903 16K
+telecode 903
+nonprinting off
+
+at ptr file 903FORT16KLP(ISS4).BIN
+j 8181
+st 8171
+
+at ptr inline 903
+
+      GLOBAL, GAUSS, ABS]
+
+C  GAUSS-SEIDEL METHOD FOR SOLVING SIMULTANEOUS EQUATIONS
+C  BASED ON CASE STUDY 10 (THE GAUSS-SEIDEL METHOD FOR SOLVING
+C  SIMULTANEOUS EQUATIONS) IN D.D. MCCRACKEN "A GUIDE TO FORTRAN IV
+C  PROGRAMMING".
+
+C  THE PROGRAM SOLVES A SYSTEM OF N EQUATIONS IN N UNKNOWNS.
+C  N MAY NOT EXCEED 60.  N IS READ AS INPUT.
+C  ONLY THE NON-ZERO ELEMENTS NEED BE ENTERED, ONE ELEMENT PER DATA
+C  CARD, WITH ROW AND COLUMN NUMBERS ON EACH CARD.
+C  A ROW NUMBER OF 99 ACTS AS AN END-OF-DATA SENTINEL.
+C  THE PROGRAM READS THE FOLLOWING PARAMETERS PRIOR TO ENTERING THE DATA:
+C    N      -- THE NUMBER OF EQUATIONS IN THE SYSTEM FOR THIS RUN
+C    MAXIT  -- THE MAXIMUM NUMBER OF ITERATIONS TO BE PERMITTED
+C    EPSLON -- THE CONVERGENCE CRITERION
+C    BIGGST -- THE MAXIMUM SIZE (IN ABSOLUTE VALUE) TO BE PERMITTED
+C              OF ANY COEFFICIENT OR CONSTANT TERM
+C  ALL INPUT IS CHECKED FOR VALIDITY, EVEN IF AN ERROR IS FOUND.
+
+      DIMENSION A(60, 61), X(60)
+
+C  CLEAR ARRAYS
+
+      I = 1
+      J = 1
+      DO 20 I = 1, 10
+         X(I) = 0.0
+         DO 10 J = 1, 11
+            A(I,J) = 0.0
+   10    CONTINUE
+   20 CONTINUE
+
+C  READ CONTROL PARAMETERS
+      
+      READ (1) N, MAXIT, EPSLON, BIGGST
+      NPLUS1 = N + 1
+
+C  READ ELEMENTS OF THE ARRAYS, WITH CHECKING
+C  DO LOOP IS USED TO CONTROL MAXIMUM NUMBER OF ELEMENTS
+C  FIRST SET ERROR COUNTER TO ZERO
+
+      NERROR = 0
+      LIMIT = N*NPLUS1 + 1
+      DO 40 K = 1, LIMIT
+         READ (1) I, J, TEMP
+         IF ( I - 99 ) 31, 41, 31
+C  VERIFY DATA
+C        I < 1?
+   31    IF ( I - 1 ) 39, 32, 32
+C        I > N?
+   32    IF ( I - N ) 33, 33, 39
+C        J < 1?
+   33    IF ( J - 1 ) 39, 34, 34
+C        J > N?
+   34    IF ( J - NPLUS1 ) 35, 35, 39
+C        ABS( TEMP ) > BIGGST?
+   35    IF ( ABS(TEMP) - BIGGST ) 36, 36, 39
+C  PASSED ALL TESTS
+   36    A(I, J) = TEMP
+         GOTO 40
+   39    WRITE (2, 110) I, J, TEMP
+         NERROR = NERROR + 1
+   40  CONTINUE
+
+C  IF DO IS SATISFIED THERE WERE TOO MANY DATA CARDS FOR THE 
+C  VALUE OF N THAT WAS  SPECIFIED -- WRITE ERROR COMMENT
+
+      WRITE (2, 120)
+      STOP
+
+C  ALL DATA CARDS HAVE BEEN READ -- CHECK ERROR COUNT AND STOP IF ANY
+
+   41  IF ( NERROR ) 42, 43, 42
+   42  WRITE (2, 130) NERROR
+       STOP
+
+C  BEGIN ITERATION SCHEME -- DO LOOP COUNTS THE NUMBER OF ITERATIONS
+
+   43  DO 70 ITER = 1, MAXIT
+       
+C         ... NEXT STATEMENT IS EXECUTED ONCE PER SWEEP OF THE SYSTEM
+
+          RESID = 0.0 
+
+C         ... INDEX I SELECTS A ROW
+          DO 60 I = 1, N
+
+C            ... NEXT STATEMENT IS EXECUTED ONCE PER ROW
+
+             SUM = 0.0
+
+C            ... GET SUM OF TERMS IN ROW I, NOT INCLUDING DIAGONAL TERM
+             DO 51 J = 1, N 
+                IF (J-I) 50, 51, 50
+   50           SUM = SUM + A(I, J)*X(J)
+   51         CONTINUE
+
+C            ... COMPUTE THE NEW APPROXIMATION TO VARIABLE X(I)
+
+             TEMP = (A(I, NPLUS1) - SUM) / A (I, I)
+
+C            ... AT THE END OF A SWEEP OF ALL EQUATIONS, THE FOLLOWING
+C            ... STATEMENT WILL HAVE PUT THE LARGEST RESIDUAL IN RESID
+
+             IF ( ABS(TEMP - X(I)) - RESID) 53, 53, 52
+   52        RESID = ABS(TEMP - X(I))
+
+C            ... STORE NEW APPROXIMATION TO VARIABLE X(I)
+
+   53        X(I) = TEMP
+   60     CONTINUE
+
+C         ... ONE SWEEP HAS BEEN COMPLETED -- PRINT VARIABLES
+
+          WRITE (2, 140) X(1)
+          DO 61 K = 2, N
+             WRITE (2, 141) X(K)
+   61     CONTINUE
+
+C         ... IF LARGEST RESIDUAL IS LESS THAN ESPLON, PROCESS HAS CONVERGED
+
+          IF ( EPSLON - RESID ) 70, 70, 999
+   70  CONTINUE
+
+C  IF THIS OUTER DO IS EVER SATISFIED, MORE THAN MAXIT ITERATIONS WOULD
+C  BE NEEDED FOR CONVERGENCE -- WRITE ERROR COMMENT AND GIVE UP
+
+       WRITE (2, 150) MAXIT
+  999  STOP
+
+  110  FORMAT (23HERROR IN CARD WITH I = , I2, 6H, J = , I2,
+£              10H, VALUE = , E14.6)
+  120  FORMAT (32HINPUT CONTAINED TOO MANY RECORDS)
+  130  FORMAT (16HERRORS FOUND IN , I4, 18H RECORDS - ABORTED)
+  140  FORMAT (F12.5)
+  141  FORMAT (Z, F12.5)
+  150  FORMAT (27HPROCESS DID NOT CONVERGE IN, I4, 11H ITERATIONS)
+       END
+<! Halt !>
+<!!>
+
+C translate - compile
+
+at ptp file DEMO6.RLB
+j 13
+st 15118
+
+C indicate complete
+j 10
+de ptp
+st 14430
+
+C load RLB
+at ptr file DEMO6.RLB
+j 14
+st 16006
+
+select out tty
+
+C run with good data
+at ptr inline
+  7 50 .000002   2500.0
+  1  1  12.418 
+  2  1  -1.501
+  3  1  2.308
+  4  1  3.359
+  5  1  -1.562
+  6  1  -1.174
+  7  1  0.109
+  1  2  -1.061
+  2  2  19.832
+  3  2  1.728
+  4  2  -0.913
+  5  2  1.168
+  6  2  7.318
+  7  2  -1.313
+  1  3  2.669
+  2  3  0.694
+  3  3  -15.165
+  4  3  -6.441
+  5  3  -2.004
+  6  3  -2.278
+  7  3  -0.900
+  1  4  4.361
+  2  4  -4.816
+  3  4  -2.023
+  4  4  27.864
+  5  4  1.818
+  6  4  -0.143
+  7  4  -1.972
+  1  5  -0.119
+  2  5  2.274
+  3  5  1.104
+  4  5  3.737
+  5  5  9.490
+  6  5  -9.835
+  7  5 -3.514
+  1  6 -1.209
+  2  6  2.001
+  3  6  2.107
+  4  6  -4.375
+  5  6  0.401
+  6  6  -31.670
+  7  6  -1.107
+  1  7  -0.500
+  2  7  -1.909
+  3  7  -1.000
+  4  7  -2.375
+  5  7  -1.073
+  6  7  4.114
+  7  7  12.094
+  1  8  8.262
+  2  8  -33.818
+  3  8  -52.673
+  4  8  -97.284
+  5  8  20.351
+  6  8  149.919
+  7  8  81.653
+ 99 99  99.0
+
+<! Halt !>
+<!!>
+
+c run
+j 11
+st 10111
+
+sh t
+
+C run with bad data (1)
+
+at ptr inline
+  7 50 .000002   2500.0
+  1  0  12.418 
+  0  1  -1.501
+  3  9  2.308
+  9  1  3.359
+  5  1  -3000.0
+  6  1  +3000.0
+ 99 99  99.0
+
+<! Halt !>
+<!!>
+
+c run
+j 11
+st 10111
+sh t
+
+
+C run with bad data (2)
+
+at ptr inline
+  7 50 .000002   2500.0
+  1  1  12.418 
+  2  1  -1.501
+  3  1  2.308
+  4  1  3.359
+  5  1  -1.562
+  6  1  1.174
+  7  1  0.109
+  1  2  -1.061
+  2  2  19.832
+  3  2  1.728
+  4  2  -0.913
+  5  2  1.168
+  6  2  7.318
+  7  2  -1.313
+  1  3  2.669
+  2  3  0.694
+  3  3  -15.165
+  4  3  -6.441
+  5  3  -2.004
+  6  3  -2.278
+  7  3  -0.900
+  1  4  4.361
+  2  4  -4.816
+  3  4  -2.023
+  4  4  27.864
+  5  4  1.818
+  6  4  -0.143
+  7  4  -1.972
+  1  5  -0.119
+  2  5  2.274
+  3  5  1.104
+  4  5  3.737
+  5  5  9.490
+  6  5  -9.835
+  7  5 -3.514
+  1  6 -1.209
+  2  6  2.001
+  3  6  2.107
+  4  6  -4.375
+  5  6  0.401
+  6  6  -31.670
+  7  6  -1.107
+  1  7  -0.500
+  2  7  -1.909
+  3  7  -1.000
+  4  7  -2.375
+  5  7  -1.073
+  6  7  4.114
+  7  7  12.094
+  1  8  8.262
+  2  8  -33.818
+  3  8  -52.673
+  4  8  -97.284
+  5  8  20.351
+  6  8  149.919
+  7  8  81.653
+  1  1  12.418 
+  2  1  -1.501
+  3  1  2.308
+  4  1  3.359
+  5  1  -1.562
+  6  1  1.174
+  7  1  0.109
+ 99 99  99.0
+
+<! Halt !>
+<!!>
+
+c run
+j 11
+st 10111
+
+sh t
+
+C run with ILL-CONDITIONED data (1)
+
+at ptr inline
+  3 50 .000002   2500.0
+  1  1  4 
+  2  1  4
+  3  1  3
+  1  2  3
+  2  2  8
+  3  2  -3
+  1  3  2
+  2  3  -4
+  3  3  7
+  1  4  4
+  2  4  -24
+  3  4  30
+ 99 99  99.0
+
+<! Halt !>
+<!!>
+
+c run
+j 11
+st 10111
+delete DEMO6.RLB
+sh t
+
+
+

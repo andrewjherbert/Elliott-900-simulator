@@ -1,0 +1,31 @@
+   IPBIN
+   ADLIB
+   OPASC
+   JUMP 12
+   IPASC
+
+fall2;
+"begin"
+   "comment" 04-NOV-1999.
+             Time for stationary Earth to fall into Sun;
+
+   "real" au, eps, factor, r, rs, safety;
+
+   "code" "real" "procedure" simps(f, x, a, b, delta, v);
+          "value" a, b, delta, v; "real" f, x, a, b, delta, v;
+   "algol";
+
+   "read" au, eps, factor, rs;
+
+   safety := 1.0+eps;
+
+   "print" ''L@weeks = @, same line, aligned(3,2), factor * 
+       SIMPS(sqrt(abs(r/(r-au))), r, rs, safety*au, eps, 3.5/eps)/
+            (7.0 * 24.0 * 3600.0)
+"end"
+
+1.496?11  0.001  2.37?-5  6.96?8
+
+
+
+ 

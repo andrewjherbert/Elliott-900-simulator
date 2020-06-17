@@ -1,0 +1,46 @@
+
+    IPBIN
+    ADLIB
+    OPASC
+    JUMP 8
+    IPASC
+bull;
+"begin"
+   "comment" 01-NOV-1998;
+   "integer" n, nmax;
+   "real" dt, t, v, vx, vy, w1, w2, x, y;
+
+   "print" ''L@01-NOV-1998'L@@;
+   n := 0;
+   x := 0;
+   y := 1;
+   vx:= 0.0;
+   vy:= 0.0;
+   "print" ''L@dt,v = @;
+   "read" nmax, v; dt := 1.0/(10*nmax);
+   "print" same line, aligned(1,4), dt, '  @, v;
+   "print" ''LS3@t'S6@x'S6@y'S5@vx'S5@vy@;
+loop:
+   t := n * dt;
+   "if" (n "div" nmax) * nmax = n "then"
+   "print" aligned(1,3), t, same line, aligned(1,4), x, y, vx, vy;
+   w1 := (t-x)*(t-x) + y*y; w2 := sqrt(w1);
+   vx := v * abs(t-x)/w2;
+   vy := -v * y/w2;
+   y  := y + dt * vy;
+   x  := x + dt * vx;
+   n  := n + 1;
+   t  := n * dt;
+
+   "if" x<t 
+   "then" "goto" loop
+   "else"
+   "begin"
+      "print" ''L@met before @, same line, aligned(1,4), x;
+      "print" ''L@met after  @, same line, aligned(1,4), x - dt * vx;
+      "print" ''L@t, vx, vy =@, same line, aligned(1,4), t, vx, vy;
+   "end"
+"end"
+ 100  1.618034
+
+

@@ -1,0 +1,28 @@
+﻿c Demonstrate DO-ALL-4 legible tape
+
+on 903 8K
+
+c load do-all-4
+at ptr file DOALL4.BIN
+j 8181
+st 8175
+
+c legible tape
+at ptr inline 900
+
+A SAMPLE MESSAGE
+ABCDEFGHIJKLMNOPQRTSUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+01234567889
+!@$%^&*()_+-={}[]:;"'|\\<>,.?/
+<! halt !>
+<!!>
+
+at ptp file demo5.txt legible
+j 8
+de ptp
+st 57
+
+print demo5.txt
+delete demo5.txt
+

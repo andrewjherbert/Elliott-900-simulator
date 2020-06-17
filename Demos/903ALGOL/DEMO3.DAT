@@ -1,0 +1,64 @@
+﻿C
+C DEMO3 - Library mode
+C
+on 903 8K
+telecode 903
+C load translator
+at ptr file ALG1(ISS6).BIN
+j 8181
+c translate program in library mode
+at ptr inline
+sine table;
+"begin"
+   "comment" 31-MAR-2011;
+   "integer" x; "real" pi;
+   "real" "procedure" readint;
+   "begin"
+      "read" reader(1), readint;
+   "end" readint;          
+   punch(3);
+   "print" ''LS3`X'S4`SIN(X)`;
+   pi := 4 * arctan(1);   
+   "for" x := readint, readint "while" x "ge" 0 "do" 
+      "print" digits(3), x, same line,
+         aligned(2, 6), sin(x * pi / 180);
+"end"
+<! halt !>
+<!!>
+at ptp file DEMO3.BIN
+j 12
+st 5368
+c add library
+at ptr file ALG3(ISS7).RLB
+nonstop on
+j 9
+c insert data
+at ptr inline
+
+Algol allows data to follow the program
+
+ 10 20 30 40 50 60 70 80 90 -1
+
+<! halt !>
+<!!>
+restart
+nonstop off
+de ptp
+st 9
+
+c load interpreter
+at ptr file ALG2(ISS6).BIN
+j 8181
+st 8171
+c load rlb overwriting library
+at ptr file DEMO3.BIN
+j 13
+st 7943
+
+c run program
+select out tty
+nonprinting off
+j 10
+st 1727
+delete DEMO3.BIN
+sh t

@@ -1,0 +1,19 @@
+﻿c X3 - Function Test
+
+on 903 8K
+
+nonstop on
+
+at ptr file X3(ISS4).BIN
+j 8181
+st 8174
+
+c start test
+j 8
+c wait for demand for tape punch
+at ptp file demox3.txt legible
+step 1000000
+restart
+de ptp
+print demox3.txt
+sh t

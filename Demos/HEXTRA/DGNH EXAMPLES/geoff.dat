@@ -1,0 +1,54 @@
+   IPBIN
+   ADLIB
+   OPASC
+   JUMP 12
+   IPASC
+
+geoff;
+"begin"
+   "comment" 18-NOV-1999.
+             Time for stationary Earth to fall into Sun.
+             All figures are in MKS Units;
+
+   "real" "procedure" arccos(x, L);
+      "value" x; "real" x; "label" L;
+   "begin"
+      "if" abs(x) > 1.0 
+      "then"
+      "begin"
+         "print" ''L2@Invalid arccos argument@,
+                       same line, '  @, x;
+         "goto" L
+      "end"
+      "else"
+      "if" abs(x) = 0.0 
+      "then" arccos := 2.0 * arctan(1.0)
+      "else"
+      arccos := arctan(sqrt(1-x*x)/x)
+   "end";
+
+   "real" AU, factor, RS;
+
+   "comment" AU is an Astronomical Unit, ie the
+             distance from Earth to Sun;
+   AU := 1.496?11;
+
+   "comment" factor is 1/(sqrt(2 * G * M)), because
+             M is too big for 903 Algol 
+             (G is 6.67?-11, M is 1.99?30);
+   factor := 6.137557?-11;
+
+   "comment" rs is the radius of the Sun;
+   RS := 6.96?8;
+
+   "print" ''L@weeks = @, same line, aligned(3,2),
+       factor * 
+       sqrt(AU) * (
+                   AU * arccos(sqrt(RS/AU), fin) +
+                   exp(0.5*(ln(RS)+ln(AU-RS)))
+                   ) /
+            (7.0*24.0*3600.0);
+fin:
+"end"
+
+ 

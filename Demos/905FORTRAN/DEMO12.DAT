@@ -1,0 +1,155 @@
+﻿c
+C McCracken A Guide to FORTRAN IV Programming Case Study 11A
+C
+C Load Fortran system
+on 905 16K
+at ptr file 905FORT(ISS6).BIN
+j 8181
+
+C compile program
+
+nonstop on
+
+at ptp file DEMO12.BIN
+at ptr inline
+C  CASE STUDY 11A
+C  DAMPED OSCILLATION WITH GRAPHING
+C
+C
+      REAL I, IM, Q, R, C, L, F0, F1, C1, C2, T, DELTAT, TEMP
+C
+C DECLARE LINE, BLANK, DOT AS INTEGERS TO AVOID PROBLEMS
+C  WITH 905 FORTRAN ALPHANUMERIC INPUT/OUTPUT
+      INTEGER LINE, BLANK, DOT, X
+      DIMENSION LINE(61)
+C
+C  COMPUTER COMMONLY-USED FACTORS
+      TWOPI  = 2.0 * 3.141593
+      REC2PI = 1.0 / TWOPI 
+C
+C   READ PLOTTING SYMBOLS
+      READ (1, 90) BLANK, DOT, X
+      WRITE (3, 90) BLANK, DOT, X
+  90  FORMAT (3A1)
+C
+C  READ PARAMETERS -- USE 905 FORTRAN FREE FORMAT FACILITY
+      READ (1, 100) Q, R, C, L, CYCLES, NPERCY
+ 100  FORMAT (FREE)
+C
+C  PRINT PARAMETERS, WITH IDENTIFICATION, AND COLUMN HEADINGS
+      WRITE (3, 200) Q, R, C, L
+ 200  FORMAT (17HINITIAL CHARGE = , F10.6, 10H   COULOMB/
+     1        17HRESISTANCE     = , F7.3,   9H      OHM/
+     2        17HCAPACITANCE    = , F10.6,  8H   FARAD/
+     3        17HINDUCTANCE     = , F7.3,  11H      HENRY///)
+C
+C CHECK FOR INVALID DATA
+      IF (      (Q      .LE. 0.0    )
+     1     .OR. (CYCLES .LE. 0      )
+     2     .OR. (NPERCY .LE. 0      )
+     3     .OR. (R**2   .GT. 4.0*L/C) ) STOP
+C
+C     PRINT A LINE OF DOTS, WHICH WILL BE VERTICAL AXIS WHEN PAGE TURNED
+      DO 6 J = 1, 61
+   6  LINE(J) = DOT
+C
+C NOTE THAT WITH 905 FORTRAN WRONG THING HAPPEND IF WE INVOKE
+C     WRITE (3, 110) LINE
+      WRITE (3, 110) (LINE(K), K=1, 61)
+ 110  FORMAT (61A1)
+C
+C BLANK THE LINE
+      DO 8 J = 1, 61
+   8  LINE(J) = BLANK
+C
+C PUT A DOT IN LINE(31), TO PRODUCE HORIZONTAL AXIS WHEN PAGE IS TURNED
+      LINE(31) = DOT
+C COMPUTER INTERMEDIATE VARIABLES
+      F0     = REC2PI / SQRT(L * C)
+      F1     = REC2PI * SQRT(1.0/(L*C) - R**2/(4.0*L**2))
+      TEMP   = NPERCY
+      DELTAT = 1.0 / (TEMP * F0)
+      IM     = TWOPI * F0**2 * Q / F1
+      C1     = R / (2.0 * L)
+      C2     = TWOPI * F1
+C
+C  START T AT ZERO BEFORE ENTERING LOOP
+      T = 0.0
+C
+C  COMPUTE THE NUMBER OF POINTS NEEDED
+      LIMIT = CYCLES * NPERCY
+C
+C  COMPUTING LOOP - DO USED FOR COUNTING THE NUMBER OF EXECUTIONS
+      DO 10 J1 = 1, LIMIT
+         I = IM * EXP(-C1 * T) * SIN(C2 * T)         
+C
+C        ... COMPUTE DESIRED LOCATION OF PLOTTING SYMBOL
+         J = 30.0 * (I/IM + 1.0) + 1.5
+C
+C        ... PUT X IN SELECTED POSITION AND PRINT LINE
+         LINE(J) = X
+C
+C        .. OPTIMIZE FOR TELEPRINTER (VERSUS LINE PRINTER)
+         LMAX = AMAX0 (J, 31)
+         WRITE (3, 120) (LINE(K), K=1, LMAX)
+ 120     FORMAT (61A1)
+C
+C        ... PUT A BLANK IN SELECTED POSITION
+         LINE(J) = BLANK
+C
+C        ... PUT A DOT IN AXIS LOCATION, IN CASE IT WAS JUST BLANKED
+         LINE(31) = DOT
+         T = T + DELTAT
+  10  CONTINUE
+      STOP
+ 300  FORMAT (6X, 3PF8.3, F12.3)
+      END
+<! Halt !>
+<!!>
+
+at tty inline
+O0R
+<!!>
+
+j 16
+
+c run out of tty input
+de ptp
+
+reverse DEMO12.BIN
+
+c load loader
+at ptr file ../MASIR/LOADER(ISS3).BIN
+j 8181
+st 8171
+
+c load program
+at ptr file DEMO12.BIN
+at tty inline
+O20L<!!>
+j 16
+
+c read unloads, load library tape 1
+at ptr file 905FORTLIB1(ISS4).BIN
+at tty inline
+O3L<!!>
+j 16
+
+c reader unloads, load library tape 2
+at ptr file 905FORTLIB2(ISS5).BIN
+r
+
+c reader unloads
+at tty inline
+MM<!!>
+at ptr inline
+ .X      
+0.00001 1.0 0.00001 0.002 3 20<!!>
+j 16
+delete DEMO12.BIN
+sh t
+
+
+
+
+

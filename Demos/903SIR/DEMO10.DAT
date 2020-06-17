@@ -1,0 +1,472 @@
+﻿c build 1-pass SIR Issue 6 sources
+
+on 903 8K
+
+nonprinting off
+
+c high store version
+
+clear
+
+at ptr file SIR(ISS6)(512).BIN
+j 8181
+st 8171
+
+select out tty
+
+c position assembler in high store
+
+at ptr inline
+
+^5500
+*35
+
+<! halt !>
+<!!>
+j 8
+st 1939
+
+c asssemble assembler source code
+at ptr file SIR(ISS6).900
+j 9
+st 1939
+j 9
+st 1939
+j 9
+st 1939
+j 9
+st 1939
+j 9
+st 1939
+j 9
+st 1939
+j 9
+st 1939
+j 9
+st 1939
+
+c assemble entry points
+at ptr inline
+
+^8
+[START CONTIN STARTA STARTB STARTC]
+8 START
+8 CONTIN
+8 STARTA
+8 STARTB
+8 STARTC
+8 ;+0
+8 ;+0
+8 ;+0
+8 ;+0
+
+%
+
+<! Halt !>
+<!!>
+
+j 9
+st 1939
+
+c build T22-T23  @ 4096 (reverse engineered from T22-T23).
+
+at ptr inline
+	
+*3				(load & go, labels)
+^4096				(T22_23 @ 4096)
+
+[QSCBOUT QBINOUT]
+
+QSCBOUT	8	QBINOUT		(use QBINOUT to punch loader)
+
+( see end for patch that makes QBINOUT transfer control to )
+( T23+1 to read parameter tape and punch application       )
+
+<! H !>
+<!!>
+j 8
+st 6927
+
+c assemble T.22
+at ptr inline
+
+( trigger at T22+40 to output module 1 )
+( trigger at T22+47 to read parameter tape and dump selected region )
+
+[ T22 ]
+
+T22
+
+(0)	+10
+	+8045
+	+0
+	+0
+	+0
+	+0
+	+0
+	+0
+	+0
+	+0
+(10) 	4 121;
+	5 2;
+	4 122;
+	15 2048
+	15 6144
+	7 17;
+	8 10;
+	10 2;
+	4 2;
+	9 12;
+(20)	4 132;
+	5 145;
+	4 133;
+	5 145;
+	8 24;
+	+0
+	14 8174	
+	4 122;
+	14 4
+	1 3;
+(30)	15 6144
+	4 122;
+	5 3;
+	14 7
+	15 6144
+	4 122;
+	14 7
+	15 6144
+	0 25;
+	/8 1
+(40)	4 0;
+	5 4;
+	4 1;
+	5 5;
+	4 122;
+	5 6;
+	8 49;
+	4 121;
+	8 45;
+	4 122;
+(50)	5 7;
+	5 8;
+	4 6;
+	10 6;
+	7 98;
+	9 68;
+	4 123;
+	15 6144
+	4 122;
+	15 6144
+(60)	15 6144
+	4 7;
+	11 25;
+	8 26;
+	4 8;
+	11 25;
+	8 26;
+	8 67;
+	5 4;
+	5 6;
+(70)	4 122;
+	5 5;
+	15 2048
+	1 124;
+	7 56;
+	1 125;
+	7 78;
+	8 70;
+	4 122;
+	15 2048
+(80) 	7 78;
+	1 126;
+	7 78;
+	1 127;
+	7 78;
+	1 128;
+	7 96;
+	1 129;
+	6 130;
+	5 9;
+(90)	4 5;
+	12 129;
+	14 17
+	1 9;
+	5 5;
+	8 78;
+	4 4;
+	9 118;
+	4 123;
+	5 3;
+(90)	4 4;
+	1 8;
+	5 8;
+	4 4;
+	11 25;
+	8 26;
+	0 4;
+	/4 0
+	1 7;
+	5 7;
+(100)	/4 0
+	11 25;
+	8 26;
+	4 4;
+	2 5;
+	7 52;
+	10 4;
+	8 106;
+	4 5;
+	5 4;
+(110)	8 70;
+	-30
+	+0
+	+128
+	-20
+	-23
+	-141
+	-114
+	+245
+	+10
+(120)	+15
+	8 10;
+	8 40;
+	8 47;
+
+<! halt !>
+<!!>
+j 9
+st 6927
+
+c assemble T.23
+at ptr inline
+
+[ T23 QSCBIN]
+
+T23 QSCBIN
+
+(8135)           4 8179
+                15 2048
+                 7 8136
+                 5 8173
+                 6 8178
+(8140)           7 8151
+                 4 8173
+                15 2048
+                15 2048
+                 7 8160
+(8145)           5 8174
+                 1 8176
+                 5 8176
+                 4 8179
+                15 2048
+(8150)           8 8138
+                 0 8174
+                 4 8173 
+                15 2048
+                15 2048
+(8155)          /5    0
+                 1 8175
+                 5 8175
+                10 8174
+                 8 8148
+(8160)          15 2048
+                15 2048
+                15 2048
+                 2 8175
+                 7 8167
+(8165)          15 6144
+                 8 8165
+                15 2048
+                15 2048
+                15 2048
+(8170)           2 8176
+                 7 8171
+                 8 8165
+                 +0  
+                 +8  
+(8175)           +0  
+                 +0  
+                 8 8135  
+                 +128  
+                 +0 
+
+<! halt !> 
+<!!>
+j 9
+st 6927
+
+at ptr file ../903UTILITIES/QBINOUT(ISS1).900
+j 9
+st 6927
+
+at ptr inline
+
+(use QBINOUT to output T22 [loader] )
+
+[ T22 T23 QBINOUT ]
+
+^QBINOUT+39
+	-45			(size  of T22)
+	0 T23			(start of T22)
+
+^QBINOUT+18
+	7	T22+47		(after output of loader, run T23)	
+
+$
+
+%
+<! H !>
+<!!>
+j 9
+
+c run T22_23(4096)
+select out auto
+at ptp file DEMO10.BIN
+at ptr inline
++8
++16
++5500
++8089
+<! halt !>
+<!!>
+j 4096
+de ptp
+st 4164
+
+c verify SIR by assembling a trivial program
+
+clear
+select out tty
+
+at ptr file DEMO10.BIN
+j 8181
+st 8171
+
+at ptr inline
+
+*3
+[GLOB]
+GLOB 8 GLOB
+%
+<! halt !>
+<!!>
+j 8
+st 6927
+
+c lowstore version
+
+clear
+
+at ptr file SIR(ISS6)(5500).BIN
+j 8181
+st 8171
+
+c position assembler in low store
+at ptr inline
+
+^512
+*3
+
+<! halt !>
+<!!>
+j 8
+st 6927
+
+c asssemble assembler source code
+at ptr file SIR(ISS6).900
+j 9
+st 6927
+j 9
+st 6927
+j 9
+st 6927
+j 9
+st 6927
+j 9
+st 6927
+j 9
+st 6927
+j 9
+st 6927
+j 9
+st 6927
+
+c assemble entry points
+at ptr inline
+
+^8
+[START CONTIN STARTA STARTB STARTC]
+8 START
+8 CONTIN
+8 STARTA
+8 STARTB
+8 STARTC
+8 ;+0
+8 ;+0
+8 ;+0
+8 ;+0
+
+%
+
+<! Halt !>
+<!!>
+
+j 9
+st 6927
+
+select out auto
+
+c use T22_23 to dump out sumchecked binary
+at ptp file DEMO10.BIN
+
+at ptr file ..\903UTILITIES\T22_23(ISS3).BIN
+j 8181
+st 8070
+at ptr inline
++8
++16
++512
++3101
+<! halt !>
+<!!>
+j 8179
+de ptp
+st 8113
+
+c verify SIR by assembling a trivial program
+
+clear
+select out tty
+
+at ptr file DEMO10.BIN
+j 8181
+st 8171
+
+at ptr inline
+
+^4096
+*35
+[GLOB]
+GLOB 8 GLOB
+%
+<! halt !>
+<!!>
+j 8
+st 1939
+
+c verify output using C4 - should flag an error for location 8
+
+at ptr file DEMO10.BIN
+j 8181
+st 8171
+
+at ptr file ../903UTILITIES/C4(ISS1).BIN
+j 8181
+st 8179
+
+at ptr file DEMO10.BIN
+j 8
+st 8155
+delete DEMO10.BIN
+sh t
+

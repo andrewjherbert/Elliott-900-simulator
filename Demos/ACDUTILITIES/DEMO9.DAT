@@ -1,0 +1,95 @@
+﻿c demonstrate ACD GENSORT utility
+
+
+on 903 8K
+
+c load GENSORT
+at ptr file GENSORT.BIN
+j 8181
+st 8175
+
+select out tty
+
+c load alphabet tape
+at ptr inline
+
+ABCDEFGHIJKLMNOPQRSTUVWXYZ.,0123456789 *()%
+<! halt !><!!>
+j 8
+st 470
+
+c demonstrate a sort
+at ptr inline
+(BRACKETS)
+SMITH, D. (SENIOR)
+4 DIGIT
+2 DIGIT
+2        SPACES
+        INDENT
+ZULUARAB
+SING 64%
+
+*THESE LINES WILL
+**STAY IN
+***THIS ORDER
+ARABZULU
+ZULU
+SING 36%
+.POINT
+SMITH, D. (JUNIOR)
+SMITH, A.B.C
+JONES, D.E.F.
+<! halt !><!!>
+
+j 9
+st 32
+
+c sort and output
+select out tty
+j 12
+st 84
+
+c demonstrate a merge
+c load unsorted tape
+rewind
+j 9
+st 32
+
+c load sorted tape
+at ptr inline
+ANDREW
+BILL
+CHARLES
+DAVID
+EDWARD
+FRED
+GRAHAM
+HENRY
+IAN
+JOHN
+KEN
+LEO
+MICK
+NIGEL
+OSCAR
+PETER
+QUENTIN
+ROGER
+STEVE
+TOM
+VICTOR
+WILLIAM
+<! halt !><!!>
+j 11
+st 32
+
+c push out residual data
+j 12
+st 84
+
+sh t
+
+
+
+
+

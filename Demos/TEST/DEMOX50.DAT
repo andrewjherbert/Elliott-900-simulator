@@ -1,0 +1,51 @@
+﻿c demonstrate X.50 - Teleprinter test
+
+on 903 8K
+
+telecode 903
+nonprinting off
+nonstop on
+
+c load test program
+at ptr file X50(ISS2).BIN
+j 8181
+st 7820
+
+c output pattern test, stopping after first page
+step 623000
+j 21
+
+c input key - take input in binary from tape reader
+c DEMOX50.BIN consists of teleprinter keys pressed in 
+c left to right order
+select in ptr
+at ptr file DEMOX50_DATA1.BIN
+j 22
+
+c input line test
+at ptr inline
+X.50 is a teleprinter test program;
+<!!>
+
+step 1040
+j 23
+
+c echo check
+at ptr inline
+Now is the time for all good men 
+to come to the aid of the party.
+<!!>
+j 24
+
+c reader punch check
+
+c generate pattern test, stopping after first page
+at ptp file DEMOX50_DATA2.BIN
+step 1264000
+j 21
+de ptp
+
+at ptr file DEMOX50_DATA2.BIN
+j 25
+
+sh t

@@ -1,0 +1,63 @@
+﻿c Demonstrate U.8 - UNIDUMP-C
+
+on 903 8K
+clear
+c load SIR
+at ptr file ../903SIR/SIR(ISS6)(5500).BIN
+j 8181
+st 8171
+
+c now load UNIDUMP-C
+at ptr file UNIDUMP-C.BIN
+at ptp file DEMO8.BIN
+at tty inline
+1<!!>
+j 8181
+st 53
+
+c reload SIR
+at ptr file ../903SIR/SIR(ISS6)(5500).BIN
+j 8181
+st 8171
+
+c patch 8177 to be a dynamic stop
+e 8177 =8 8177
+
+c resume dump
+j 7
+de ptp
+st 150
+
+c check dumped tape is SIR -- note runs off end of tape
+at ptr file DEMO8.BIN
+j 8181
+st 8177
+nonprinting off
+at ptr inline
+
+*19
+(DEMO8)
+[DEMO8]
+DEMO8 
+ 4 +141
+ 15 6148
+ 4 +10
+ 15 6148
+ 4 +184
+ 15 6148
+ 15 6148
+ 15 6148
+ 4 +141
+ 15 6148
+ 4 +10
+ 15 6148
+ 8 ;+0
+% 
+<! halt !><!!>
+j 8
+st 6927
+j 32
+st 44
+
+delete DEMO8.BIN
+sh t

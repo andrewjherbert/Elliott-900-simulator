@@ -1,0 +1,97 @@
+﻿c
+C Demonstrate 905 Fortran EXTERNAL statement
+C
+C Load Fortran system
+on 905 16K
+at ptr file 905FORT(ISS6).BIN
+j 8181
+
+C compile program
+nonstop on
+at ptp file DEMO17.BIN
+at ptr inline
+[ PROGRAM USING EXTERNAL STATEMENT 
+[
+[
+SUBROUTINE SUBR (X, F, Y)
+Y = F(X)
+RETURN 
+END
+[
+[ MAIN PROGRAM
+EXTERNAL SIN, COS, SQRT, SQ
+[
+[ CALL SUBR WITH SINE AS ARGUMENT
+CALL SUBR (2.0, SIN, RESULT)
+WRITE (3, 100) RESULT
+100  FORMAT (13HSIN (2.0) =  , F10.6)
+[
+[ CALL SUBR WITH COS AS ARGUMENT
+CALL SUBR (2.0, COS, RESULT)
+WRITE (3, 200) RESULT
+200  FORMAT (13HCOS (2.0) =  , F10.6)
+[
+[ CALL SUBR WITH SQRT AS ARGUMENT
+CALL SUBR (2.0, SQRT, RESULT)
+WRITE (3, 300) RESULT
+300  FORMAT (13HSQRT(2.0) =  , F10.6)
+[
+[ CALL SUBR WITH SQUARE AS ARGUMENT
+CALL SUBR (2.0, SQ, RESULT)
+WRITE (3, 400) RESULT
+400  FORMAT (13HSQ  (2.0) =  , F10.6)
+STOP
+END
+[
+[ SQARE FUNCTION
+FUNCTION SQ (X)
+SQ = X * X
+RETURN
+END
+<! Halt Code !>
+<!!>
+
+at tty inline
+O0R
+<!!>
+
+j 16
+
+c run out of tty input
+de ptp
+
+reverse DEMO17.BIN
+
+c load loader
+at ptr file ../MASIR/LOADER(ISS3).BIN
+j 8181
+st 8171
+
+c load program - note O4xx to continue after *CLW warning
+at ptr file DEMO17.BIN
+at tty inline
+O420L<!!>
+j 16
+
+c read unloads, load library tape 1
+at ptr file 905FORTLIB1(ISS4).BIN
+at tty inline
+O403L<!!>
+j 16
+
+c reader unloads, load library tape 2
+at ptr file 905FORTLIB2(ISS5).BIN
+r
+
+c reader unloads
+select out tty
+at tty inline
+MM<!!>
+j 16
+delete DEMO17.BIN
+sh t
+
+
+
+
+

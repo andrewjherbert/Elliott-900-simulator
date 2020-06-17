@@ -1,0 +1,29 @@
+   OPASC
+   IPBIN
+   ^3726
+     2  8180
+     7  3689
+     8  8181
+   ^8180
+     0  33
+     2  8180
+     15 6144
+     8  3724
+   JUMP 8
+   IPASC
+funny;
+"begin"
+   "comment" 28-AUG-1999.
+             Tests caption facility;
+   "integer" j;
+
+   "read" j; "print" j
+"end"
+
+!A jolly caption output
+before the Program starts running
+0123456789
+!
+47
+
+

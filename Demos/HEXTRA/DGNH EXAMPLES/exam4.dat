@@ -1,0 +1,24 @@
+
+    IPBIN
+    OPASC
+    JUMP 18
+
+   0   0   0   0   0  72  55  36  16   0   0   0   0   0   0  (and)
+  31   0   2  16   0   0  16   1  10  26   0   3  27   0   6
+  26  64   0  32   0   1  28   0   1  96   3  85   0   0   0
+   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+
+
+   0   0   0   0   0   0   0   0   0   0   0   0 112   0   0
+
+exam4;
+"begin"
+   "comment" 14-APR-1998;
+   "code" "integer" "procedure" and(a,b); 
+       "value" a,b; "integer" a,b;
+   "algol";
+   "integer" k1, k2;
+   k1 := 3; k2 := 5;
+   "print" ''L@14-APR-1998@;
+   "print" ''L@exam4@, same line, k1, k2, and(k1, k2)
+"end"

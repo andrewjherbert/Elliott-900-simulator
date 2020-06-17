@@ -1,0 +1,110 @@
+﻿on
+telecode 903
+at ptr file ..\HUNTER\ALG16KLG(HUNTER).BIN
+j 8181
+st 5124
+at ptr inline
+SIMEQ;
+"begin"
+   "comment" 28-NOV-2001. With parts written in 1965 
+             by TJ Dekker, Matematisch Centrum,
+             (det was AP204, sol was AP205);
+
+   "comment" revert and unsigned are for labelled output at the end;
+
+   "code" "procedure" date time; "algol";
+
+   "code" "procedure" revert; "algol";
+
+   "code" "procedure" unsigned; "algol";
+
+   "comment" det and sol written in 1965 by T.J. Dekker
+             Matematisch Centrum, Amsterdam and separately
+             compiled;
+   "code" "real" "procedure" det(a,n,p); "value" n; 
+   "integer" n; "array" a; "integer" "array" p; "algol";
+
+   "code" "procedure" sol(lu,b,n,p); "value" n; "integer" n;
+   "array" lu,b; "integer" "array" p; "algol";
+
+   "code" "procedure" alcopy(j,m,n,z,v); "value" m,n;
+      "integer" j,m,n; "real" z,v; "algol";
+
+   "comment" must leave 16 storage locations for det
+             as the FIRST declaration (separate compilation
+             requirement);
+   "real" d1,d2,d3,d4,d5,d6,d7,d8;
+
+   "integer" n;
+
+   "real" "procedure" read; "read" read;
+
+   "comment" PROGRAM START. Must pretend to call sqrt,
+             as otherwise it would not get loaded for det ;
+   "if" "false" "then" d1:=sqrt(d2);
+   date time;
+   "print" '28-NOV-2001'L``;
+   "read" n; 
+   "begin"
+      "real" "array" a[1:n,1:n],b[1:n];
+      "integer" "array" p[1:n];
+      "real" deter; "integer" j,k;      
+                        
+      "comment" get input data;
+      "for" k:=1 "step" 1 "until" n "do"
+      "begin"
+         alcopy(j,1,n,a[k,j],read);
+         b[k]:=read
+      "end"; 
+
+      "print" ''L`got the data'L``;
+
+      "comment" solve them;
+      deter:=det(a,n,p);
+
+      "print" ''L`DETERMINANT = `, same line, deter, ''L``;
+
+      sol(a,b,n,p);
+
+      "print" ''L`results'L``;
+      "for" j:=1 "step" 1 "until" n "do"
+      "begin"
+         "print" ''L``; unsigned; digits(1); same line;
+         "if" j<9 "then" "print" 'y`, j
+                  "else" "if" j=9  "then" "print" 'y `
+                  "else" "if" j=10 "then" "print" 't `
+                  "else" "if" j=11 "then" "print" 'j `
+                  "else" "print" 'm `; revert;
+            "print" aligned(6,1), same line, b[j]
+      "end"
+   "end";
+   date time
+"end"
+<!!>
+j 12
+st 1727
+at ptr file fixedbiglibrary.raw
+j 9
+st 7943
+select out tty
+at ptr inline
+
+   (input data)
+  12
+yone ytwo ythree yfour yfive ysix yseven yeight  y    t    j    m    rhs
+-2    0     0      0     0    0      0      0    1   -1    2    0   -10
+-8    0     0      0     0    0      0      0    0    9    0   -1     0
+ 0   -0.5   0      0     0    0      0      0    1    0    0.5 -1     8
+ 0    1    -1      0     0    0      0      0    0    1   -1    0     1
+ 0    0     1      0     0    0      0      0   -5    5    0   -1    10
+ 0    0     0     -1     0    0      0      0    0    2    0   -1     2
+ 0    0     0      1    -3    0      0      0    0    0   -1    3   -18
+ 0    0     0      0     1   -0.5    0      0    0    0.5 -1    0     0
+ 0    0     0      0     0    1      1      0    0    0    0   -2    10
+ 0    0     0      0     0    0      1 -0.33333333 0 0.33333333 -1 0  0
+ 0    0     0      0     0    0      0      1    0    0   -3   -2     0
+ 0    0     0      0     0    0      0      0   -1    1    0    0    -3
+<!!>
+j 10
+st 1727
+sh t

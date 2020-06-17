@@ -1,0 +1,150 @@
+﻿c Demonstrate MASIR features and facilities
+
+on 905 16K
+nonprinting off
+nonstop on
+
+c load MASIR
+at ptr file MASIR(181175).BIN
+j  8181
+st 8164
+
+
+at ptp file demo6.txt
+at ptr file DEMO6.900
+
+c macro-generate (only)
+c MASIR  commands
+c O2 macrogeneration only
+c M  read program tape
+at tty inline
+O2M
+[
+	\ RU
+	\N-T
+	\IME
+]
+<!!>
+j 16
+
+de ptp
+print demo6.txt
+de tty
+
+c code generate
+
+c load MASIR
+at ptr file MASIR(ISS3).BIN
+j  8181
+st 8164
+
+at ptr file DEMO6.900
+
+c MASIR commands
+c O4M - punch loader halt code, normal assembly
+at ptp file DEMO6.BIN
+at tty inline
+O4M
+[
+	\ RU
+	\N-T
+	\IME
+]
+<!!>
+j 16
+
+c falls off tty inline
+
+c assemble a trivial main program
+at ptr inline
+((MAIN))
+(main program will be entered first)
+*PROG MAIN
+^^0			(force in first module)
+[MAIN DEMO6 SUB]
+	4	+141
+	15	6148
+	4	+10
+	15      6148
+	15	6148
+	4	+77
+	15	6148
+	4	+65
+	15	6148
+	4	+201
+	15	6148
+	4	+78
+	15	6148
+ 	0	+DEMO6
+	/8	0
+
+(subroutine called from module 1)
+SUB	>+1	(link)
+	5	ADJA
+	0 	SUB
+	/4	1	(pick up first parameter)
+	9	STPA1	(direct address)
+	1	ADJA	(indirect address)
+	5	W
+	0	W
+	/4	0
+STPA1	6	&377777
+	1	ADJA
+	5	PAR1	(address of first parameter)
+	0	PAR1
+	/4	0
+        0	SUB
+	/8	2
+
+ADJA	>+1		(address adjustment)
+W	>+1		(workspace)
+PAR1	>+1
+%
+<! halt !>
+<!!>
+at tty inline
+O0M<!!>
+restart
+
+de ptp
+
+c MASIR outputs RLB "back to front"
+reverse DEMO6.BIN
+
+c load LOADER
+
+at ptr file LOADER(ISS3).BIN
+j 8181
+st 8171
+
+at ptr file DEMO6.BIN
+
+c LOADER commands
+c 0120 loader options
+c 020 - do not use built in  routines
+c 100 - list labels
+c L load tape
+at tty inline
+O120L<!!>
+j 16
+
+c load library from demo4
+c halts on end of tape, library scan maths rlb
+at ptr file DEMO4_LIB.BIN
+c LOADER commands
+c O   - options (not changing options requires re-entry at 16)
+c 001 - do not (re-)initialize
+c 002 - library scan
+c 020 - no built in routines required
+c 100 - list labels
+c L   - load
+c MM  - indicate program complete, execute
+
+at tty inline
+O123LMM<!!>
+j 16
+
+st 16306
+delete demo6.txt
+delete DEMO6.BIN
+sh t

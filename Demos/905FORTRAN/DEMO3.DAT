@@ -1,0 +1,120 @@
+﻿c
+C McCracken A Guide to FORTRAN IV Programming Case Study 2
+C
+C Load Fortran system
+on 905 16K
+at ptr file 905FORT(ISS6).BIN
+j 8181
+
+C compile program
+nonstop on
+at ptp file DEMO3.BIN
+at ptr inline
+
+C CASE STUDY 2
+C CURRENT IN AN AC CIRCUIT
+C
+C
+C  READ THE VALUES OF THE 4 PARAMETERS
+C  (THIS FIRST READ IS EXECUTED ONLY ONCE)
+      READ (1, 100) VOLT, OHM, HENRY, FARAD
+C
+C  WRITE THE 4 PARAMETERS FOR IDENTIFICATION
+      WRITE (3, 110) VOLT, OHM, HENRY, FARAD
+C
+C  READ A VALUE OF FREQUENCY, IN HERTZ (CYCLES PER SECOND)
+C  (THIS SECOND READ IS EXECUTED ONCE FOR EACH FREQUENCY CARD)
+   10 READ (1, 100) HERTZ
+C
+C  TEST FOR SENTINEL
+      IF ( HERTZ .LT. 0.0 ) STOP
+C
+C  COMPUTE THE CURRENT FROM THE FORMULA
+      AMPERE = VOLT / SQRT(OHM**2 + (6.283185 * HERTZ * HENRY
+     1 -1.0 / (6.283185 * HERTZ * FARAD))**2)
+C
+C  WRITE FREQUENCY AND CURRENT
+      WRITE (3, 110) HERTZ, AMPERE
+C
+C  GO BACK FOR ANOTHER FREQUENCY CARD
+      GO TO 10
+  100 FORMAT (4F10.0)
+  110 FORMAT (1P4E16.6)
+      END
+<! Halt !>
+<!!>
+
+at tty inline
+O0R
+<!!>
+
+j 16
+
+c run out of tty input
+de ptp
+
+reverse DEMO3.BIN
+
+c load loader
+at ptr file ../MASIR/LOADER(ISS3).BIN
+j 8181
+st 8171
+
+c load program
+at ptr file DEMO3.BIN
+at tty inline
+O20L<!!>
+j 16
+
+c read unloads, load library tape 1
+at ptr file 905FORTLIB1(ISS4).BIN
+at tty inline
+O3L<!!>
+j 16
+
+c reader unloads, load library tape 2
+at ptr file 905FORTLIB2(ISS5).BIN
+r
+
+c reader unloads
+at ptr inline
+        10      1000       0.10.00000005
+      1000
+      1100
+      1200
+      1300
+      1400
+      1500
+      1600
+      1700
+      1800
+      1900
+      2000
+      2100
+      2200
+      2300
+      2400
+      2500
+      2600
+      2700
+      2800
+      2900
+      3000
+      3100
+      3200
+      3300
+      3400
+      3500
+        -1
+<! halt !> 
+<!!>
+at tty inline
+MM<!!>
+j 16
+delete DEMO3.BIN
+sh t
+
+
+
+
+

@@ -1,0 +1,37 @@
+﻿C Demonstrate U.9 - UNIDUMP-D
+
+on 903 16K
+
+c load AJH 16KLG Algol as system to dump
+at ptr file ../AJHALGOL/ALG16KLG(AJH).BIN
+j 8181
+st 8175
+
+c load UNIDUMP-D
+at ptr file UNIDUMP-D.BIN
+at tty inline
+3 tty input
+2 clear stores
+8171 dynamic stop
+8192 16383 translator
+8  4492 interpreter and library
+7851 8129 rlb loader
+<! halt !><!!>
+at ptp file DEMO9.BIN
+j 8181
+de ptp
+st 4670
+
+c verify dump is ok
+at ptr file DEMO9.BIN
+j 8181
+st 8171
+at ptr inline
+demo9; "begin" "print" punch(3), {DEMO9 OK{L}} "end"
+<! halt !><!!>
+j 8
+st 8000
+j 10
+st 1715
+delete DEMO9.BIN
+sh t

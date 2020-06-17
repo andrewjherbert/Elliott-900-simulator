@@ -1,0 +1,64 @@
+﻿c X6 - Instruction Timing
+
+on 903 8K
+
+c load T2
+at ptr file ../903UTILITIES/T2(ISS1).BIN
+j 8181
+st 7746
+
+c patch to make dynamic stop at end of T2 a loop stop
+e 8016 =8 8016
+
+c assemble X.6
+at ptr file X6(ISS2).900
+j 7749
+st 8016
+
+c asssemble parameter tape
+at ptr inline
+&
++52
+*
+-1
++0
+4 0
+)
+<! halt !>
+<!!>
+j 7749
+st 8016
+
+c run timing test
+at ptp file DEMOX6.BIN
+nonstop on
+break on 3505
+j 8
+
+sh t
+c count 20 cycles
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+restart
+
+de ptp
+
+c seconds used will be instruction time in microseconds (24)
+sh t

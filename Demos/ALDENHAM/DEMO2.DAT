@@ -1,0 +1,33 @@
+﻿C Demonstrate U.2 PUNCHIT
+
+on 903
+at ptp file DEMO2.BIN
+at ptr file PUNCHIT.BIN
+nonstop on
+j 8181
+nonstop off
+
+c input code for ACD 8K clear store
+at ptr inline
+(8177) 0 8179 (Prepare to load 5 words)
+(8178) 8 8182
+(8179)  -5
+
+(8175) 8 8177 (8 ;+2)
+(8176) 8 8181 (Exit)
+(8177) 5 2    (Store +0)
+(8178) 10 8177 (10 ;-1)
+(8179) 8 8175 (8 ;-4)
+<! halt !><!!>
+r
+de ptp
+
+c verify output tape
+at ptr file DEMO2.BIN
+scb
+delete DEMO2.BIN
+
+sh t
+
+
+

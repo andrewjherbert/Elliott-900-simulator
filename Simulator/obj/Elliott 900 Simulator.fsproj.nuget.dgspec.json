@@ -1,0 +1,47 @@
+{
+  "format": 1,
+  "restore": {
+    "Z:\\elliott903\\Programs\\elliott-900-simulator\\Simulator\\Elliott 900 Simulator.fsproj": {}
+  },
+  "projects": {
+    "Z:\\elliott903\\Programs\\elliott-900-simulator\\Simulator\\Elliott 900 Simulator.fsproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "Z:\\elliott903\\Programs\\elliott-900-simulator\\Simulator\\Elliott 900 Simulator.fsproj",
+        "projectName": "SIM900",
+        "projectPath": "Z:\\elliott903\\Programs\\elliott-900-simulator\\Simulator\\Elliott 900 Simulator.fsproj",
+        "packagesPath": "C:\\Users\\Andrew\\.nuget\\packages\\",
+        "outputPath": "Z:\\elliott903\\Programs\\elliott-900-simulator\\Simulator\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\Andrew\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net471"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net471": {
+            "projectReferences": {}
+          }
+        }
+      },
+      "frameworks": {
+        "net471": {
+          "dependencies": {
+            "FSharp.Core": {
+              "target": "Package",
+              "version": "[4.7.1, )",
+              "generatePathProperty": true
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.301\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

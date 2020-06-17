@@ -1,0 +1,85 @@
+﻿c demonstrate BOWDLER editor
+
+on 903 8K
+runout on
+telecode 920
+
+c load bowdler
+at ptr file BOWDLER70.BIN
+j 8181
+st 8175
+
+c load steering tape
+select out tty
+at ptr inline 920 mode3
+
+920
+920
+CLE	0	+0
+INS
+	4	+0
+^%,
+REP 2
+RTS COUNT
+SUM^%,
+END
+CLI REPEAT
+DLI	7	EXIT
+INS
+	9	REPEAT
+^%,
+CAN2
+CSE REPEAT
+PHT
+CLI	EXIT
+DSE	CHECK
+INS
+	7	^%,
+CSI	CHE
+DSP
+COP
+<! halt !>
+<!!>
+j 8
+st 847
+
+c load tape to edit
+select out auto
+at ptr inline 920 mode3
+
+((EXAMPLE)
+[CHECK]
+CHECK	>1
+	0	+0
+	3	COUNT
+	5	WS
+REPEAT	5	WSP
+	7	EXIT
+	1	-1
+	6	WSP
+	10	COUNT
+	8REPEAT
+EXIT	4	COUNT
+	0	CHE CK
+	/8	1
+WS	>1
+WSP	>1
+COUNT	>1
+%
+<! HALT !>
+<!!>
+at ptp file DEMO4.BIN
+j 9
+de ptp
+st 847
+
+c verify punched tape
+at ptr file DEMO4.BIN
+j 12
+st 847
+
+totelecode DEMO4.BIN 920
+print DEMO4.920
+delete DEMO4.BIN
+delete DEMO4.920
+sh t

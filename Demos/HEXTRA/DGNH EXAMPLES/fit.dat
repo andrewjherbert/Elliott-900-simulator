@@ -1,0 +1,139 @@
+
+    IPBIN
+    OPASC
+    JUMP 8
+    IPASC
+fit;
+"begin"
+   "comment" 18-OCT-1999;
+   "integer" j, k, L, m, n, r;
+   "real" w;
+
+   "print" '18-OCT-1999'L@@;
+   "read" m, r;  n := m + 1; 
+
+   "begin"
+      "real" "array" x, y[1:r], a[1:n,1:n], b[1:n];
+      "integer" "array" p[1:n];
+
+      "real" "procedure" sigma(j,n,z);
+         "value" n;
+         "integer" j,n;
+         "real" z;
+      "begin"
+         "real" s;
+         s:=0;
+         "for" j:=1 "step" 1 "until" n "do" s:=s+z; sigma:=s
+      "end" of sigma; 
+
+      "comment" AP204 written by T.J. Dekker at the Matematisch
+                Centrum in 1965;
+      "real" "procedure" det(a,n,p);
+      "value" n; "integer" n;
+      "array" a; "integer" "array" p;
+      "begin"
+         "integer" i,j,k,l;
+         "real" d,r,s,sum;
+         "array" v[1:n];
+         "for" i:=1 "step" 1 "until" n "do"
+         "begin"
+            d:=0;
+            "for" j:=1 "step" 1 "until" n "do"
+                  d:=d+a[i,j]*a[i,j];
+            v[i]:=sqrt(d)
+         "end";
+         d:=1;
+         "for" k:=1 "step" 1 "until" n "do"
+         "begin"
+            r:= -1;
+            "for" i:=k "step" 1 "until" n "do"
+            "begin"
+               sum:=0;
+               "for" l:=1 "step" 1 "until" k-1 "do"
+                     sum:=sum+a[i,l]*a[l,k];
+               a[i,k]:=a[i,k]-sum;
+               s:=abs(a[i,k])/v[i];
+               "if" s>r "then"
+               "begin"
+                  r:=s;
+                  p[k]:=i
+               "end"
+            "end" lower;
+            v[p[k]]:=v[k];
+            "for" j:=1 "step" 1 "until" n "do"
+            "begin"
+               r:=a[k,j];
+               "if" j "le" k 
+               "then" a[k,j]:=a[p[k],j]
+               "else"
+               "begin"
+                  sum:=0;
+                  "for" l:=1 "step" 1 "until" k-1 "do"
+                        sum:=sum+a[k,l]*a[l,j];
+                  a[k,j]:=(a[p[k],j]-sum)/a[k,k]
+               "end";
+               "if" p[k] "ne" k 
+               "then" a[p[k],j]  := -r
+            "end" upper;
+            d:=a[k,k]*d
+         "end" LU;
+         det:=d
+      "end" of AP204;
+      
+      "comment" AP205 written by T.J. Dekker at the Matematisch
+                Centrum in 1965;
+      "procedure" sol(lu,b,n,p);
+      "value" n; "integer" n;
+      "array" lu,b; "integer" "array" p;
+      "begin"
+         "integer" k,l;
+         "real" r,sum;
+         "for" k:=1 "step" 1 "until" n "do"
+         "begin"
+            r:=b[k];
+            sum:=0;
+            "for" l:=1 "step" 1 "until" k-1 "do"
+                    sum:=sum+lu[k,l]*b[l];
+            b[k]:=(b[p[k]]-sum)/lu[k,k];
+            "if" p[k] "ne" k "then" b[p[k]]:= -r
+         "end";
+         "for" k:=n "step" -1 "until" 1 "do"
+         "begin"
+            sum:=0;
+            "for" l:=k+1 "step" 1 "until" n "do"
+                   sum:= sum+lu[k,l]*b[l];
+            b[k]:=b[k]-sum
+         "end"
+      "end" of AP205;
+                  
+      "comment" PROGRAM START;
+
+      "for" j := 1 "step" 1 "until" r "do" "read" x[j], y[j];
+
+      "for" j := 1 "step" 1 "until" n "do"
+      "begin"
+         "for" k:=1 "step" 1 "until" n "do"
+         a[j, k] := sigma(L, r, x[L] ^ (j + k - 2));
+         b[j] := sigma(L, r, x[L] ^ (j - 1) * y[L])
+      "end";
+
+      w:=det(a,n,p); sol(a,b,n,p);
+      "for" j:=1 "step" 1 "until" n "do" "print" b[j]
+   "end"
+"end"
+
+
+   2  11
+  -0.05  1.11977
+  -0.04  1.14328
+  -0.03  1.16808
+  -0.02  1.19441
+  -0.01  1.22263
+   0.00  1.25324
+   0.01  1.28700
+   0.02  1.32523
+   0.03  1.27046
+   0.04  1.42926
+   0.05  1.57080
+
+

@@ -1,0 +1,48 @@
+   OPASC
+   IPBIN
+   ^3726
+     2  8180
+     7  3689
+     8  8181
+   ^8180
+     0  33
+     2  8180
+     15 6144
+     8  3724
+   ADLIB
+   JUMP 12
+   IPASC
+hanoi;
+"begin"
+   "comment" 22-JUL-2000.
+             Towers of Hanoi;
+   "integer" j,n;
+   "code" "procedure" unsigned; "algol";
+   "procedure" line;
+   "begin"
+      "if" (j "div" 20) * 20 = j "then" "print" ''L@@;
+      j := j+1
+   "end" of line;
+
+   "procedure" move(no, from, to, via);
+               "value" no, from, to, via;
+               "integer" no, from, to, via;
+   "if" no=1 "then" "print" line, from, to, ' @
+             "else"
+   "begin"
+      move(no-1, from, via, to);
+      "print" line, from, to ,' @;
+      move(no-1, via, to, from)
+   "end" of move;
+
+   "read" n; j :=0; unsigned;
+   "print" ''L@22-JUL-2000'L@No. = @, same line, digits(2), n;
+   same line; digits(1);
+   move(n, 1, 3, 2)
+"end"
+
+!The Towers of Hanoi problem
+!
+8
+
+

@@ -1,0 +1,108 @@
+﻿c Demonstrate MONITOR
+
+on 920B
+
+select out tty
+
+at ptr file ../ACDSIR/SIR1P71.BIN
+j 8181
+st 8175
+
+at ptr inline
+
+*+19
+[DEMO15 QIN1 QOUT1]
+
+DEMO15 	4	+10
+	15	6144
+	15	6144
+	4 	-9
+ 	5 	COUNT
+LOOP	11	QIN1		( read an integer or fraction )
+	8	QIN1+1	
+	5	NUMBER
+	11   	QOUT1		( print as integer )
+	8	QOUT1+1
+	/0 0			( output on a newline )
+	4	NUMBER
+	11 	QOUT1		( output as fraction )
+	8	QOUT1+2
+	0 0			( sameline)
+	4	NUMBER
+	11	QOUT1		( output as octal )
+        8	QOUT1+3
+        0 0
+	10	COUNT
+	4	COUNT
+	9	LOOP
+	4 	+10
+	15	6144
+	8	;+0
+
+ 
+
+COUNT 	>+1
+NUMBER	>+1
+<! halt !><!!>
+j &17740
+st 6852
+at ptr file T5_QIN.900
+j &17742
+st 6852
+at ptr file T6_QOUT.900
+j &17742
+st 6852
+at ptr inline
+
+%
+<! halt !><!!>
+j &17742
+st 7573
+at ptr inline
+
+^+1024
+<! halt !><!!>
+J &17742
+st 6852
+at ptr file MONITOR.900
+j &17742
+st 6852
+at ptr inline
+
+%
+<! halt !><!!>
+j &17742
+st 7573
+
+at ptr inline
+
+15, 7
+<! halt !>
+
+A	+678	B	+.05	C	-.999999
+A	+713	B	+.40	C	-.995000
+A	+82	B	+.10	C	+.000010
+
+
+
+A	+678	B	+.05	C	-.999999
+A	+713	B	+.40	C	-.995000
+A	+82	B	+.10	C	+.000010
+<! halt !><!!>
+
+c set up monitor
+j 1024
+st 1165
+
+c run program with monitor
+j 10
+st 32
+
+c cancel monitor
+j 1025
+st 1165
+
+c run program without monitor
+j 8
+st 32
+sh t

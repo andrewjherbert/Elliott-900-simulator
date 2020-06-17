@@ -1,0 +1,20 @@
+﻿c X202 Store Test 1 - Chequerboard for Internal and External Stores
+
+on 903 16K
+nonstop on
+at ptr file X202(ISS1).BIN 
+j 8181
+st 8177
+
+c patch to use 903 halt code rather than 920 stop code
+e 7918 20
+
+c load parameter tape
+at ptr file DEMOX202.BIN
+at ptp file demox202.txt legible
+j  7884
+
+de ptp
+print demox202.txt
+
+sh t

@@ -1,0 +1,32 @@
+DPMI Kernel already active
+SIM900AL:  Version of 10-JAN-2003
+SIM900AL:  Simulation Starting
+
+ NEW    3960
+ QACODL 5247
+ QAVNDA 5321
+FIRST  NEXT
+ 3960   5343
+
+
+ NEW   
+
+
+  0  0  0  0  0  0  0  0  0  0
+  73  96   0  16   0   0   0   0   0   0   0   0  27  65  36
+  16  64   0  16  64   0  16  64   0  16  64   0  31  64   9
+  32   0  17  16   1  48  32   0  21  28  65  33  25   0   1
+  31  64  22  25   0   1  31  64  25  29   1  34  31  64  26
+  31  64  11  28  65  35  29   1  36  31  64  20  31  64  10
+  30   1  32  25   0   1  31  64  20  31  64  17  96  18  36
+
+  0  0  0  0  0  0  0  0 112 0  0
+
+
+FINISH
+
+
+
+Stop at        +1727
+SIM900AL:  Character Ignored
+SIM900AL:  Simulation Completed

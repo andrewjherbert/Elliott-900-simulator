@@ -1,0 +1,56 @@
+﻿C DEMONSTRATE XMT72
+
+on 903
+
+delete tape1
+delete tape2
+delete tape3
+delete tape4
+
+at ptr file XMT72(ISS1).BIN
+j 8181
+st 8171
+
+at mt 0 tape1 wp
+at mt 1 tape2 wp
+at mt 2 tape3 wp
+at mt 3 tape4 wp
+
+nonstop on
+step 45000000
+
+c set report all errors
+j 28
+
+c set parameters cycles
+at tty inline
+///25./
+<!!>
+j 26
+
+c start test
+j 22
+
+c stops on step limit
+
+c put 2 handlers in remote
+de mt 1
+de mt 2
+
+c continue test on remaining handlers
+step 45000000
+r
+
+c stops on step limit
+reset
+
+c produce error report
+j 32
+st 34
+
+de mt 0
+de mt 1
+de mt 2
+de mt 3
+
+sh t
