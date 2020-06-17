@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "Z:\\elliott903\\Programs\\elliott-900-simulator\\Simulator\\Elliott 900 Simulator.fsproj": {}
+    "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj": {}
   },
   "projects": {
-    "Z:\\elliott903\\Programs\\elliott-900-simulator\\Simulator\\Elliott 900 Simulator.fsproj": {
+    "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "Z:\\elliott903\\Programs\\elliott-900-simulator\\Simulator\\Elliott 900 Simulator.fsproj",
+        "projectUniqueName": "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj",
         "projectName": "SIM900",
-        "projectPath": "Z:\\elliott903\\Programs\\elliott-900-simulator\\Simulator\\Elliott 900 Simulator.fsproj",
+        "projectPath": "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj",
         "packagesPath": "C:\\Users\\Andrew\\.nuget\\packages\\",
-        "outputPath": "Z:\\elliott903\\Programs\\elliott-900-simulator\\Simulator\\obj\\",
+        "outputPath": "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Andrew\\AppData\\Roaming\\NuGet\\NuGet.Config",

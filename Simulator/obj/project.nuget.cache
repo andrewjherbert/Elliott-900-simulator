@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "I+gpfm+8Mq+st4rfRd7X+17JrMGQW2s5aT7uPOtIdoOJY7Q9IEPKZqeBg5/V5NKPTeSUlCC2cALHMl7FPdhy5A==",
+  "dgSpecHash": "84RD7wxXpk1bKioDZ9+WXZ+ilot3WsFpvT2vohP6LfOE3eukTQnhBd5qWbvYdifw1BvySKxhfjP4TpF8NYoTQA==",
   "success": true,
-  "projectFilePath": "Z:\\elliott903\\Programs\\elliott-900-simulator\\Simulator\\Elliott 900 Simulator.fsproj",
+  "projectFilePath": "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj",
   "expectedPackageFiles": [
     "C:\\Users\\Andrew\\.nuget\\packages\\fsharp.core\\4.7.1\\fsharp.core.4.7.1.nupkg.sha512"
   ],

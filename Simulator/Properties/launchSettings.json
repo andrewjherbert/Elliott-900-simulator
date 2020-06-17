@@ -1,8 +1,7 @@
 {
   "profiles": {
     "Elliott 900 Simulator": {
-      "commandName": "Project",
-      "workingDirectory": "Z:\\elliott903\\Programs\\elliott-900-simulator\\Demos"
+      "commandName": "Project"
     }
   }
 }
