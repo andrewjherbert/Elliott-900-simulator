@@ -178,3 +178,4 @@
 28-JUL-2019: TranslateFromText modified to convert \n into cr lf
 29-AUG-2019: PERT table decode
 10-MAR-2020: Compiled using VS 2019 Community
+19-JUN-2020: DEMOS command added

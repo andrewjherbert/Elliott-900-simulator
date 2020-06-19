@@ -249,14 +249,18 @@ open Sim900.Help
             | (_,     [|"CD"; d|])
             | (_,     [|"CHANGEDIR"; d|])   -> ChangeDir d
 
-            | (true,  [|"CL"|]) | (true, [|"CLEAR"|])
+            | (true,  [|"CL"|]) 
+            | (true, [|"CLEAR"|])
                                             -> ClearStore ()
 
-            | (true,  [|"CL"; n|]) | (true, [|"CLEAR"; n|])  
-                                            -> ClearModule (GetAddress n)
+            | (true,  [|"CL"; n|]) 
+            | (true, [|"CLEAR"; n|])        -> ClearModule (GetAddress n)
 
             | (_,     [|"COMP";    m; c|])
             | (_,     [|"COMPARE"; m; c|])  -> Compare m c
+
+            | (_,     [|"DEMOS"        |])  -> DemosDir ()
+                                               
 
             | (true,  [|"DE";     "CRD"|]) 
             | (true,  [|"DETACH"; "CRD"|])  -> CloseCardReader ()

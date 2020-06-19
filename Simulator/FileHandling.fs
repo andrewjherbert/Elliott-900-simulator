@@ -44,6 +44,18 @@ module Sim900.FileHandling
             then System.Environment.CurrentDirectory <- d
             else raise (Syntax (sprintf "Cannot open directory %s" d))
 
+        // find demos directory
+        let DemosDir () =
+            let rec Helper last root =
+                if   Directory.Exists "Demos"
+                then System.Environment.CurrentDirectory <- "Demos"
+                else System.Environment.CurrentDirectory <- ".."
+                     if   System.Environment.CurrentDirectory = last
+                     then printfn "Demonstration folder not found"
+                          System.Environment.CurrentDirectory <- root
+                     else Helper System.Environment.CurrentDirectory root
+            Helper System.Environment.CurrentDirectory System.Environment.CurrentDirectory
+
         // IMAGES are dumps of memory write out as four bytes per word.
         // words 0-7 are not included in the file
         // (this format is due to Terry Froggatt)

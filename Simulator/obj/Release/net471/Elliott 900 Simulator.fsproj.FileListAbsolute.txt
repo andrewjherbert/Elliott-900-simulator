@@ -66,10 +66,10 @@ Z:\elliott903\Programs\elliott-900-simulator\Simulator\obj\Release\net471\Elliot
 Z:\elliott903\Programs\elliott-900-simulator\Simulator\obj\Release\net471\SIM900.exe
 Z:\elliott903\Programs\elliott-900-simulator\Simulator\obj\Release\net471\SIM900.pdb
 Z:\elliott903\Programs\elliott-900-simulator\Simulator\obj\Release\net471\Elliott 900 Simulator.fsprojAssemblyReference.cache
-\\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\SIM900.exe.config
 \\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\SIM900.exe
-\\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\SIM900.pdb
 \\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\FSharp.Core.dll
+\\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\SIM900.exe.config
+\\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\SIM900.pdb
 \\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\cs\FSharp.Core.resources.dll
 \\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\de\FSharp.Core.resources.dll
 \\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\es\FSharp.Core.resources.dll

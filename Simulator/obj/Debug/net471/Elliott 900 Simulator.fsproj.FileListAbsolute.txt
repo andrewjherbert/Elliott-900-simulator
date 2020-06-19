@@ -21,10 +21,10 @@ C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\obj\Debug\net471\Ell
 C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\obj\Debug\net471\Elliott 900 Simulator.fsproj.CopyComplete
 C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\obj\Debug\net471\Elliott 900 Simulator.exe
 C:\Users\Andrew\Source\Repos\elliot-903-simulator\Simulator\obj\Debug\net471\Elliott 900 Simulator.pdb
-\\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Debug\net471\SIM900.exe.config
 \\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Debug\net471\SIM900.exe
-\\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Debug\net471\SIM900.pdb
 \\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Debug\net471\FSharp.Core.dll
+\\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Debug\net471\SIM900.exe.config
+\\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Debug\net471\SIM900.pdb
 \\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Debug\net471\cs\FSharp.Core.resources.dll
 \\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Debug\net471\de\FSharp.Core.resources.dll
 \\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Debug\net471\es\FSharp.Core.resources.dll

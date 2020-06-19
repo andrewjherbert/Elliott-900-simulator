@@ -67,6 +67,8 @@ module Sim900.Help
                     "   Compare two paper tape files";
                     "DELete file";
                     "    Delete file";
+                    "DEMOS";
+                    "    Find folder of demonstration programs";
                     "DEtach CRD";
                     "    Disconnect card reader from current input (if any)";
                     "DEtach MT n";
