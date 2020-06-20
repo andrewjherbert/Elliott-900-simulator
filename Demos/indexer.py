@@ -1,4 +1,4 @@
-# INDEXER - progrsm to insert HTML index files in a directory tree
+# INDEXER - program to insert HTML index files in a directory tree
 #
 # Andrew Herbert 19/06/2020
 
@@ -18,7 +18,6 @@ def indexPath (path):
     filenames.sort()
     count = 0
     for n in filenames:
-        print ("Next: ", n)
         if n.startswith ('.'):
             continue
         pn = fullName (path, n)
