@@ -68,4 +68,9 @@ j 30
 st 242
 sh t
 
+delete tape1
+delete tape2
+delete tape3
+delete tape4
+
 

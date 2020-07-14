@@ -24,6 +24,7 @@ j 16
 c will fall off tape
 de ptp
 print demox400.txt
+delete demox400.txt
 
 c soak test
 step 10000000

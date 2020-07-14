@@ -48,4 +48,5 @@ de ptp
 at ptr file DEMOX50_DATA2.BIN
 j 25
 
+delete DEMOX50_DATA2.BIN
 sh t

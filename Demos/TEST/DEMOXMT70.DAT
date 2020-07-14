@@ -99,4 +99,6 @@ j 23
 
 de mt 0
 
+delete tape1
+
 sh t

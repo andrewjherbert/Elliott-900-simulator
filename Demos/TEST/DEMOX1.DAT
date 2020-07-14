@@ -20,4 +20,5 @@ nonstop on
 j 8031
 de ptp
 print DEMOX1B.BIN
+delete DEMOX1B.BIN
 sh t

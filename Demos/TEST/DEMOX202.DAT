@@ -2,7 +2,7 @@
 
 on 903 16K
 nonstop on
-at ptr file X202(ISS1).BIN 
+at ptr file X202(ISS1).BIN
 j 8181
 st 8177
 
@@ -16,5 +16,5 @@ j  7884
 
 de ptp
 print demox202.txt
-
+delete demox202.txt
 sh t

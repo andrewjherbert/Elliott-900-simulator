@@ -24,4 +24,5 @@ j 22
 
 de ptp
 print DEMOX51B.BIN
+delete DEMOX51B.BIN
 sh t

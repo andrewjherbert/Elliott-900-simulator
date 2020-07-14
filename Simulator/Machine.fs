@@ -1209,10 +1209,6 @@ module Sim900.Machine
                                             (mm, mm)
                      | E920b             -> qRegister <- N                                           
                                             let mm = (m+(oldSequenceControlRegister &&& aModuleMask))
-                                            if   mm = 65552
-                                            then printfn "N =%d B=%d (%d) m=%d (%d)" N memory.[bRegisterAddr] 
-                                                         (Normalize memory.[bRegisterAddr])
-                                                         m (Normalize m)
                                             (mm, mm)
                      | E920m              -> // 920M "affected" but not known how
                                             qRegister <- N
@@ -1282,11 +1278,7 @@ module Sim900.Machine
                          let t = int64 timing.[6]
                          cpuTime     <- cpuTime + t
                          elapsedTime <- elapsedTime + t
-                         // WriteMem M accumulator
-                         if  M = 65552
-                         then raise (Machine (sprintf "B=%d (%d) N=%d S=%d SMod=%d"
-                                                       memory.[bRegisterAddr] (Normalize memory.[bRegisterAddr])
-                                                       N oldSequenceControlRegister (oldSequenceControlRegister&&&cModuleMask)))
+                         // WriteMem M accumulator 
                          WriteMem M accumulator
               
                 |  6  -> // collate

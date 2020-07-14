@@ -45,3 +45,5 @@ de ptp
 print demox5.txt
 at ptp file demox5.txt legible
 sh t
+
+delete demo5.txt

@@ -16,4 +16,5 @@ step 1000000
 restart
 de ptp
 print demox3.txt
+delete demo3.txt
 sh t

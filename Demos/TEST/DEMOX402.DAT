@@ -31,5 +31,5 @@ st 7997
 
 de ptp
 print demox402.txt
-
+delete demox402.txt
 sh t

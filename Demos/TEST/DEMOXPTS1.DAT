@@ -24,5 +24,9 @@ nonstop on
 j 32
 de ptp
 st 387
+
 print DEMOXPTS1B.BIN
+delete DEMOXPTS1A.BIN
+delete DEMOXPTS1B.BIN
+
 sh t

@@ -15,7 +15,7 @@ at ptr file X6(ISS2).900
 j 7749
 st 8016
 
-c asssemble parameter tape
+c assemble parameter tape
 at ptr inline
 &
 +52
@@ -62,3 +62,4 @@ de ptp
 
 c seconds used will be instruction time in microseconds (24)
 sh t
+delete demo6.bin

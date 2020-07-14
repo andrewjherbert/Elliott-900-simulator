@@ -1,5 +1,5 @@
 ﻿
 module Sim900.Version
     
-    let simulatorVersion = "Version of 10-MAR-2020"
+    let simulatorVersion = "Version of 08-JULY-2020"
 

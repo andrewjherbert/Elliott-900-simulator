@@ -24,5 +24,6 @@ st 7999
 
 de ptp
 print demox4.txt
+delete demo4.txt
 
 sh t

@@ -21,4 +21,5 @@ j 32
 
 de ptp
 print DEMOX10.BIN
+delete DEMOX10.BIN
 sh t

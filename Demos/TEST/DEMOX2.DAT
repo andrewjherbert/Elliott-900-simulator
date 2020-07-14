@@ -15,4 +15,5 @@ restart
 c will hit step limit
 de ptp
 print demox2.txt
+delete demo2.txt
 sh t

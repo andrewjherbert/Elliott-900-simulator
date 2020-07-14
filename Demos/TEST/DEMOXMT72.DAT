@@ -53,4 +53,9 @@ de mt 1
 de mt 2
 de mt 3
 
+delete tape1
+delete tape2
+delete tape3
+delate tape4
+
 sh t

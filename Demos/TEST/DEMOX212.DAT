@@ -24,10 +24,11 @@ de tty
 c soak test module 1
 at ptp file demox212.txt legible
 at ptr inline bin
-000 000 000 000 000 000 000 000 000 000 000 
+000 000 000 000 000 000 000 000 000 000 000
 <!!>
 enter A 1
 j 10
 de ptp
 print demox212.txt
+delete demox212.txt
 sh t
