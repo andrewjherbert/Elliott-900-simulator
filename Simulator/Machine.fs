@@ -134,10 +134,10 @@ module Sim900.Machine
             then raise (Machine (sprintf "Read from store address %d outside memory bounds" address))
             if initialInstructionsEnabled
             then if  address < initialInstructionsBase || address > (initialInstructionsBase+11)
-                 then memory.[address]
+                 then  memory.[address]
                  else let w = initialInstructionStore.[address-initialInstructionsBase]
                       memory.[address] <- w
-                      w
+                      w 
             else memory.[address]
 
         let WriteMem addr contents =
@@ -149,7 +149,6 @@ module Sim900.Machine
                       | E920m
                       | E900  -> addr &&& mask16
                       | E920c -> addr &&& mask17
-
             if   address = watchLoc then watch <- true
             if   address < 0 || address >= memorySize
             then raise (Machine (sprintf "Write to store address %d outside memory bounds" address))
@@ -1201,7 +1200,7 @@ module Sim900.Machine
                      elapsedTime <- elapsedTime + modifyTime
                      let m = Modify N
                      match machineType with
-                     | E900              -> // Generic 900 leaves Q unchanged, 920M effect not known
+                     | E900              -> // Generic 900 leaves Q unchanged
                                             let mm = (m+(oldSequenceControlRegister &&& aModuleMask))
                                             (mm, mm)
                      | E920a             -> qRegister <- word                                           
@@ -1264,7 +1263,7 @@ module Sim900.Machine
                          let t = int64 timing.[4]
                          cpuTime     <- cpuTime + t
                          elapsedTime <- elapsedTime + t
-                         WriteMem M (qRegister >>> 1)
+                         WriteMem M ((qRegister >>> 1) &&& mask17)
                  
                 |  4  -> // read memory
                          // A:=m
@@ -1350,7 +1349,7 @@ module Sim900.Machine
                          let t = int64 timing.[14]
                          cpuTime     <- cpuTime +  t                        
                          elapsedTime <- elapsedTime + t
-                         memory.[M] <- ((ReadMem M) + 1) &&& mask18
+                         WriteMem M (((ReadMem M) + 1) &&& mask18)
 
                 | 11  -> // store Sequence Control Register
                          // m[13..1]:=(S+1)[13..1]; Q[17..14]:=(S+1)[17..14]; Q[13..1]:=0
@@ -1931,11 +1930,10 @@ module Sim900.Machine
 
                 // SCR is incremented after instruction fetch, before decode
                 AdvanceSCR ()
-                try
-                    Execute (ReadMem (oldSequenceControlRegister))
-                with
-                | exn -> stopped <- true 
-                         raise exn
+                try Execute (ReadMem (oldSequenceControlRegister)) with
+                   exn -> stopped <- true
+                          SetSCR(oldSequenceControlRegister)
+                          raise exn
             
                 // increment instruction count
                 iCount <- iCount+1L
@@ -2026,7 +2024,7 @@ module Sim900.Machine
         TraceBufferClear () 
         SetSCR address
         SaveSCRH ()
-        Restart tracePut monitorPut -1 
+        Restart tracePut monitorPut -1
         
     let Jump tracePut monitorPut = 
         if machineType <> E920c then JumpInit ()

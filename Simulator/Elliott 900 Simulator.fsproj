@@ -4,6 +4,7 @@
     <TargetFramework>net471</TargetFramework>
     <TargetType>EXE</TargetType>
     <AssemblyName>SIM900</AssemblyName>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>

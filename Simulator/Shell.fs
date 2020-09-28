@@ -5,6 +5,7 @@ module Sim900.Shell
 open System.Text
 open System.IO
 open System.Windows.Forms
+open System.Diagnostics
 
 open Sim900.Version
 open Sim900.Bits
@@ -679,7 +680,7 @@ open Sim900.Help
             | Syntax s     ->   MessagePut s;                                        if not nonStop then raise Finished
             | Watch        ->   MessagePut "Watch location accessed"; MiniDump ();   if not nonStop then raise Finished
             | Quit         ->   raise Quit 
-            | err          ->   MessagePut err.Message;                              if not nonStop then raise Finished
+            | err          ->   MessagePut err.Message;                              if not nonStop then raise Finished 
             ReadCommands interactive
 
         // read commands from file
@@ -691,8 +692,8 @@ open Sim900.Help
                 let f = if File.Exists file then file elif File.Exists fe then fe else file
                 let mutable commands = File.ReadAllText f 
                 // substitute parameters
-                for i in 0..(args.Length-1) do
-                    let pi = "%"+(i+1).ToString ()
+                for i in 1..args.Length do
+                    let pi = "%"+(i-1).ToString ()
                     commands <- commands.Replace (pi, args.[i]) 
                 let reader = new StringReader (commands)
                 System.Console.SetIn reader

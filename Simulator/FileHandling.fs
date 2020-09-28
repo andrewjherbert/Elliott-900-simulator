@@ -320,12 +320,14 @@ module Sim900.FileHandling
             let rec nextLine () =
                 let line = System.Console.ReadLine ()
                 if   line = null   // end of file terminates
-                then s.ToString () // return as string
+                then s.ToString() // return as string
+                elif line.StartsWith "<!!>"
+                then s.ToString()
                 elif line.EndsWith "<!!>"
                 then // <!!> at end of line terminates
                      s.Append(line.Substring (0, line.Length-4)).ToString()
                 else (s.Append line).Append ("\n") |> ignore
-                     nextLine () 
+                     nextLine()
             let out = nextLine () 
             // printfn "INLINE %s INLINE" (VisibleWhiteSpace out)
             out
