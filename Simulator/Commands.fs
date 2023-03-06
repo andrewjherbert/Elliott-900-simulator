@@ -99,6 +99,7 @@ module Sim900.Commands
             | "A" -> APut value
             | "Q" -> QPut value
             | "B" -> BPut value
+            | "S" -> SPut value
             | _   -> WriteStore (GetAddress loc) value
 
         let Find value =

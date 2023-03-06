@@ -146,7 +146,6 @@ Z:/elliott903/Programs/elliott-900-simulator/Simulator/obj/Release/net471/Elliot
 \\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\System.Security.SecureString.dll
 \\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\System.Threading.Overlapped.dll
 \\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\System.Xml.XPath.XDocument.dll
-\\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\obj\Release\net471\Elliott 900 Simulator.fsproj.AssemblyReference.cache
 X:\Library\CloudStorage\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\SIM900.exe.config
 X:\Library\CloudStorage\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\SIM900.exe
 X:\Library\CloudStorage\Dropbox\elliott903\Programs\FS_SIM900\Simulator\bin\Release\net471\SIM900.pdb
@@ -170,3 +169,5 @@ X:\Library\CloudStorage\Dropbox\elliott903\Programs\FS_SIM900\Simulator\obj\Rele
 X:\Library\CloudStorage\Dropbox\elliott903\Programs\FS_SIM900\Simulator\obj\Release\net471\SIM900.exe
 X:\Library\CloudStorage\Dropbox\elliott903\Programs\FS_SIM900\Simulator\obj\Release\net471\SIM900.pdb
 X:\Library\CloudStorage\Dropbox\elliott903\Programs\FS_SIM900\Simulator\obj\Release\net471\Elliott 900 Simulator.fsprojAssemblyReference.cache
+\\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\obj\Release\net471\SIM900.exe.config
+\\Mac\Dropbox\elliott903\Programs\FS_SIM900\Simulator\obj\Release\net471\Elliott 900 Simulator.fsproj.AssemblyReference.cache

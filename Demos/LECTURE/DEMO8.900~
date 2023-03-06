@@ -1,0 +1,15 @@
+demo8;
+"begin"
+   "integer" x; "real" pi;
+   "real" "procedure" readint;
+   "begin"
+      "read" reader(1), readint;
+   "end" readint;          
+   punch(3);
+   "print" {{ls3}x{s4}sin(x)};
+   pi := 4 * arctan(1);   
+   "for" x := readint, readint "while" x "ge" 0 "do" 
+      "print" digits(3), x, same line,
+         aligned(2, 6), sin(x * pi / 180);
+"end"
+<! HALT !>

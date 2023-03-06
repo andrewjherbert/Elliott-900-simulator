@@ -2044,7 +2044,7 @@ module Sim900.Machine
         InterruptOn level
 
     // EXECUTE SINGLE INSTRUCTION
-    let Obey () = // Execute one instruction from word generator
+    let Obey word = // Execute one instruction 
         if not stopped then NotStoppedError ()
         try Execute wordGenerator finally stopped <- true
 

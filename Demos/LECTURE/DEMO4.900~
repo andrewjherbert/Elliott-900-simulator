@@ -1,0 +1,10 @@
+demo 4;
+"begin"
+    "integer" large;
+    large := 131071;
+    "print" large, large*10;
+
+    "comment" Run time error 3 Integer overflow;
+    
+"end"
+<! HALT !>

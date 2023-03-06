@@ -206,20 +206,21 @@ module Sim900.FileHandling
                      Comment loc contents
                      Words f addr (loc+1) limit
 
-            tw.WriteLine (sprintf "\n\n(output from DUMPASSIR %s %s)\n"
-                                    (System.DateTime.Now.ToShortDateString ())
-                                    (System.DateTime.Now.ToShortTimeString ()))
-            // comment output labels for addresses above literals
-            if   memorySize = 4096
-            then tw.WriteLine "*16 (start at 8)"
-            else tw.WriteLine "*8192"
-                 tw.WriteLine "*16 (clear 8K, start at 8)"
-            for loc=lastLiteral to 8191 do
-                if labels.[loc]
-                then tw.WriteLine (sprintf "L%d=%d" loc loc)
-            Words -1 -1 8 literals
-            tw.WriteLine "%"
-            tw.WriteLine "<! Halt !>"
+            if literals <> memorySize && memorySize > 8192
+            then MessagePut ("Literals only allowed if memory size <= 8192")
+            else tw.WriteLine (sprintf "\n\n(output from DUMPASSIR %s %s)\n" (System.DateTime.Now.ToShortDateString ()) (System.DateTime.Now.ToShortTimeString ()))        
+                 if   memorySize = 8192
+                 then tw.WriteLine "*8192"
+                 if memorySize = 8192
+                 then tw.WriteLine "*16 (clear 8K, start at 8)"
+                      for loc=lastLiteral to 8191 do
+                         if labels.[loc]
+                         then tw.WriteLine (sprintf "L%d=%d" loc loc)
+                      Words -1 -1 8 literals
+                      tw.WriteLine "%"
+                      tw.WriteLine "<! Halt !>"
+                 else // only deal with literals if inside 
+                     Words -1 -1 8 memorySize                    
             tw.Close ()             
                  
         // list directory

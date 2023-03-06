@@ -1,0 +1,134 @@
+demo9;
+"begin"
+
+    "integer" i, j, eqnsize, super;
+    "real" pi, two pi, four pi, piby2, piby4,piby3, piby6, piby12;
+    "real" in2steps, inc2rad, plot inc, eps;
+    "real" chsize, cs;
+    "real" x, y;
+
+"comment" basic graphics;
+
+"comment" move to position on plot measured in inches from origin;
+
+    "procedure" move to (x, y);
+    "value" x, y; "real" x, y;
+    "begin"
+        move pen (x*in2steps, y*in2steps)
+    "end" move to;
+
+"comment" draw to position on plot measured in inches from origin;
+
+    "procedure" draw to (x, y);
+    "value" x, y; "real" x, y;
+    "begin"
+        draw line (x*in2steps, y*in2steps)
+    "end" draw to;
+
+"comment" procedures for plotting with polar coordinates;
+
+"comment" move pen to polar coordinate r, t centred at x, y;
+
+    "procedure" move polar (r, t, x, y);
+    "value" r, t, x, y; "real" r, t, x, y;
+    "begin"
+        move to (x + r * cos(t), y + r * sin(t))
+    "end" move polar;
+
+"comment" draw a line to polar coordinate r, t centred at x, y;
+
+    "procedure" draw polar (r, t, x, y);
+    "value" r, t, x, y; "real" r, t, x, y;
+    "begin"
+        draw to (x + r * cos(t), y + r * sin(t))
+    "end" draw polar; 
+
+"comment" titles and labels; 
+
+"comment" plot string s from position x, y character size l;
+
+    "procedure" plot string (s, l, x, y);
+    "value" l, x, y; "string" s; "real" x, y; "integer" l;
+    "begin"
+        way (0, l);
+        ch size := 5.0*l*plot inc;
+        move to (x, y);
+        "print" s
+    "end" plot string;
+
+"comment" draw axes with xrpt  x segments, 
+          y rpt y segments of 0.5 inches;
+
+    "procedure" axes (x rpt, y rpt, x, y);
+    "value" x rpt, y rpt, x, y; "integer" x rpt, y rpt; "real" x, y; 
+    "begin"
+        "real" major, minor, mm; 
+        "real" x1, y1;
+        major := 0.4; minor := 0.05; mm := 0.45;
+        "for" x1 := x-xrpt*mm "step" mm "until" x-minor "do"
+        "begin"
+	    move to (x1, y); draw to (x1+major, y)
+        "end";
+        "for" x1 := x "step" mm "until" x+xrpt*mm-minor "do"
+	"begin"
+	    move to (x1+minor, y); draw to (x1+mm, y)
+        "end";
+        "for" y1 := y-yrpt*mm "step" mm "until" y-minor "do"
+        "begin"
+            move to (x, y1); draw to (x, y1+major)
+        "end";
+        "for" y1 := y "step" mm "until" y+yrpt*mm-minor "do"
+        "begin"
+            move to (x, y1+minor); draw to (x, y1+mm)
+        "end"
+    "end" axes;
+
+"comment" draw a cardioid r = a(1 - cos t);
+    
+    "procedure" cardioid (a, x, y);
+    "value" a, x, y; "real" a, x, y;
+    "begin"
+        "real" t, tinc, tlimit;
+        tinc := inc2rad/a; tlimit := twopi-eps;
+        t := 0.0;
+        move polar (0.0, 0.0, x, y);
+        "for" t := tinc "step" tinc "until" tlimit "do" 
+            draw polar (a*(1.0-cos(t)), t, x, y)
+    "end" cardioid;  
+
+"comment" useful constants;
+
+    "comment" plotter step size in inches";
+    plot inc  := 0.005; 
+    eps       := plot inc/2.0;
+    "comment" inches to plotter steps;
+    in2steps  := 1.0/plot inc;
+    "comment" plotter increments to theta at radius = 1
+              (divide by r for other values);
+    inc2rad   := 4.0*plot inc; 
+    pi        := 3.1415926536;
+    twopi     := pi*2.0;
+    fourpi    := pi*4.0;
+    piby2     := pi/2.0;
+    piby4     := pi/4.0;
+    piby3     := pi/3.0;
+    piby6     := pi/6.0; 
+    piby12    := pi/12.0;
+    eqnsize   := 5; "comment" text in equations;
+    super     := 3; "comment" superscript size";
+
+"comment" initialize plotter;
+
+    set origin (10, 0);
+    punch (5);
+
+
+    cardioid (0.70,                                                  2.000, 2.000);
+    axes     (2, 2, 2.0, 2.0);
+    plot string ('Cardioid@,             eqn size, 1.250,  0.750);
+    plot string ('r = a(1 - cos theta)@, eqn size, 0.500,  0.500);
+    
+"end" curves
+<! halt !>
+
+	

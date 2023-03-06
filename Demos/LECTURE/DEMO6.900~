@@ -1,0 +1,28 @@
+demo6;
+"begin"
+
+    "integer" i;
+
+    "integer" "procedure" a;
+    "begin"
+        "integer" "procedure" b;
+	"begin"
+	    "integer" "procedure" c;
+            "begin"
+                c := 99
+            "end" c;
+	    checks('procedure b@);
+	    b := checki(c + 1);
+	    checks(''L@@)
+        "end" b;
+	checks('procedure c@);
+        a := checkr(b + 1);
+	checks(''L@@)
+    "end" a;
+
+    "for" i := 1, 2, 3, 5, 7 "do"
+    "begin"
+        "print" sameline, i, a, ''l@@
+    "end"
+"end"
+<! HALT !>

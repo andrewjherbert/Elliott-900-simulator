@@ -53,7 +53,7 @@
                  then BadParameter ()
                  else (moduleNo <<< 13) ||| offset 
 
-        let GetInstruction (fn: string) addr = // instruction F N or /F N
+        let GetInstruction (fn: string) addr = // instruction =F N or =/F N
             if fn.Length < 2
             then BadParameter ()
             elif fn.[0] <> '='

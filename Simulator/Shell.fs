@@ -313,13 +313,13 @@ open Sim900.Help
             | (true,  [|"DUMPIMAGE"; n; f|]) 
                                             -> DumpImage f (GetNatural n)
 
+            | (true,  [|"E"; loc; f; n|]) 
+            | (true,  [|"ENTER"; loc; f; n|])
+                                            -> Enter loc (GetInstruction f n) 
+                                
             | (true,  [|"E"; loc; value|]) 
             | (true,  [|"ENTER"; loc; value|])   
                                             -> Enter loc (GetConstant value)
-
-            | (true,  [|"E"; loc; f; n|]) 
-            | (true,  [|"ENTER"; loc; f; n|])
-                                            -> Enter loc (GetInstruction f n)
 
             | (true,  [|"F"; value|])               
             | (true,  [|"FIND"; value|])    -> Find (GetConstant value)
@@ -400,8 +400,14 @@ open Sim900.Help
             | (_,     [|"NP";         "ON"|])
             | (_,     [|"NONPRINTING";"ON"|])   
                                             -> nonPrinting <- true
-            
-            | (true,  [|"OBEY"|])           -> Obey ()  
+ 
+            | (true,  [|"O";    f; n|])
+            | (true,  [|"OBEY"; f; n|])     -> WordGeneratorPut (GetInstruction f n); Obey WordGeneratorGet
+            | (true,  [|"O";    value|]) 
+            | (true,  [|"OBEY"; value|])    -> WordGeneratorPut (GetConstant value); Obey WordGeneratorGet
+            | (true,  [|"O"|])
+            | (true,  [|"OBEY"|])           -> Obey WordGeneratorGet
+
 
             | (_,     [|"OFF"|])            -> turnOff ()
                          
@@ -416,7 +422,6 @@ open Sim900.Help
             | (_,     [|"ON"|])
                                             -> turnOn Generic900.name Generic900.memSize Generic900.memSpeed Generic900.ptrSpeed
 
-            | (true,  [|"O";      x; y|])
             | (true,  [|"ORIGIN"; x; y|])   -> SetOrigin (GetNatural x) (GetNatural y)
 
             | (_,     [|"P"|])

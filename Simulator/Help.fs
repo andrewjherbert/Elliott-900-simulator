@@ -91,8 +91,14 @@ module Sim900.Help
                     "    Dump all of memory as a SIR program to specified file";
                     "DUmpimage words file";
                     "   Dump a memory image of size specified from memory location 0 upwards to file";  
+                    "Enter address";
+                    "Store word generator contents at address";
+                    "Enter reg value";
+                    "   Store value in specified register (A, Q, B, S)"
                     "Enter address value";
                     "   Store value in specified memory location";
+                    "Enter address =/f n";
+                    "Store instruction at address"
                     "Find value";
                     "   Report locations in store cotaining specified value";
                     "FIXrlb from to";
@@ -137,8 +143,12 @@ module Sim900.Help
                     "    Don't exit command level on stop conditions";
                     "NonStop ON";
                     "    Exit command level on stop conditions";
-                    "OBEY";
+                    "Obey";
                     "   Execute word generator as an instruction";
+                    "Obey =/f n";
+                    "   Execute instruction f n (and set word generator)";
+                    "Obey pattern";
+                    "   Execute bit pattern (and set word generator)";
                     "OFF"; "Switch machine off";
                     "ON";
                     "   Switch machine on";
@@ -150,7 +160,7 @@ module Sim900.Help
                     "   Switch machine on with specified architecture, memory size and cycle time";
                     "ON architecture memory speed rate";
                     "   Switch machine on with specified architecture, memory cycle time and reader input rate";
-                    "Origin x y";
+                    "ORIGIN x y";
                     "    Set plotter origin relative to (0, 0)";
                     "Pause";
                     "   Wait for input before continuing"
