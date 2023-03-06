@@ -1,0 +1,41 @@
+
+*19 (LOAD AND GO, LABELS, START AT 32)
+
+[DEMO14 QOUT1 QDOUT QCHOP]      (GLOBAL LABELS)
+
+DEMO14    4     +3		(SET TELETYPE OUTPUT)
+	  5     QDOUT
+	  4     +1              (PRINT NEWLINE)
+	 11     QCHOP		(SAVE LINK IN QCHOP+0)
+	  8     QCHOP+1		(JUMP TO SUBROUTINE)
+	  4     +1              (PRINT NEWLINE)
+	 11     QCHOP
+	  8     QCHOP+1
+	  4	X		(CALCULATE XY+X+Y)
+	 12     Y
+	  1     X
+	  1     Y
+	 11     QOUT1		(OUTPUT AS FRACTION)
+	  8     QOUT1+2
+	 /0     1               (NEWLINE, 6 DIGITS, SCALE BY 10)
+
+          4     A		(CALCULATE AB+A+B)
+	 12     B
+	 14     17              (ADJUST BY 2^17)
+	  1     A
+	  1     B
+	 11     QOUT1		(OUTPUT AS INTEGER)
+	  8     QOUT1+1
+	 /1     2		(NEWLINE, 5 DIGITS, SCALE BY 100)
+	  8     ;+0
+
+X       +.5
+Y       +.25
+Z       >1
+A       +5
+B       +10
+C       >1
+
+*2				(CONTINUE LOAD AND GO, NO LABELS)
+
+<! HALT !>

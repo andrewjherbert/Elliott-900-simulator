@@ -101,19 +101,21 @@ module Sim900.FileHandling
             // build list of possible labels
             let labels: bool[] = Array.create memorySize false
 
-            let rec SetLabels prevF prevAddr loc lastLiteral =
+            let rec SetLabels prevF prevAddr loc  lastLiteral =
                 if   loc < literals
                 then let contents = ReadStore loc
                      let f = FunctionField contents
                      let addr = AddressField contents
-                     if   addr > literals && addr < lastLiteral && (f = 3 || f = 5 || f = 11)
+                     if   addr >= literals && (f = 3 || f = 5 || f = 11)
                      then labels.[addr] <- true
-                          SetLabels prevF prevAddr loc addr
-                     elif  addr >= 8              // exclude registers
+                          if addr < lastLiteral
+                          then SetLabels prevF prevAddr (loc+1) addr-1
+                          else SetLabels prevF prevAddr (loc+1) lastLiteral
+                     elif  addr >= 8             // exclude registers
                           && abs (addr-loc) >  5 // exclude relative addresses
                           && 0 < f && f < 14     // exclude 14, 15 instructions
                      then if prevF = 11 && (addr=prevAddr+1 || addr=prevAddr+2)
-                          then SetLabels f addr  (loc+1) lastLiteral // exclude subroutine calls
+                          then SetLabels f addr  (loc+1) lastLiteral  // exclude subroutine calls
                           elif addr < literals
                           then labels.[addr] <- true
                                SetLabels f addr (loc+1) lastLiteral
@@ -121,15 +123,19 @@ module Sim900.FileHandling
                      else SetLabels f addr (loc+1) lastLiteral
                 else lastLiteral
 
-            let lastLiteral = SetLabels -1 -1 8 8192
+            let lastLiteral = SetLabels -1 -1 8 8191
 
             if   literals <> memorySize
-            then MessagePut (sprintf "Literals from %d to %d" literals lastLiteral)
+            then MessagePut (sprintf "Literals detected from %d to %d" literals lastLiteral)
 
-            let Comment contents = 
+            let Comment location contents = 
                 let number = Normalize contents
+
+                // print location
+                tw.Write (sprintf "\t(%2d" (location/8192))
+                tw.Write (sprintf "^%04d:" (location%8192))
                 // print as octal
-                tw.Write (sprintf "\t(&%06o" contents)
+                tw.Write (sprintf "  &%06o" contents)
                 // print as integer
                 tw.Write (sprintf " %+8d " number)
                 // print as instruction
@@ -152,28 +158,23 @@ module Sim900.FileHandling
                 tw.WriteLine ')'
 
             let rec Words prevF prevAddr loc limit =
-                if loc <= limit
+                if loc < limit
                 then let contents = ReadStore loc
                      let number = Normalize contents
                      let modify = ModifyField contents
                      let m = if modify = 0 then "" else "/"
                      let f = FunctionField contents
                      let addr = AddressField contents
+
                      // if location is referenced, output label
                      if   labels.[loc] 
                      then tw.Write (sprintf "L%d\t" loc)
                      else tw.Write "\t"
-                     let addr = AddressField contents
-                     if   -8192 < number && number < 0
-                     then // /15 n
-                          tw.Write (sprintf"%+d" number)
-                     elif 0 <= number && number < 8192 && number < literals && (not labels.[number])
-                     then // 0 n
-                          tw.Write (sprintf "%+d" number)
-                     elif f >= 14
+
+                     if f >= 14
                      then // special case 14 and 15 instructions
                           tw.Write (sprintf "%s%d %d" m f addr)
-                     elif limit <= 8192 && literals <= addr && addr <= lastLiteral 
+                     elif literals <= addr && addr <= lastLiteral 
                           && (f <= 2 || f = 4 || f = 6 || f = 12 || f = 13)
                      then // special case literals
                           tw.Write (sprintf "%s%d " m f)
@@ -199,33 +200,24 @@ module Sim900.FileHandling
                      elif labels.[addr] 
                      then // addressing labelled location
                           tw.Write (sprintf "%s%d L%d" m f addr)
-                     elif addr < literals
-                     then tw.Write (sprintf "%s%d %d" m f addr)
-                     else tw.Write (sprintf "&%06o" contents)
-                     Comment contents
+                     //elif addr < literals
+                     else tw.Write (sprintf "%s%d %d" m f addr)
+                     //else tw.Write (sprintf "&%06o" contents)
+                     Comment loc contents
                      Words f addr (loc+1) limit
 
             tw.WriteLine (sprintf "\n\n(output from DUMPASSIR %s %s)\n"
                                     (System.DateTime.Now.ToShortDateString ())
                                     (System.DateTime.Now.ToShortTimeString ()))
-            let limit = min 8166 literals // 8166 is maximum location allowed in module 0 by 2-pass SIR
             // comment output labels for addresses above literals
+            if   memorySize = 4096
+            then tw.WriteLine "*16 (start at 8)"
+            else tw.WriteLine "*8192"
+                 tw.WriteLine "*16 (clear 8K, start at 8)"
             for loc=lastLiteral to 8191 do
                 if labels.[loc]
                 then tw.WriteLine (sprintf "L%d=%d" loc loc)
-            if   memorySize = 4096
-            then tw.WriteLine "*16 (start at 8)"
-                 Words -1 -1 8 memorySize
-            elif memorySize = 8192
-            then tw.WriteLine "*8192"
-                 tw.WriteLine "*16 (clear 8K, start at 8)"
-                 Words -1 -1 8 limit
-            else tw.WriteLine "*16384"
-                 tw.WriteLine "*16 (clear 16K, start at 8)"
-                 Words -1 -1 8 limit // stop at limit for 2-pass SIR
-                 if   memorySize > 8192
-                 then tw.WriteLine "^8192"
-                      Words -1 -1 8192 16383
+            Words -1 -1 8 literals
             tw.WriteLine "%"
             tw.WriteLine "<! Halt !>"
             tw.Close ()             

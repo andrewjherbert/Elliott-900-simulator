@@ -1,0 +1,30 @@
+demo 2;
+"begin"
+
+   "integer" x, max;
+
+    "read" max;
+	
+    punch(3);          "comment" select teletype output;
+    digits(4);         "comment" set integer output format;
+    prefix('   ...@);  "comment" prefix each item by    ...;
+   
+    "for" x := 0 "step" 1 "until" max "do"
+        "print" x, x*x, scaled(5), sqrt(x), ''l@@;
+
+   "comment"  setting procedures:
+             reader(1)    -- input from paper tape
+             reader(3)    -- input from teletype
+	     punch(1)     -- output to paper tape
+	     punch(3)     -- output to paper tape
+	     freepoint(n) -- floating point format with n digits
+	     aligned(m,n) -- m digits . n digits
+	     scaled(n)    -- scientific notation with n digits
+	     sameline     -- no newline between items
+	     prefix(s)    -- precede each item with string s;
+
+    "print" ''l5@@, prefix(''l@@), freepoint(6), 123.456, aligned(3,2), 123.456;
+	
+"end"
+10
+<! HALT !>

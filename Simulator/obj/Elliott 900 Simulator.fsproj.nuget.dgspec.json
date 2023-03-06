@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj": {}
+    "X:\\Library\\CloudStorage\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj": {}
   },
   "projects": {
-    "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj": {
+    "X:\\Library\\CloudStorage\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj",
+        "projectUniqueName": "X:\\Library\\CloudStorage\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj",
         "projectName": "SIM900",
-        "projectPath": "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj",
+        "projectPath": "X:\\Library\\CloudStorage\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj",
         "packagesPath": "C:\\Users\\Andrew\\.nuget\\packages\\",
-        "outputPath": "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\obj\\",
+        "outputPath": "X:\\Library\\CloudStorage\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Andrew\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -40,6 +40,11 @@
             }
           },
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.402\\RuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "win7-x86": {
+          "#import": []
         }
       }
     }

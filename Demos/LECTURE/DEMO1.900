@@ -1,0 +1,20 @@
+demo 1;
+"begin"
+
+   punch(3); "comment" select teleprinter output;
+   "print" 'hello brave new world'l2@@;
+
+   punch(1); "comment" select punch output;
+   "print" 'goodbye cruel world'l2@@;
+
+"comment" note inner string for printing layout:
+          l, l2 etc -- newlines
+	  s, s2 etc -- spaces
+	  r, r2 etc -- runout
+	  q, q2 etc -- single quote (grave)
+	  u, u2 etc -- single unquote (acute)
+	  h, h2 etc -- halt code
+	  b20       -- punch decimal 20 as 8-bit character;
+	  
+"end"
+<! HALT !>

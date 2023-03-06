@@ -1,0 +1,162 @@
+[DEMO15 NEWTON
+  QF 
+  SQRT
+  QCHOP QDOUT]
+
+DEMO15	4	+3		(set tty output for QOUT1)
+	5	QDOUT
+	4       +1
+	11      QCHOP           (output a newline)
+	8       QCHOP+1
+
+(read and write integers, convert to real)
+	4	XP
+	5	QF+4		(address of integer for input)
+	5	QF+3		(address of integer for output)
+	
+RDINT	11	QF
+	8	QF+1		(enter QF - use packed reals)
+	6	0		(reset presumed i/o settings)
+	6	7		(set integer i/o)
+	6	8191		(set format)
+	/4 6			(newline, digits[6])
+	15	2048		(read and print an integer)
+	15	6144
+	6	3		(convert to real)
+	6	8		(set real i/o)
+	6	8191		(set format)
+	0 5			(sameline, freepoint[5])
+	15	6148
+	6	8191		(set format)
+	1 65			(sameline, aligned[4,1] - 16m+n)
+	15	6148
+	6	8191		(set format)
+	2 5			(sameline, scaled[5])
+	15	6148
+	+0			(exit QF)
+	4	X	
+	7	;+4
+	8	RDINT
+
+X       >1                      (workspace)
+XP      0       X               (pointer to X)
+
+(calculate square roots by Newton-Rasphson and compare to
+ QFMATH sqrt function)
+        4       +1		(print two newlines)
+	11      QCHOP
+	8       QCHOP+1
+	4       +1		(print two newlines)
+	11      QCHOP
+	11	QF		(enter QF three word format)
+	8	QF+2
+
+MORE	6	8191		(set format)
+	/2 9			(newline, scaled 9)
+	15	2048
+	7	END
+	15	6148
+	5	X
+	11	NEWTON		(calculate sqrt by newton's method)
+	8	NEWTON+1
+	9	MORE		(skip if negative)
+	6 	8191
+	2 9			(sameline, scaled 9)
+	15	6148
+	4	X
+	11	SQRT		(compare to built in sqrt)
+	8	SQRT+1
+	15 	6148
+	8	MORE	
+
+END	+0			(exit QF)
+	4       +1
+	11 	QCHOP
+	8 	QCHOP+1
+	8	;+0		(stop at end)
+
+
+
+(newton-raphson method for square roots)
+(assumes run from within QF            )
+(argument is in accumulator	       )
+
+[NEWTON QF QCHOP]
+NEWTON	>1			(link)
+	9	ERROR1
+	7	EXIT		(sqrt 0 = 0)
+	5	A
+	
+SETXN	5	XN	        (save x[n])
+	4	MAXIT		(maximum number of iterations)
+	5	COUNT
+LOOP	4	A		(x[n+1] := 0.5 [x[n] + a / x[n]])
+	13	XN
+	1	XN
+	14	8191
+	5	XN1
+	2       XN		(calculate abs [x[n+1] - x[n]]/ x[n])	
+	9       ;+2             
+	8       ;+2
+	2       ZERO
+	13      XN1		
+        5       XN		(use xn as temporary workspace)
+	4       EPS		(compare to eps)
+	2       XN
+	9       CONV		(converged if abs[x[n+1]-x[n]] <= eps)
+	7       CONV
+	10	COUNT		(iteration counter)
+	4	COUNT
+	7	ERROR2		(reached iteration limit)
+	4	XN1		(x[n] := x[n+1])
+	5	XN
+	8	LOOP		(next iteration)
+	
+CONV	4	XN1
+EXIT	0	NEWTON
+	/8	1
+
+ERROR1	+0
+        4 	\  N		(negative argument)
+	5	ERRCOD
+	8       ERROR
+ERROR2  +0
+        4       \  I
+	5       ERRCOD
+ERROR	4       +1              (print newline)
+        11      QCHOP
+	8       QCHOP+1
+	4	ERRCODE		(print error code)
+	11	QCHOP
+	8	QCHOP+1
+	4	ERRCODE		(print error code)
+	11	QCHOP
+	8       QCHOP+1
+	4	ERRCODE		(print error code)
+	11	QCHOP
+	8       QCHOP+1
+	4       +1              (print newline)
+	11	QCHOP
+	8	QCHOP+1
+	8       ;+0             (stop on error)
+
+A	>3
+XN	>3
+XN1	>3
+EPS     +.75			(precision: 0.75*2^-31)
+        +0
+	-31
+ZERO	+0
+	+0
+	+0
+ONE     +.5			(0.5 * 2^1)
+	+0
+	+1
+MAXIT   -50			(maximum iterations - used as an integer)
+	>2
+COUNT  	>3			(used as an integer)
+ERRCOD	>1
+
+*2
+
+<! HALT !>

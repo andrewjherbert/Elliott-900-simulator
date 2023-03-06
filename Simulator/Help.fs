@@ -206,6 +206,8 @@ module Sim900.Help
                     "    Plot in landscape format";
                     "TeleCode telecode";
                     "    Set default telecode";
+                    "TIDYup";
+                    "    Reset all breakand monitor points; clear step count; set NOPRINTING and NEWLINE on"
                     "TOBINary file";
                     "   Convert file to binary format based on extension";
                     "TORAW file";

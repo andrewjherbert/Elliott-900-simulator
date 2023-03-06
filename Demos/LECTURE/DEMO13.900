@@ -1,0 +1,17 @@
+*19
+[DEMO13]
+
+DEMO13    4	X	(CALCULATE Z = XY+X+Y)
+	 12     Y
+	 14    17       (ADJUST BY 2^17)
+	  1     X
+	  1     Y
+	  5     Z
+	  8     ;+0
+
+X       +5
+Y       +10
+Z       >1
+
+%
+<! HALT !>

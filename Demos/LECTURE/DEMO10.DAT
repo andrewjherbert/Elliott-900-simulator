@@ -1,0 +1,42 @@
+C Demo 10
+
+c set up algol
+on 903 16K
+telecode 903
+at ptr file ../903ALGOL/ALG1(ISS6).BIN
+j 8181
+st 8171
+
+at ptp file DEMO10.RLB
+c read matrix package 
+at ptr file ../ALMAT/ALMAT(ISS2).900
+j 8
+st 5368
+
+c read test program
+at ptr file DEMO10.900
+j 9
+de ptp
+st 9
+
+c run program
+c read in 16K large program interpreter 
+at ptr file ../903ALGOL/ALG16KLP(ISS6).BIN
+j 8181
+st 4309
+
+tidy
+
+at ptr file DEMO10.RLB 
+select out tty
+at tty inline
+R
+<!!>
+C will run out of tty input....
+nonstop on
+
+sh t
+j 8
+
+delete DEMO10.RLB
+sh t

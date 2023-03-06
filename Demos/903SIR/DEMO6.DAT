@@ -545,30 +545,33 @@ RTWO	>3
 (assumes run from within QF            )
 (argument is in accumulator	       )
 
-[NEWTON QF QCHOP OUTSTR NEWLIN QERROR]
-NEWTON	+0			(link)
+[NEWTON QF QCHOP QERROR NEWLIN]
+NEWTON	>1			(link)
 	9	ERROR1
 	7	EXIT		(sqrt 0 = 0)
 	5	A
-	4	ONE	
-SETXN	5	XN		(x[0] := 1.0)
-	4	MIN20
+	
+SETXN	5	XN	        (save x[n])
+	4	MAXIT		(maximum number of iterations)
 	5	COUNT
 LOOP	4	A		(x[n+1] := 0.5 [x[n] + a / x[n]])
 	13	XN
 	1	XN
 	14	8191
 	5	XN1
-	2	XN		(x[n]-x[n+1])
-	9	;+2		(abs)
-	8	;+2
-	2	ZERO
-	1	MEPS		(abs[x[n]-x[n+1]]-eps)
-	7	CONV		(x[n+1]-x[n] = eps)
-	9	CONV		(x[n+1]-x[n] < eps)
+	2       XN		(calculate abs [x[n+1] - x[n]]/ x[n])	
+	9       ;+2             
+	8       ;+2
+	2       ZERO
+	13      XN1		
+        5       XN		(use xn as temporary workspace)
+	4       EPS		(compare to eps)
+	2       XN
+	9       CONV		(converged if abs[x[n+1]-x[n]] <= eps)
+	7       CONV
 	10	COUNT		(iteration counter)
 	4	COUNT
-	7	ERROR2		(too many iterations)
+	7	ERROR2		(reached iteration limit)
 	4	XN1		(x[n] := x[n+1])
 	5	XN
 	8	LOOP		(next iteration)
@@ -577,10 +580,26 @@ CONV	4	XN1
 EXIT	0	NEWTON
 	/8	1
 
+A	>3
+XN	>3
+XN1	>3
+EPS     +.75			(precision: 0.75*2^-31)
+        +0
+	-31
+ZERO	+0
+	+0
+	+0
+ONE     +.5			(0.5 * 2^1)
+	+0
+	+1
+MAXIT   -50			(maximum iterations - used as an integer)
+	>2
+COUNT  	>3			(used as an integer)
+
 ERROR1	+0
 	4 	+1		(negative argument)
 	5	ERRNO
-	8	 ERROR
+	8	ERROR
 
 ERROR2	+0
 	4	+2		(iteration count exceeded)
@@ -602,23 +621,8 @@ ERR1	0 NEWTON		(ptr to link)
 	0 1			(size of string)
 	£NWT			(error string)
 
-A	>3
-XN	>3
-XN1	>3
-ZERO	+0
-	+0
-	+0
-ONE     &200000			(0.5 * 2^1)
-	&000000
-	&000001
-MEPS	&400000			(-1 * 2^-20)
-        &000000
-	-20
-MIN20   -20			(used as an integer)
-	+0
-	+0
-COUNT  	>3			(used as an integer)
-ERRNO	>1
+ERRNO   >1
+
 
 [NEWLIN NEWLI2 QCHOP]
 
@@ -678,6 +682,7 @@ LOOP	0 	OUTSTR
 	8 	LOOP
 EXIT	0 	OUTSTR
 	/8 	2
+
 <! halt !>
 <!!>
 
@@ -716,7 +721,7 @@ newton data: 			1 4 9 2 0.5 0.25 -1 +1234.5678 10 ?5 3.142 0.9 0
 j 32
 
 c resume after QERROR triggered by -1 in NEWTON data
-st 2809
+st 2811
 j 9
 st 403
 sh t

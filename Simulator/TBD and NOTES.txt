@@ -184,3 +184,5 @@
 				10 instruction uses WriteMem and ReadMem to ensure full address checking - was making 905FORTRAN fail
 				inline text now handles <!!> at end and beginning of line correctly
 				DO command argument processing corrected
+22-FEB-2022: TIDY command added to HELP information
+05_MAR-2022: DUMPASSIR format improved

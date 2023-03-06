@@ -1170,6 +1170,8 @@ module Sim900.Machine
            
             // SHIFT operators for combined accumulator and Q register
             let aqShiftLeft () =
+                let a = accumulator
+                let q = qRegister
                 accumulator <- (accumulator <<< 1) &&& mask18
                 if qRegister >= bit18 then accumulator <- accumulator ||| 1
                 qRegister <- (qRegister <<< 1) &&& mask18
@@ -1331,8 +1333,7 @@ module Sim900.Machine
                          // M is always relative
                          match machineType with 
                          | E920a  -> qRegister <- I ()
-                         | E920b  
-                         | E920m  -> qRegister <- N
+                         | E920b  -> qRegister <- N
                          | _      -> ()
                          if   accumulator < bit18 
                          then let t = int64 timing.[12]
