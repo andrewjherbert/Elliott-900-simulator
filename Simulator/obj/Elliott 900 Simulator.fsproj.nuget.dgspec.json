@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj": {}
+    "X:\\Library\\CloudStorage\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj": {}
   },
   "projects": {
-    "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj": {
+    "X:\\Library\\CloudStorage\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj",
+        "projectUniqueName": "X:\\Library\\CloudStorage\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj",
         "projectName": "SIM900",
-        "projectPath": "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj",
-        "packagesPath": "C:\\Users\\andrewherbert\\.nuget\\packages\\",
-        "outputPath": "\\\\Mac\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\obj\\",
+        "projectPath": "X:\\Library\\CloudStorage\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\Elliott 900 Simulator.fsproj",
+        "packagesPath": "C:\\Users\\Andrew\\.nuget\\packages\\",
+        "outputPath": "X:\\Library\\CloudStorage\\Dropbox\\elliott903\\Programs\\FS_SIM900\\Simulator\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\andrewherbert\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Andrew\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -26,23 +26,20 @@
         },
         "frameworks": {
           "net471": {
-            "targetAlias": "net471",
             "projectReferences": {}
           }
         }
       },
       "frameworks": {
         "net471": {
-          "targetAlias": "net471",
           "dependencies": {
             "FSharp.Core": {
-              "include": "Runtime, Compile, Build, Native, Analyzers, BuildTransitive",
               "target": "Package",
-              "version": "[5.0.0, )",
+              "version": "[4.7.2, )",
               "generatePathProperty": true
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.405\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.402\\RuntimeIdentifierGraph.json"
         }
       },
       "runtimes": {

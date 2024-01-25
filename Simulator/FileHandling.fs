@@ -44,17 +44,21 @@ module Sim900.FileHandling
             then System.Environment.CurrentDirectory <- d
             else raise (Syntax (sprintf "Cannot open directory %s" d))
 
-        // find demos directory
-        let DemosDir () =
+        // find named directory
+        let FindDir name =
             let rec Helper last root =
-                if   Directory.Exists "Demos"
-                then System.Environment.CurrentDirectory <- "Demos"
+                if   Directory.Exists name
+                then System.Environment.CurrentDirectory <- name
                 else System.Environment.CurrentDirectory <- ".."
                      if   System.Environment.CurrentDirectory = last
-                     then printfn "Demonstration folder not found"
+                     then printfn "%s: folder not found" name
                           System.Environment.CurrentDirectory <- root
                      else Helper System.Environment.CurrentDirectory root
             Helper System.Environment.CurrentDirectory System.Environment.CurrentDirectory
+
+        let DemosDir () = FindDir "DEMOS"
+
+        let ArchiveDir () = FindDir "SoftwareArchive"
 
         // IMAGES are dumps of memory write out as four bytes per word.
         // words 0-7 are not included in the file
@@ -453,7 +457,7 @@ module Sim900.FileHandling
                  let sc, fc = Trim cbytes
                  let lc = fc-sc+1
                  if   lm < lc
-                 then printfn "Master file (%s) is smaller than copy (%s): %d %d" master copy lm lc
+                 then printfn "Master file (%s) has fewer bytes than copy (%s): %d %d" master copy lm lc
                  else let rec Scan midx cidx errors =
                         if   midx <= fm
                         then // still have bytes to scan
@@ -462,23 +466,20 @@ module Sim900.FileHandling
                                   Scan (midx+1) (cidx+1) errors
                              elif (midx+1) <= fm
                              then // more bytes left to scan
-                                  if   mbytes.[midx+1] = cbytes.[cidx]
+                                  if   mbytes.[midx+1] = cbytes.[cidx] || mbytes.[midx] = cbytes.[cidx+1]
                                   then // dropped character
-                                       printfn "%6d %4d (Missing byte)" (midx-sm) mbytes.[midx]
+                                       printfn "Missing byte at %6d: master %4d copy %4d" midx mbytes.[midx] mbytes.[cidx]
                                        Scan (midx+2) (cidx+1) (errors+1)
                                   elif mbytes.[midx+1] = cbytes.[cidx+1]
                                   then // mispunch
-                                       printfn "%6d %4d (Mispunch)" (midx-sm) (256+(int mbytes.[midx]))
+                                       printfn "Mispunch at %6d %4d" midx (int mbytes.[midx])
                                        Scan (midx+1) (cidx+1) (errors+1)
                                   else // other error
                                        printfn "Compare abandoned - files diverge at byte %d" (midx+1)
-                             else // at last byte
-                                  printfn "%6d %+3d (Mispunch)" (midx-sm) (256+(int mbytes.[midx]))
-                                  Scan (midx+1) (cidx+1) (errors+1)
                         elif cidx <= fc
-                        then  printfn "Problem: %d unused bytes in copy file" (fc-cidx+1)
+                        then  printfn "%d unused bytes in copy file" (fc-cidx+1)
                         elif errors > 0 
-                        then printfn "%6d %6d (Complete)" -1 (lc-1)
+                        then printfn "Fininished with errors"
                         else printfn "No mismatches found in %d bytes" (fm-sm+1)
                       Scan sm sc  0                                    
                         

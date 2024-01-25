@@ -485,14 +485,14 @@ module Sim900.Devices
         let mutable maxy    = 0     // maximum value of y
         let mutable xInit   = -1    // initial x coordinate
         let mutable yInit   = -1    // initial y coordinate
-        let mutable scale   = 1     // scaling factor
+        let mutable scale   = 1.0   // scaling factor
 
         let mutable down         = false // state of pen
         let mutable plotting     = false
 
         // width in pixels of window margins around bitmap
-        let xMargin = 16
-        let yMargin = 38
+        let xMargin = 10
+        let yMargin = 10
 
         let mutable plotsWaiting = false
         
@@ -517,17 +517,19 @@ module Sim900.Devices
                  if   machineType = E900
                  then maxx   <- 639 
                       maxy   <- 479 // 640*480 VGA screen
-                      width  <- maxx+1+xMargin
-                      height <- maxy+1+yMargin
+                      width  <- maxx+1+xMargin*2
+                      height <- maxy+1+yMargin*2
+                      maxx   <- int(floor(float(maxx)/scale))
+                      maxy   <- int(floor(float(maxy)/scale))
                       if yInit = -1 then yInit <- 160
                       x      <- xInit     
                       y      <- yInit 
                  else maxx   <- 1799 // 2675 = 13.375"
                       maxy   <-  749   
-                      width  <- maxx+1+xMargin
-                      height <- maxy+1+yMargin 
-                      maxx   <- maxx*(int scale)
-                      maxy   <- maxy*(int scale)
+                      width  <- maxx+1+xMargin*2
+                      height <- maxy+1+yMargin*2
+                      maxx   <- int(floor(float(maxx)/scale))
+                      maxy   <- int(floor(float(maxy)/scale))
                       if xInit = -1 then xInit <- 0
                       if yInit = -1 then yInit <- 0
                       x      <- if swapxy then xInit      else yInit
@@ -541,7 +543,7 @@ module Sim900.Devices
         type PlotterWindow () as plotter =
             inherit Form ()
 
-            let mutable bitmap = new Bitmap (maxx+1, maxy+1, Imaging.PixelFormat.Format24bppRgb)
+            let mutable bitmap = new Bitmap (width, height, Imaging.PixelFormat.Format24bppRgb)
 
             let paintBitmap (g: Graphics) =
                 plotsWaiting <- false
@@ -563,7 +565,7 @@ module Sim900.Devices
                         plotter.Invalidate())
 
             member plotter.DrawPixel (x, y) =
-                bitmap.SetPixel (x, y, Color.Black)     
+                bitmap.SetPixel (x+xMargin, y+yMargin, Color.Black)     
 
         // Direct plotting events to the most recent window           
         let mutable latestPlot: PlotterWindow option = None 
@@ -594,7 +596,7 @@ module Sim900.Devices
             xInit <- -1
             yInit <- -1
             swapxy <- machineType = E900 
-            scale <- 1
+            scale <- 1.0
                                                           
     open GraphPlotter  
 
@@ -628,8 +630,8 @@ module Sim900.Devices
         // clip to screen
         if   down 
         then if   swapxy
-             then if 0 <= x && x <= maxx && 0 <= y && y <= maxy then Pixel ((x)/scale,      (y)/scale)
-             else if 0 <= x && x <= maxy && 0 <= y && y <= maxx then Pixel ((maxx-y)/scale, (x)/scale)
+             then if 0 <= x && x <= maxx && 0 <= y && y <= maxy then Pixel (int(floor(float(x)*scale)),      int(floor(float(y)*scale)))
+             else if 0 <= x && x <= maxy && 0 <= y && y <= maxx then Pixel (int(floor(float(maxx-y)*scale)), int(floor(float(x)*scale)))
 
     let PlotterSetX value = 
         // set x coordinate for plotting

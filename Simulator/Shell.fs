@@ -54,6 +54,8 @@ open Sim900.Help
             | (true,  [|"ALGOL"; "ON"|])    
                                             -> AlgolOn ()
 
+            | (_,     [|"ARCHIVE"|])        -> ArchiveDir ()
+
             | (true,  [|"AT";     "CRD"; "FILE"; f|])
             | (true,  [|"ATTACH"; "CRD"; "FILE"; f|])
                                             -> if   f.EndsWith ".900" || f.EndsWith ".DAT" || f.EndsWith ".TXT"
@@ -480,7 +482,8 @@ open Sim900.Help
 
             | (_,     [|"RUNOUT"; "ON"|])   -> addRunout <- true
 
-            | (true,  [|"SCALE"; n|])       -> SetScale (GetNatural n)
+            | (true,  [|"SCALE"; n|])       -> SetScale (1.0/float(GetNatural n))
+            | (true,  [|"SCALE"; a; b|])    -> SetScale ((float(GetNatural a)) / (float (GetNatural b)))
 
             | (true,  [|"SCB"|])
             | (true,  [|"SCBDECODE"|])      -> SCBDecode ()

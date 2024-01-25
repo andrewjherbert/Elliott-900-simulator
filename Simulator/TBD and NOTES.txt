@@ -186,3 +186,5 @@
 				DO command argument processing corrected
 22-FEB-2022: TIDY command added to HELP information
 06-MAR-2022: DUMPASSIR. ENTER, OBEY, KEYS  improved
+02-MAY-2023: Tidied up compare command
+25-JAN-2023: ARCHIVE command added. SCALE a b command added.

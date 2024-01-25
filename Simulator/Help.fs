@@ -192,6 +192,8 @@ module Sim900.Help
                     "    Turn on (off) addition of runout padding to text files";
                     "SCALE n";
                     "    Scale plotting by 1/n";
+                    "SCALE a b";
+                    "    Scale plotting by a/b";
                     "SCBdecode";
                     "    Decode sum checked binary tape";
                     "SELECT IN PTR | AUTO | TTY"
